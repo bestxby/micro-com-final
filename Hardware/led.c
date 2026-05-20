@@ -108,11 +108,11 @@ void LED_Toggle(uint8_t index)
     if (index >= LED_COUNT) return;
     const LED_Desc *led = &led_table[index];
 
-    /* read ODR, check if the pin is "on" at the electrical level */
+    /* toggle the physical state of the pin directly */
     if (led->port->ODR & led->pin) {
-        led_reset_pin(led);
+        led->port->BRR = led->pin;
     } else {
-        led_set_pin(led);
+        led->port->BSRR = led->pin;
     }
 }
 
