@@ -439,6 +439,21 @@
               <FileType>1</FileType>
               <FilePath>.\Hardware\led.c</FilePath>
             </File>
+            <File>
+              <FileName>my_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\my_i2c.c</FilePath>
+            </File>
+            <File>
+              <FileName>aht20.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\aht20.c</FilePath>
+            </File>
+            <File>
+              <FileName>bmp280.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\bmp280.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

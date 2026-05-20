@@ -39,3 +39,5 @@ RTE/**/*.base@*
 *~
 Thumbs.db
 Desktop.ini
+~$*
+*.tmp
