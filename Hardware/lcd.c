@@ -349,6 +349,63 @@ void LCD_DrawRectangle_Filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
 }
 
 /**
+  * @brief  使用 Bresenham 算法绘制空心圆。
+  * @param  x0, y0: 圆心坐标。
+  * @param  r: 半径。
+  * @param  color: 圆周颜色。
+  * @retval 无
+  */
+void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+{
+    int a = 0, b = r;
+    int di = 3 - (r << 1);
+    while (a <= b) {
+        LCD_DrawPoint(x0 + a, y0 + b, color);
+        LCD_DrawPoint(x0 - a, y0 + b, color);
+        LCD_DrawPoint(x0 + a, y0 - b, color);
+        LCD_DrawPoint(x0 - a, y0 - b, color);
+        LCD_DrawPoint(x0 + b, y0 + a, color);
+        LCD_DrawPoint(x0 - b, y0 + a, color);
+        LCD_DrawPoint(x0 + b, y0 - a, color);
+        LCD_DrawPoint(x0 - b, y0 - a, color);
+        a++;
+        if (di < 0) {
+            di += (a << 2) + 6;
+        } else {
+            di += 10 + ((a - b) << 2);
+            b--;
+        }
+    }
+}
+
+/**
+  * @brief  使用对称线填充算法绘制实心圆。
+  * @param  x0, y0: 圆心坐标。
+  * @param  r: 半径。
+  * @param  color: 填充颜色。
+  * @retval 无
+  */
+void LCD_DrawCircle_Filled(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+{
+    int a = 0, b = r;
+    int di = 3 - (r << 1);
+    while (a <= b) {
+        /* 通过连接对称点绘制横向线段来填充圆 */
+        LCD_DrawLine(x0 - a, y0 + b, x0 + a, y0 + b, color);
+        LCD_DrawLine(x0 - a, y0 - b, x0 + a, y0 - b, color);
+        LCD_DrawLine(x0 - b, y0 + a, x0 + b, y0 + a, color);
+        LCD_DrawLine(x0 - b, y0 - a, x0 + b, y0 - a, color);
+        a++;
+        if (di < 0) {
+            di += (a << 2) + 6;
+        } else {
+            di += 10 + ((a - b) << 2);
+            b--;
+        }
+    }
+}
+
+/**
   * @brief  在 LCD 屏幕上绘制单个 8x16 点阵的 ASCII 字符。
   * @param  x: 字符起始 X 坐标。
   * @param  y: 字符起始 Y 坐标。

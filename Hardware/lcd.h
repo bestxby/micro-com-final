@@ -55,6 +55,8 @@ void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color);
 void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 void LCD_DrawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 void LCD_DrawRectangle_Filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
+void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
+void LCD_DrawCircle_Filled(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
 void LCD_ShowChar(uint16_t x, uint16_t y, char chr, uint16_t fc, uint16_t bc);
 void LCD_ShowString(uint16_t x, uint16_t y, const char *str, uint16_t fc, uint16_t bc);
 

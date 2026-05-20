@@ -17,6 +17,14 @@ volatile float test_bmp280_press = 0.0f;
 volatile uint8_t test_aht20_init_status = 1;  /* 0 = 成功, 1 = 失败 */
 volatile uint8_t test_bmp280_init_status = 1; /* 0 = 成功, 1 = 失败 */
 
+/* 传感器运行在线健康状态 (0 = 异常/掉线, 1 = 正常) */
+volatile uint8_t aht20_healthy = 1;
+volatile uint8_t bmp280_healthy = 1;
+
+/* 连续采样失败计数器 */
+uint8_t aht20_fail_cnt = 0;
+uint8_t bmp280_fail_cnt = 0;
+
 /* AI 检测器与异常日志环形缓冲区结构体变量 */
 AI_Detector my_detector;
 AnomalyLogBuffer my_log_buffer;
@@ -79,6 +87,27 @@ void Draw_Deviation_Chart(void)
 }
 
 /**
+  * @brief  绘制屏幕底部桌面翻页指示小圆点 (Page Dots)。
+  * @retval 无
+  */
+void Draw_Page_Dots(void)
+{
+    uint16_t dot_xs[3] = {104, 120, 136};
+    uint16_t y = 305;
+    
+    for (uint8_t i = 0; i < 3; i++) {
+        if (i == current_page) {
+            /* 当前页高亮绘制为实心蓝绿色圆点 */
+            LCD_DrawCircle_Filled(dot_xs[i], y, 3, CYAN);
+        } else {
+            /* 非当前页擦除并绘制空心灰色圆圈 */
+            LCD_DrawCircle_Filled(dot_xs[i], y, 3, BLACK);
+            LCD_DrawCircle(dot_xs[i], y, 3, GRAY);
+        }
+    }
+}
+
+/**
   * @brief  根据当前选择的页面，刷新绘制 LCD 屏幕内容。
   * @param  force_refresh: 设为 1 时强制完整重绘静态文字背景 (如切页时)
   * @retval 无
@@ -87,7 +116,7 @@ void Display_Refresh(uint8_t force_refresh)
 {
     char text_buf[32];
 
-    /* 1. 检测到切页时，执行全屏擦除，防止文字残留重叠 */
+    /* 1. 检测到切页时，执行全屏擦除，防止静态标签文字残留重叠 */
     if (current_page != last_page || force_refresh) {
         LCD_Clear(BLACK);
         last_page = current_page;
@@ -95,7 +124,10 @@ void Display_Refresh(uint8_t force_refresh)
     }
 
     /* 2. 绘制顶部系统运行状态警示条 */
-    if (current_ai_state == AI_STATE_ANOMALY) {
+    if (aht20_healthy == 0 || bmp280_healthy == 0) {
+        LCD_DrawRectangle_Filled(0, 0, 239, 24, RED);
+        LCD_ShowString(36, 4, "! SENSOR DISCONNECTED !", WHITE, RED);
+    } else if (current_ai_state == AI_STATE_ANOMALY) {
         LCD_DrawRectangle_Filled(0, 0, 239, 24, RED);
         LCD_ShowString(40, 4, "! ANOMALY DETECTED !", WHITE, RED);
     } else if (current_ai_state == AI_STATE_LEARNING) {
@@ -131,16 +163,26 @@ void Display_Refresh(uint8_t force_refresh)
         }
 
         /* 原位使用固定宽度格式化字符串重写变量，防止闪烁 */
-        sprintf(text_buf, "%5.2f", test_aht20_temp);
-        LCD_ShowString(96, 65, text_buf, GREEN, BLACK);
+        if (aht20_healthy) {
+            sprintf(text_buf, "%5.2f", test_aht20_temp);
+            LCD_ShowString(96, 65, text_buf, GREEN, BLACK);
+            sprintf(text_buf, "%5.2f", test_aht20_humi);
+            LCD_ShowString(96, 95, text_buf, GREEN, BLACK);
+        } else {
+            LCD_ShowString(96, 65, "[ERROR]", RED, BLACK);
+            LCD_ShowString(96, 95, "[ERROR]", RED, BLACK);
+        }
 
-        sprintf(text_buf, "%5.2f", test_aht20_humi);
-        LCD_ShowString(96, 95, text_buf, GREEN, BLACK);
+        if (bmp280_healthy) {
+            sprintf(text_buf, "%6.0f", test_bmp280_press);
+            LCD_ShowString(96, 125, text_buf, GREEN, BLACK);
+        } else {
+            LCD_ShowString(96, 125, " [ERROR]", RED, BLACK);
+        }
 
-        sprintf(text_buf, "%6.0f", test_bmp280_press);
-        LCD_ShowString(96, 125, text_buf, GREEN, BLACK);
-
-        if (current_ai_state == AI_STATE_LEARNING) {
+        if (aht20_healthy == 0 || bmp280_healthy == 0) {
+            LCD_ShowString(112, 155, "SENSOR ERROR   ", RED, BLACK);
+        } else if (current_ai_state == AI_STATE_LEARNING) {
             uint8_t pct = (my_detector.learning_samples * 100) / 100;
             sprintf(text_buf, "LEARNING (%3d%%)", pct);
             LCD_ShowString(112, 155, text_buf, BLUE, BLACK);
@@ -157,27 +199,73 @@ void Display_Refresh(uint8_t force_refresh)
         /* PAGE 1: AI自适应基准学习状态与实时偏差图 */
         if (force_refresh) {
             LCD_ShowString(16, 65,  "Base Temp:           C", WHITE, BLACK);
-            LCD_ShowString(16, 95,  "Filt Temp:           C", WHITE, BLACK);
-            LCD_ShowString(16, 125, "Deviation:           C", WHITE, BLACK);
-            LCD_ShowString(16, 155, "Samples  :     / 100", WHITE, BLACK);
+            LCD_ShowString(16, 90,  "Filt Temp:           C", WHITE, BLACK);
+            LCD_ShowString(16, 115, "Deviation:           C", WHITE, BLACK);
             
-            /* 绘制图表标签和边框 */
-            LCD_ShowString(16, 182, "Real-time Deviation Chart (+/-5 C)", GRAY, BLACK);
+            /* 绘制偏差对称指示彩条背景刻度线 */
+            LCD_DrawRectangle(29, 134, 211, 142, DARK_GRAY);
+            LCD_DrawLine(120, 132, 120, 144, GRAY); /* 0偏差中心线 */
+
+            LCD_ShowString(16, 160, "Samples  :     / 100", WHITE, BLACK);
+            LCD_ShowString(16, 185, "Real-time Deviation Chart (+/-5 C)", GRAY, BLACK);
             LCD_DrawRectangle(20, 200, 220, 290, GRAY);
         }
 
-        sprintf(text_buf, "%5.2f", my_detector.baseline_temp);
-        LCD_ShowString(96, 65, text_buf, GREEN, BLACK);
+        if (aht20_healthy) {
+            sprintf(text_buf, "%5.2f", my_detector.baseline_temp);
+            LCD_ShowString(96, 65, text_buf, GREEN, BLACK);
 
-        sprintf(text_buf, "%5.2f", test_filtered_temp);
-        LCD_ShowString(96, 95, text_buf, GREEN, BLACK);
+            sprintf(text_buf, "%5.2f", test_filtered_temp);
+            LCD_ShowString(96, 90, text_buf, GREEN, BLACK);
 
-        float dev = test_filtered_temp - my_detector.baseline_temp;
-        sprintf(text_buf, "%+5.2f", dev);
-        LCD_ShowString(96, 125, text_buf, (dev > 5.0f || dev < -5.0f) ? RED : GREEN, BLACK);
+            float dev = test_filtered_temp - my_detector.baseline_temp;
+            sprintf(text_buf, "%+5.2f", dev);
+            uint16_t dev_color = GREEN;
+            if (dev > 3.0f || dev < -3.0f) dev_color = RED;
+            else if (dev > 1.5f || dev < -1.5f) dev_color = YELLOW;
+            LCD_ShowString(96, 115, text_buf, dev_color, BLACK);
+
+            /* 绘制双向对称偏差动态指示柱 */
+            float dev_lim = dev;
+            if (dev_lim > 5.0f) dev_lim = 5.0f;
+            if (dev_lim < -5.0f) dev_lim = -5.0f;
+            int16_t w = (int16_t)(dev_lim * 18.0f); /* -5C到+5C对应30px到210px，0度在120px */
+            
+            if (w > 0) {
+                /* 清理左侧负偏差图形残留 */
+                LCD_DrawRectangle_Filled(30, 135, 119, 141, BLACK);
+                /* 绘制正偏差填充条 */
+                LCD_DrawRectangle_Filled(120, 135, 120 + w, 141, dev_color);
+                /* 清理右侧剩余背景区域 */
+                if (120 + w < 210) {
+                    LCD_DrawRectangle_Filled(121 + w, 135, 210, 141, BLACK);
+                }
+            } else if (w < 0) {
+                /* 清理左侧剩余背景区域 */
+                if (120 + w > 30) {
+                    LCD_DrawRectangle_Filled(30, 135, 120 + w - 1, 141, BLACK);
+                }
+                /* 绘制负偏差填充条 */
+                LCD_DrawRectangle_Filled(120 + w, 135, 120, 141, dev_color);
+                /* 清理右侧正偏差图形残留 */
+                LCD_DrawRectangle_Filled(121, 135, 210, 141, BLACK);
+            } else {
+                /* 偏差完全为0，擦除整条 */
+                LCD_DrawRectangle_Filled(30, 135, 210, 141, BLACK);
+            }
+            /* 重新画一下中间被覆盖的0基准中轴线 */
+            LCD_DrawLine(120, 132, 120, 144, GRAY);
+        } else {
+            LCD_ShowString(96, 65, "[ERROR]", RED, BLACK);
+            LCD_ShowString(96, 90, "[ERROR]", RED, BLACK);
+            LCD_ShowString(96, 115, "[ERROR]", RED, BLACK);
+            /* 清空整条区域 */
+            LCD_DrawRectangle_Filled(30, 135, 210, 141, BLACK);
+            LCD_DrawLine(120, 132, 120, 144, GRAY);
+        }
 
         sprintf(text_buf, "%3d", my_detector.learning_samples);
-        LCD_ShowString(96, 155, text_buf, YELLOW, BLACK);
+        LCD_ShowString(96, 160, text_buf, YELLOW, BLACK);
 
         /* 刷新折线图 */
         Draw_Deviation_Chart();
@@ -208,6 +296,44 @@ void Display_Refresh(uint8_t force_refresh)
             }
         }
     }
+
+    /* 5. 绘制底部的桌面式翻页指示小圆点 */
+    Draw_Page_Dots();
+}
+
+/**
+  * @brief  前台运行心跳旋转Beacon微动画 (每 200ms 刷新一次字符)。
+  * @retval 无
+  */
+void Draw_Alive_Beacon(void)
+{
+    static uint8_t beacon_idx = 0;
+    static uint32_t beacon_tick = 0;
+    const char beacon_chars[4] = {'|', '/', '-', '\\'};
+    
+    beacon_tick++;
+    if (beacon_tick >= 20) { /* 主循环10ms心跳，20次 = 200ms */
+        beacon_tick = 0;
+        char buf[2] = {beacon_chars[beacon_idx], '\0'};
+        
+        /* 根据当前系统警报状态自适应匹配背景色 */
+        uint16_t bg_color = DARK_GRAY;
+        uint16_t fg_color = GREEN;
+        
+        if (aht20_healthy == 0 || bmp280_healthy == 0) {
+            bg_color = RED;
+            fg_color = WHITE;
+        } else if (current_ai_state == AI_STATE_ANOMALY) {
+            bg_color = RED;
+            fg_color = WHITE;
+        } else if (current_ai_state == AI_STATE_LEARNING) {
+            bg_color = BLUE;
+            fg_color = WHITE;
+        }
+        
+        LCD_ShowString(226, 4, buf, fg_color, bg_color);
+        beacon_idx = (beacon_idx + 1) % 4;
+    }
 }
 
 /**
@@ -230,9 +356,12 @@ int main(void)
     LCD_Init();
     LCD_Clear(BLACK);
 
-    /* 3. 初始化板载 I2C 传感器 (AHT20 与 BMP280，SCL=PB6, SDA=PB7) */
+    /* 3. 初始化板载 I2C 传感器并确立初始健康度 */
     test_aht20_init_status = AHT20_Init();
+    aht20_healthy = (test_aht20_init_status == 0) ? 1 : 0;
+
     test_bmp280_init_status = BMP280_Init();
+    bmp280_healthy = (test_bmp280_init_status == 0) ? 1 : 0;
 
     /* 4. 初始化 AI 检测器与异常数据历史缓冲区 */
     /* 配置平滑系数 Alpha = 0.2f, 学习采样期设定为 100 次 (约 150 秒) */
@@ -266,42 +395,77 @@ int main(void)
             Display_Refresh(1); /* 切页时触发即时清屏重绘 */
         } 
         else if (key_pressed == KEY2_PRESS) {
-            /* KEY2 按键: 警报复位与自适应算法参数重新初始化 */
+            /* KEY2 按键: 警报复位、计数清零与自适应算法参数重新初始化 */
             AI_Init(&my_detector, 0.2f, 100);
             current_ai_state = AI_STATE_LEARNING;
             system_mode = 0;
+            aht20_fail_cnt = 0;
+            bmp280_fail_cnt = 0;
+            
+            /* 强制重构物理硬件并尝试握手自愈 */
+            test_aht20_init_status = AHT20_Init();
+            aht20_healthy = (test_aht20_init_status == 0) ? 1 : 0;
+            test_bmp280_init_status = BMP280_Init();
+            bmp280_healthy = (test_bmp280_init_status == 0) ? 1 : 0;
+
             LED_Off(0); /* 强制关闭 PC13 闪烁 */
             Display_Refresh(1); /* 立即刷新界面状态 */
         }
 
-        /* 7. 传感器非阻塞定时采集与 AI 处理 (每隔 1.5 秒采样一次)
+        /* 7. 运行状态下自动掉线重连与周期轮询 (每隔 1.5 秒采样一次)
            150 次循环 * 10ms = 1500ms */
         loop_counter++;
         if (loop_counter >= 150) {
             loop_counter = 0;
 
-            /* AHT20 初始化成功后读取温湿度数据 */
-            if (test_aht20_init_status == 0) {
+            /* (A) AHT20 掉线自愈检测与数据读取 */
+            if (aht20_healthy == 0) {
+                if (AHT20_Init() == 0) {
+                    aht20_healthy = 1;
+                    test_aht20_init_status = 0;
+                    aht20_fail_cnt = 0;
+                }
+            }
+            if (aht20_healthy) {
                 float temp = 0.0f;
                 float humi = 0.0f;
                 if (AHT20_ReadData(&temp, &humi) == 0) {
                     test_aht20_temp = temp;
                     test_aht20_humi = humi;
+                    aht20_fail_cnt = 0;
+                } else {
+                    aht20_fail_cnt++;
+                    if (aht20_fail_cnt >= 3) {
+                        aht20_healthy = 0; /* 连续 3 次超时未应答判定掉线 */
+                    }
                 }
             }
 
-            /* BMP280 初始化成功后读取温度与大气压强数据 */
-            if (test_bmp280_init_status == 0) {
+            /* (B) BMP280 掉线自愈检测与数据读取 */
+            if (bmp280_healthy == 0) {
+                if (BMP280_Init() == 0) {
+                    bmp280_healthy = 1;
+                    test_bmp280_init_status = 0;
+                    bmp280_fail_cnt = 0;
+                }
+            }
+            if (bmp280_healthy) {
                 float temp = 0.0f;
                 float press = 0.0f;
                 if (BMP280_ReadData(&temp, &press) == 0) {
                     test_bmp280_temp = temp;
                     test_bmp280_press = press;
+                    bmp280_fail_cnt = 0;
+                } else {
+                    bmp280_fail_cnt++;
+                    if (bmp280_fail_cnt >= 3) {
+                        bmp280_healthy = 0; /* 连续 3 次超时未应答判定掉线 */
+                    }
                 }
             }
 
-            /* 若 AHT20 数据有效，进行 AI 自适应分析 */
-            if (test_aht20_init_status == 0) {
+            /* (C) 若 AHT20 健康在线，送入 AI 核心引擎进行突变检测 */
+            if (aht20_healthy && test_aht20_init_status == 0) {
                 float filtered = 0.0f;
                 uint8_t next_state = AI_Process(&my_detector, test_aht20_temp, &filtered);
                 test_filtered_temp = filtered;
@@ -323,27 +487,29 @@ int main(void)
                 }
 
                 current_ai_state = next_state;
+            }
 
-                /* 将 AI 判断出的状态映射到硬件 LED 的工作模式 */
-                if (current_ai_state == AI_STATE_ANOMALY) {
-                    system_mode = 1; /* 系统判定异常 */
-                } else {
-                    system_mode = 0; /* 系统正常或正在学习基准中 */
-                }
+            /* (D) 将 AI 检测出的状态和传感器物理在线状态映射到硬件 LED */
+            if (current_ai_state == AI_STATE_ANOMALY || aht20_healthy == 0 || bmp280_healthy == 0) {
+                system_mode = 1; /* 进入告警/硬件物理断开的异常模式 */
+            } else {
+                system_mode = 0; /* 正常模式 */
             }
 
             /* 标记传感器数据更新，用于刷新显示 */
             ui_refresh_tick = 1;
         }
 
-        /* 8. 局部无闪烁 UI 周期重绘
-           与传感器采样同步，每 1.5 秒更新一次动态字符和折线图 */
+        /* 8. 周期刷新动态数值 UI */
         if (ui_refresh_tick) {
             ui_refresh_tick = 0;
             Display_Refresh(0);
         }
 
-        /* 9. 双 LED 灯状态指示机调度 */
+        /* 9. 前台刷新运行指示 Beacon (心跳小助手) */
+        Draw_Alive_Beacon();
+
+        /* 10. 双 LED 灯物理状态机驱动调度 */
         if (system_mode == 0) {
             /* 正常模式：PA0 进行定时器 TIM2 PWM 呼吸渐变，PC13 常灭 */
             LED_Off(0);
