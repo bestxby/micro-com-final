@@ -429,6 +429,16 @@
               <FileType>1</FileType>
               <FilePath>.\User\main.c</FilePath>
             </File>
+            <File>
+              <FileName>ai_detect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\ai_detect.c</FilePath>
+            </File>
+            <File>
+              <FileName>anomaly_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\anomaly_log.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
