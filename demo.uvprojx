@@ -469,6 +469,11 @@
               <FileType>1</FileType>
               <FilePath>.\Hardware\key.c</FilePath>
             </File>
+            <File>
+              <FileName>lcd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\lcd.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
