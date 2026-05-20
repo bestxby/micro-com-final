@@ -59,25 +59,25 @@ void Delay(__IO uint32_t nCount)
 void Draw_Deviation_Chart(void)
 {
     /* 清除折线图绘制区域的旧图形 */
-    LCD_DrawRectangle_Filled(21, 201, 219, 289, BLACK);
+    LCD_DrawRectangle_Filled(21, 201, 219, 284, BLACK);
     
     /* 绘制网格与坐标轴 */
-    LCD_DrawLine(20, 245, 220, 245, DARK_GRAY);  /* 零偏差基准线 */
-    LCD_DrawLine(20, 200, 20, 290, DARK_GRAY);   /* Y 轴边界 */
-    LCD_DrawLine(220, 200, 220, 290, DARK_GRAY);  /* 右侧边界 */
+    LCD_DrawLine(20, 242, 220, 242, DARK_GRAY);  /* 零偏差基准线 */
+    LCD_DrawLine(20, 200, 20, 285, DARK_GRAY);   /* Y 轴边界 */
+    LCD_DrawLine(220, 200, 220, 285, DARK_GRAY);  /* 右侧边界 */
 
     /* 遍历绘制偏差走势折线 */
     for (uint8_t i = 0; i < 19; i++) {
         uint16_t x1 = 20 + i * 10;
-        /* 计算 Y 轴像素坐标 (中心 Y=245. 比例: 1度偏差 = 9像素, 最大偏差5度时对应45像素) */
-        float y1_val = 245.0f - (dev_history[i] * 9.0f);
-        float y2_val = 245.0f - (dev_history[i+1] * 9.0f);
+        /* 计算 Y 轴像素坐标 (中心 Y=242. 比例: 1度偏差 = 8.5像素) */
+        float y1_val = 242.0f - (dev_history[i] * 8.5f);
+        float y2_val = 242.0f - (dev_history[i+1] * 8.5f);
 
         /* 坐标上下界限限幅，防止画出界 */
-        if (y1_val < 200.0f) y1_val = 200.0f;
-        if (y1_val > 290.0f) y1_val = 290.0f;
-        if (y2_val < 200.0f) y2_val = 200.0f;
-        if (y2_val > 290.0f) y2_val = 290.0f;
+        if (y1_val < 201.0f) y1_val = 201.0f;
+        if (y1_val > 284.0f) y1_val = 284.0f;
+        if (y2_val < 201.0f) y2_val = 201.0f;
+        if (y2_val > 284.0f) y2_val = 284.0f;
 
         uint16_t y1 = (uint16_t)y1_val;
         uint16_t y2 = (uint16_t)y2_val;
@@ -199,16 +199,20 @@ void Display_Refresh(uint8_t force_refresh)
         /* PAGE 1: AI自适应基准学习状态与实时偏差图 */
         if (force_refresh) {
             LCD_ShowString(16, 65,  "Base Temp:           C", WHITE, BLACK);
-            LCD_ShowString(16, 90,  "Filt Temp:           C", WHITE, BLACK);
-            LCD_ShowString(16, 115, "Deviation:           C", WHITE, BLACK);
+            LCD_ShowString(16, 87,  "Filt Temp:           C", WHITE, BLACK);
+            LCD_ShowString(16, 109, "Deviation:           C", WHITE, BLACK);
             
             /* 绘制偏差对称指示彩条背景刻度线 */
-            LCD_DrawRectangle(29, 134, 211, 142, DARK_GRAY);
-            LCD_DrawLine(120, 132, 120, 144, GRAY); /* 0偏差中心线 */
+            LCD_DrawRectangle(29, 127, 211, 135, DARK_GRAY);
+            LCD_DrawLine(120, 125, 120, 137, GRAY); /* 0偏差中心线 */
 
-            LCD_ShowString(16, 160, "Samples  :     / 100", WHITE, BLACK);
+            LCD_ShowString(16, 145, "Samples  :     / 100", WHITE, BLACK);
+            
+            /* 绘制学习进度水平进度条背景框 */
+            LCD_DrawRectangle(29, 164, 211, 172, DARK_GRAY);
+
             LCD_ShowString(16, 185, "Real-time Deviation Chart (+/-5 C)", GRAY, BLACK);
-            LCD_DrawRectangle(20, 200, 220, 290, GRAY);
+            LCD_DrawRectangle(20, 200, 220, 285, GRAY);
         }
 
         if (aht20_healthy) {
@@ -216,16 +220,16 @@ void Display_Refresh(uint8_t force_refresh)
             LCD_ShowString(96, 65, text_buf, GREEN, BLACK);
 
             sprintf(text_buf, "%5.2f", test_filtered_temp);
-            LCD_ShowString(96, 90, text_buf, GREEN, BLACK);
+            LCD_ShowString(96, 87, text_buf, GREEN, BLACK);
 
             float dev = test_filtered_temp - my_detector.baseline_temp;
             sprintf(text_buf, "%+5.2f", dev);
             uint16_t dev_color = GREEN;
             if (dev > 3.0f || dev < -3.0f) dev_color = RED;
             else if (dev > 1.5f || dev < -1.5f) dev_color = YELLOW;
-            LCD_ShowString(96, 115, text_buf, dev_color, BLACK);
+            LCD_ShowString(96, 109, text_buf, dev_color, BLACK);
 
-            /* 绘制双向对称偏差动态指示柱 */
+            /* 绘制双向对称偏差动态指示柱 (X在30到210像素) */
             float dev_lim = dev;
             if (dev_lim > 5.0f) dev_lim = 5.0f;
             if (dev_lim < -5.0f) dev_lim = -5.0f;
@@ -233,39 +237,58 @@ void Display_Refresh(uint8_t force_refresh)
             
             if (w > 0) {
                 /* 清理左侧负偏差图形残留 */
-                LCD_DrawRectangle_Filled(30, 135, 119, 141, BLACK);
+                LCD_DrawRectangle_Filled(30, 128, 119, 134, BLACK);
                 /* 绘制正偏差填充条 */
-                LCD_DrawRectangle_Filled(120, 135, 120 + w, 141, dev_color);
+                LCD_DrawRectangle_Filled(120, 128, 120 + w, 134, dev_color);
                 /* 清理右侧剩余背景区域 */
                 if (120 + w < 210) {
-                    LCD_DrawRectangle_Filled(121 + w, 135, 210, 141, BLACK);
+                    LCD_DrawRectangle_Filled(121 + w, 128, 210, 134, BLACK);
                 }
             } else if (w < 0) {
                 /* 清理左侧剩余背景区域 */
                 if (120 + w > 30) {
-                    LCD_DrawRectangle_Filled(30, 135, 120 + w - 1, 141, BLACK);
+                    LCD_DrawRectangle_Filled(30, 128, 120 + w - 1, 134, BLACK);
                 }
                 /* 绘制负偏差填充条 */
-                LCD_DrawRectangle_Filled(120 + w, 135, 120, 141, dev_color);
+                LCD_DrawRectangle_Filled(120 + w, 128, 120, 134, dev_color);
                 /* 清理右侧正偏差图形残留 */
-                LCD_DrawRectangle_Filled(121, 135, 210, 141, BLACK);
+                LCD_DrawRectangle_Filled(121, 128, 210, 134, BLACK);
             } else {
                 /* 偏差完全为0，擦除整条 */
-                LCD_DrawRectangle_Filled(30, 135, 210, 141, BLACK);
+                LCD_DrawRectangle_Filled(30, 128, 210, 134, BLACK);
             }
             /* 重新画一下中间被覆盖的0基准中轴线 */
-            LCD_DrawLine(120, 132, 120, 144, GRAY);
+            LCD_DrawLine(120, 125, 120, 137, GRAY);
         } else {
             LCD_ShowString(96, 65, "[ERROR]", RED, BLACK);
-            LCD_ShowString(96, 90, "[ERROR]", RED, BLACK);
-            LCD_ShowString(96, 115, "[ERROR]", RED, BLACK);
+            LCD_ShowString(96, 87, "[ERROR]", RED, BLACK);
+            LCD_ShowString(96, 109, "[ERROR]", RED, BLACK);
             /* 清空整条区域 */
-            LCD_DrawRectangle_Filled(30, 135, 210, 141, BLACK);
-            LCD_DrawLine(120, 132, 120, 144, GRAY);
+            LCD_DrawRectangle_Filled(30, 128, 210, 134, BLACK);
+            LCD_DrawLine(120, 125, 120, 137, GRAY);
         }
 
         sprintf(text_buf, "%3d", my_detector.learning_samples);
-        LCD_ShowString(96, 160, text_buf, YELLOW, BLACK);
+        LCD_ShowString(96, 145, text_buf, YELLOW, BLACK);
+
+        /* 绘制基准自适应学习阶段进度条 */
+        uint32_t cur_samples = my_detector.learning_samples;
+        uint32_t max_samples = my_detector.max_learning_samples;
+        if (cur_samples > max_samples) cur_samples = max_samples;
+        
+        /* 进度条宽度为 180 像素，范围在 X=30 到 X=210 */
+        uint16_t bar_w = (uint16_t)(cur_samples * 180 / max_samples);
+        uint16_t progress_color = BLUE;
+        if (my_detector.is_learning_done) {
+            progress_color = GREEN; /* 学习完成转为绿色 */
+        }
+
+        if (bar_w > 0) {
+            LCD_DrawRectangle_Filled(30, 165, 30 + bar_w - 1, 171, progress_color);
+        }
+        if (30 + bar_w < 210) {
+            LCD_DrawRectangle_Filled(30 + bar_w, 165, 210, 171, BLACK);
+        }
 
         /* 刷新折线图 */
         Draw_Deviation_Chart();
@@ -348,7 +371,7 @@ int main(void)
     uint32_t uptime_loop_counter = 0;
     uint8_t ui_refresh_tick = 0;
 
-    /* 1. 初始化板载配置的 LED 与独立按键 */
+    /* 1. 初始化板载配置 of LED 与独立按键 */
     LED_Init();
     KEY_Init();
 
