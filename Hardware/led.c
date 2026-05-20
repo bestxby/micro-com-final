@@ -57,9 +57,44 @@ void LED_Init(void)
             rcc_enable(led_table[i].rcc_enr);
             enabled |= led_table[i].rcc_enr;
         }
-        gpio_config_output(&led_table[i]);
+        
+        if (i == 1) {
+            /* LED2 (PA0) is TIM2_CH1 PWM output.
+               We configure PA0 as Alternate Function Push-Pull (CNF=10, MODE=11 -> 0xB) */
+            GPIOA->CRL &= ~0x0000000F;
+            GPIOA->CRL |=  0x0000000B;
+        } else {
+            gpio_config_output(&led_table[i]);
+        }
+        
         LED_Off(i);  /* default to off after init */
     }
+
+    /* Configure TIM2 for CH1 PWM output */
+    /* 1. Enable TIM2 clock on APB1 */
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    (void)RCC->APB1ENR; /* Flush pipeline */
+
+    /* 2. Configure Prescaler and Auto-reload for 720 Hz frequency
+          PSC = 999 (72MHz / 1000 = 72kHz tick rate)
+          ARR = 99 (Period = 100 ticks -> 720Hz PWM frequency) */
+    TIM2->PSC = 999;
+    TIM2->ARR = 99;
+
+    /* 3. Configure Capture/Compare Mode Register 1 (CCMR1)
+          OC1M = 110 (PWM mode 1)
+          OC1PE = 1 (Enable preload register for channel 1) */
+    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M;
+    TIM2->CCMR1 |= (6U << 4) | TIM_CCMR1_OC1PE;
+
+    /* 4. Enable Output Channel 1 in Capture/Compare Enable Register (CCER) */
+    TIM2->CCER |= TIM_CCER_OC1E;
+
+    /* 5. Enable TIM2 Counter in Control Register 1 (CR1) */
+    TIM2->CR1 |= TIM_CR1_CEN;
+
+    /* 6. Set initial duty cycle to 0 (off) */
+    TIM2->CCR1 = 0;
 }
 
 /* ---- Internal: write a pin to its active level ---- */
@@ -88,7 +123,11 @@ static inline void led_reset_pin(const LED_Desc *led)
 void LED_On(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    led_set_pin(&led_table[index]);
+    if (index == 1) {
+        TIM2->CCR1 = 99; /* Max duty cycle */
+    } else {
+        led_set_pin(&led_table[index]);
+    }
 }
 
 /* ============================================================
@@ -97,7 +136,11 @@ void LED_On(uint8_t index)
 void LED_Off(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    led_reset_pin(&led_table[index]);
+    if (index == 1) {
+        TIM2->CCR1 = 0; /* Min duty cycle */
+    } else {
+        led_reset_pin(&led_table[index]);
+    }
 }
 
 /* ============================================================
@@ -106,13 +149,20 @@ void LED_Off(uint8_t index)
 void LED_Toggle(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    const LED_Desc *led = &led_table[index];
-
-    /* toggle the physical state of the pin directly */
-    if (led->port->ODR & led->pin) {
-        led->port->BRR = led->pin;
+    if (index == 1) {
+        if (TIM2->CCR1 > 0) {
+            TIM2->CCR1 = 0;
+        } else {
+            TIM2->CCR1 = 99;
+        }
     } else {
-        led->port->BSRR = led->pin;
+        const LED_Desc *led = &led_table[index];
+        /* toggle the physical state of the pin directly */
+        if (led->port->ODR & led->pin) {
+            led->port->BRR = led->pin;
+        } else {
+            led->port->BSRR = led->pin;
+        }
     }
 }
 
@@ -123,8 +173,39 @@ void LED_Write(uint8_t index, uint8_t state)
 {
     if (index >= LED_COUNT) return;
     if (state) {
-        led_set_pin(&led_table[index]);
+        LED_On(index);
     } else {
-        led_reset_pin(&led_table[index]);
+        LED_Off(index);
     }
+}
+
+/* ============================================================
+ * LED_SetBreathingDuty — write duty cycle directly to TIM2 CCR1
+ * ============================================================ */
+void LED_SetBreathingDuty(uint16_t duty)
+{
+    if (duty > 99) {
+        duty = 99;
+    }
+    TIM2->CCR1 = duty;
+}
+
+/* ============================================================
+ * LED_ProcessBreathing — smooth duty cycle transition logic
+ * ============================================================ */
+void LED_ProcessBreathing(void)
+{
+    static int16_t duty = 0;
+    static int16_t dir = 1;
+
+    duty += dir;
+    if (duty >= 99) {
+        duty = 99;
+        dir = -1;
+    } else if (duty <= 0) {
+        duty = 0;
+        dir = 1;
+    }
+    
+    TIM2->CCR1 = duty;
 }

@@ -14,7 +14,7 @@
 #define LED1_RCC_ENR          RCC_APB2ENR_IOPCEN
 #define LED1_ACTIVE_LEVEL     0   /* 0 = active low (sink current), 1 = active high */
 
-/* ---- LED2 (default: PA0, change as needed) ---- */
+/* ---- LED2 (default: PA0, connected to TIM2_CH1) ---- */
 #define LED2_PORT             GPIOA
 #define LED2_PIN              0
 #define LED2_RCC_ENR          RCC_APB2ENR_IOPAEN
@@ -44,5 +44,9 @@ void LED_On(uint8_t index);
 void LED_Off(uint8_t index);
 void LED_Toggle(uint8_t index);
 void LED_Write(uint8_t index, uint8_t state);
+
+/* Breathing & Anomaly Flash APIs */
+void LED_SetBreathingDuty(uint16_t duty);
+void LED_ProcessBreathing(void);
 
 #endif /* __LED_H */

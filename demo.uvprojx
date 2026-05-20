@@ -454,6 +454,11 @@
               <FileType>1</FileType>
               <FilePath>.\Hardware\bmp280.c</FilePath>
             </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\key.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
