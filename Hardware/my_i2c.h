@@ -3,21 +3,21 @@
 
 #include "stm32f10x.h"
 
-/* I2C SCL & SDA Pin Definitions */
+/* I2C SCL 和 SDA 物理引脚定义 */
 #define I2C_SCL_PORT        GPIOB
 #define I2C_SCL_PIN         GPIO_Pin_6
 #define I2C_SDA_PORT        GPIOB
 #define I2C_SDA_PIN         GPIO_Pin_7
 #define I2C_RCC_ENR         RCC_APB2ENR_IOPBEN
 
-/* I2C GPIO physical write helpers */
+/* I2C 物理引脚读写低层寄存器控制宏 */
 #define I2C_SCL_H()         (I2C_SCL_PORT->BSRR = I2C_SCL_PIN)
 #define I2C_SCL_L()         (I2C_SCL_PORT->BRR  = I2C_SCL_PIN)
 #define I2C_SDA_H()         (I2C_SDA_PORT->BSRR = I2C_SDA_PIN)
 #define I2C_SDA_L()         (I2C_SDA_PORT->BRR  = I2C_SDA_PIN)
 #define I2C_SDA_READ()      ((I2C_SDA_PORT->IDR & I2C_SDA_PIN) ? 1 : 0)
 
-/* Public API */
+/* 外部公开接口 */
 void I2C_Init(void);
 void I2C_Start(void);
 void I2C_Stop(void);
