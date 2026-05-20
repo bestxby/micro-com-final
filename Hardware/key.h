@@ -3,12 +3,12 @@
 
 #include "stm32f10x.h"
 
-/* Key definitions */
-#define KEY_NONE        0
-#define KEY1_PRESS      1
-#define KEY2_PRESS      2
+/* 按键扫描状态返回值 */
+#define KEY_NONE        0   /* 无按键按下 */
+#define KEY1_PRESS      1   /* KEY1 (PB0) 按下 */
+#define KEY2_PRESS      2   /* KEY2 (PB8) 按下 */
 
-/* Pin Definitions */
+/* 按键硬件端口及引脚定义 */
 #define KEY1_PORT       GPIOB
 #define KEY1_PIN        GPIO_Pin_0
 #define KEY1_RCC_ENR    RCC_APB2ENR_IOPBEN
@@ -17,7 +17,7 @@
 #define KEY2_PIN        GPIO_Pin_8
 #define KEY2_RCC_ENR    RCC_APB2ENR_IOPBEN
 
-/* Public API */
+/* 外部公开接口 */
 void KEY_Init(void);
 uint8_t KEY_Scan(uint8_t mode);
 

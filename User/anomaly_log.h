@@ -3,24 +3,24 @@
 
 #include <stdint.h>
 
-#define MAX_ANOMALY_LOGS    5
+#define MAX_ANOMALY_LOGS    5   /* 环形历史记录的最大容量 */
 
-/* Anomaly Log Event Record Structure */
+/* 异常历史日志数据结构 */
 typedef struct {
-    uint32_t timestamp_s;   /* System uptime in seconds when triggered */
-    float baseline_temp;    /* Adaptive learning baseline temperature */
-    float current_temp;     /* Filtered temperature at trigger time */
-    float current_press;    /* Current barometric pressure in Pa */
+    uint32_t timestamp_s;   /* 异常发生时的系统上电运行时间 (秒) */
+    float baseline_temp;    /* 发生异常时的自适应环境温度基准 */
+    float current_temp;     /* 发生异常时的实时滤波温度 */
+    float current_press;    /* 发生异常时的实时大气压强 (Pa) */
 } AnomalyEvent;
 
-/* Ring Buffer Structure for Logs */
+/* 日志存储环形队列结构体 */
 typedef struct {
     AnomalyEvent logs[MAX_ANOMALY_LOGS];
-    uint8_t head;           /* Points to the index where the next log will be written */
-    uint8_t count;          /* Total active log records stored (max MAX_ANOMALY_LOGS) */
+    uint8_t head;           /* 写入指针，指向下一个写入的数组位置 */
+    uint8_t count;          /* 队列当前有效记录个数 (最大为 MAX_ANOMALY_LOGS) */
 } AnomalyLogBuffer;
 
-/* Public API */
+/* 外部公开接口 */
 void Log_Init(AnomalyLogBuffer *buf);
 void Log_Add(AnomalyLogBuffer *buf, uint32_t timestamp, float baseline, float current_t, float current_p);
 

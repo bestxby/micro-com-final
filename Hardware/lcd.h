@@ -3,21 +3,21 @@
 
 #include "stm32f10x.h"
 
-/* LCD Pin Mapping (4-wire Software SPI) */
+/* LCD 引脚配置 (4线软件模拟 SPI 引脚定义) */
 #define LCD_RST_PORT        GPIOA
 #define LCD_RST_PIN         GPIO_Pin_3
 #define LCD_CS_PORT         GPIOA
 #define LCD_CS_PIN          GPIO_Pin_4
 #define LCD_SCL_PORT        GPIOA
 #define LCD_SCL_PIN         GPIO_Pin_5
-#define LCD_DC_PORT         GPIOA   /* RS / Data-Command Select */
+#define LCD_DC_PORT         GPIOA   /* RS / 命令与数据选择引脚 */
 #define LCD_DC_PIN          GPIO_Pin_6
-#define LCD_SDA_PORT        GPIOA   /* MOSI */
+#define LCD_SDA_PORT        GPIOA   /* MOSI 数据线 */
 #define LCD_SDA_PIN         GPIO_Pin_7
-#define LCD_BL_PORT         GPIOB   /* Backlight */
+#define LCD_BL_PORT         GPIOB   /* 背光控制引脚 */
 #define LCD_BL_PIN          GPIO_Pin_1
 
-/* Bit-banding physical write macros */
+/* 寄存器级物理引脚高低电平控制位带宏定义 */
 #define LCD_RST_H()         (LCD_RST_PORT->BSRR = LCD_RST_PIN)
 #define LCD_RST_L()         (LCD_RST_PORT->BRR  = LCD_RST_PIN)
 #define LCD_CS_H()          (LCD_CS_PORT->BSRR  = LCD_CS_PIN)
@@ -31,11 +31,11 @@
 #define LCD_BL_H()          (LCD_BL_PORT->BSRR  = LCD_BL_PIN)
 #define LCD_BL_L()          (LCD_BL_PORT->BRR   = LCD_BL_PIN)
 
-/* Screen Resolution (Default Portrait) */
+/* 屏幕分辨率参数 (默认竖屏) */
 #define LCD_WIDTH           240
 #define LCD_HEIGHT          320
 
-/* RGB565 Color Definitions */
+/* 常用 RGB565 颜色编码宏定义 */
 #define BLACK               0x0000
 #define WHITE               0xFFFF
 #define RED                 0xF800
@@ -47,7 +47,7 @@
 #define CYAN                0x07FF
 #define MAGENTA             0xF81F
 
-/* Public API */
+/* 外部公开接口 */
 void LCD_Init(void);
 void LCD_Clear(uint16_t color);
 void LCD_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);

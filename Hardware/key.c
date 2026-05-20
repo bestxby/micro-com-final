@@ -1,6 +1,6 @@
 #include "key.h"
 
-/* Software millisecond delay for debouncing */
+/* 按键消抖软件毫秒级延时函数 */
 static void KEY_DelayMs(uint32_t ms)
 {
     volatile uint32_t count = ms * 7200;
@@ -8,52 +8,52 @@ static void KEY_DelayMs(uint32_t ms)
 }
 
 /**
-  * @brief  Initializes the keys (PB0, PB8) as inputs with pull-up resistors.
-  * @param  None
-  * @retval None
+  * @brief  将按键引脚 (PB0, PB8) 初始化为带上拉的输入模式。
+  * @param  无
+  * @retval 无
   */
 void KEY_Init(void)
 {
-    /* 1. Enable GPIOB Clock */
+    /* 1. 开启 GPIOB 端口外设时钟 */
     RCC->APB2ENR |= KEY1_RCC_ENR;
-    (void)RCC->APB2ENR; /* Flush pipeline */
+    (void)RCC->APB2ENR; /* 刷新流水线 */
 
-    /* 2. Configure PB0 as Input with pull-up/pull-down (CNF=10, MODE=00 -> 0x8) */
+    /* 2. 配置 PB0 为上拉/下拉输入模式 (CNF=10, MODE=00 -> 0x8) */
     GPIOB->CRL &= ~0x0000000F;
     GPIOB->CRL |=  0x00000008;
 
-    /* 3. Configure PB8 as Input with pull-up/pull-down (CNF=10, MODE=00 -> 0x8) */
+    /* 3. 配置 PB8 为上拉/下拉输入模式 (CNF=10, MODE=00 -> 0x8) */
     GPIOB->CRH &= ~0x0000000F;
     GPIOB->CRH |=  0x00000008;
 
-    /* 4. Select Pull-Up by setting ODR bits high */
+    /* 4. 将 ODR 寄存器对应位置 1 选定为上拉输入模式 */
     GPIOB->ODR |= KEY1_PIN;
     GPIOB->ODR |= KEY2_PIN;
 }
 
 /**
-  * @brief  Scans the keys for state changes with software debounce.
-  * @param  mode: 0 = Single-press mode (must release before triggering again),
-  *               1 = Continuous mode (keeps triggering if held down).
-  * @retval KEY1_PRESS, KEY2_PRESS, or KEY_NONE.
+  * @brief  带软件消抖的按键状态扫描函数。
+  * @param  mode: 0 = 单次触发模式（按键必须释放后才能触发下一次）,
+  *               1 = 连续触发模式（按下不放可以持续触发）。
+  * @retval KEY1_PRESS, KEY2_PRESS, 或 KEY_NONE。
   */
 uint8_t KEY_Scan(uint8_t mode)
 {
-    static uint8_t key_up = 1; /* Tracks whether keys have been released */
+    static uint8_t key_up = 1; /* 按键释放标志位 */
     
     if (mode) {
         key_up = 1;
     }
 
-    /* Read pin states (0 = pressed, 1 = released due to pull-up) */
+    /* 读取物理引脚输入电平 (低电平表示按下，高电平表示释放) */
     uint8_t key1_low = (GPIOB->IDR & KEY1_PIN) ? 0 : 1;
     uint8_t key2_low = (GPIOB->IDR & KEY2_PIN) ? 0 : 1;
 
     if (key_up && (key1_low || key2_low)) {
-        KEY_DelayMs(20); /* Wait 20ms to debounce */
-        key_up = 0;      /* Block further triggers until released */
+        KEY_DelayMs(20); /* 延时 20ms 进行消抖 */
+        key_up = 0;      /* 锁定，防止重复触发 */
         
-        /* Read again to confirm */
+        /* 再次读取确认按键状态 */
         key1_low = (GPIOB->IDR & KEY1_PIN) ? 0 : 1;
         key2_low = (GPIOB->IDR & KEY2_PIN) ? 0 : 1;
 
@@ -64,7 +64,7 @@ uint8_t KEY_Scan(uint8_t mode)
             return KEY2_PRESS;
         }
     } else if (!key1_low && !key2_low) {
-        key_up = 1; /* Reset release flag when both buttons are released */
+        key_up = 1; /* 两个按键均释放后，复位释放标志位 */
     }
 
     return KEY_NONE;

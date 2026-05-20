@@ -1,7 +1,7 @@
 #include "bmp280.h"
 #include "my_i2c.h"
 
-/* Calibration Parameters Structure */
+/* 校准参数存储结构体 */
 typedef struct {
     uint16_t T1;
     int16_t  T2;
@@ -20,14 +20,14 @@ typedef struct {
 static BMP280_Calib calib;
 static int32_t t_fine;
 
-/* Software millisecond delay */
+/* 软件毫秒级延时函数 */
 static void BMP280_DelayMs(uint32_t ms)
 {
     volatile uint32_t count = ms * 7200;
     while (count--);
 }
 
-/* Write to a single BMP280 register */
+/* 向指定 BMP280 寄存器写入一个字节数据 */
 static void BMP280_WriteReg(uint8_t reg, uint8_t value)
 {
     I2C_Start();
@@ -40,7 +40,7 @@ static void BMP280_WriteReg(uint8_t reg, uint8_t value)
     I2C_Stop();
 }
 
-/* Read a single BMP280 register */
+/* 从指定 BMP280 寄存器读取一个字节数据 */
 static uint8_t BMP280_ReadReg(uint8_t reg)
 {
     uint8_t value = 0;
@@ -50,15 +50,15 @@ static uint8_t BMP280_ReadReg(uint8_t reg)
     I2C_SendByte(reg);
     I2C_WaitAck();
     
-    I2C_Start(); /* Re-start */
+    I2C_Start(); /* 产生重复起始信号 */
     I2C_SendByte(BMP280_ADDR_READ);
     I2C_WaitAck();
-    value = I2C_ReceiveByte(0); /* NACK */
+    value = I2C_ReceiveByte(0); /* 发送 NACK */
     I2C_Stop();
     return value;
 }
 
-/* Read multiple consecutive bytes from BMP280 */
+/* 从指定寄存器地址开始连续读取多个字节数据 */
 static void BMP280_ReadMulti(uint8_t reg, uint8_t *buf, uint32_t len)
 {
     I2C_Start();
@@ -67,7 +67,7 @@ static void BMP280_ReadMulti(uint8_t reg, uint8_t *buf, uint32_t len)
     I2C_SendByte(reg);
     I2C_WaitAck();
     
-    I2C_Start(); /* Re-start */
+    I2C_Start(); /* 重复起始信号 */
     I2C_SendByte(BMP280_ADDR_READ);
     I2C_WaitAck();
     for (uint32_t i = 0; i < len; i++) {
@@ -77,9 +77,9 @@ static void BMP280_ReadMulti(uint8_t reg, uint8_t *buf, uint32_t len)
 }
 
 /**
-  * @brief  Reads calibration parameters from BMP280 non-volatile memory.
-  * @param  None
-  * @retval None
+  * @brief  从 BMP280 的 OTP 非易失性存储器中读取校准参数系数。
+  * @param  无
+  * @retval 无
   */
 static void BMP280_ReadCalib(void)
 {
@@ -102,28 +102,28 @@ static void BMP280_ReadCalib(void)
 }
 
 /**
-  * @brief  Initializes the BMP280 sensor.
-  * @param  None
-  * @retval 0 = Success, 1 = Failure.
+  * @brief  初始化 BMP280 气压计传感器。
+  * @param  无
+  * @retval 0 = 成功, 1 = 失败。
   */
 uint8_t BMP280_Init(void)
 {
-    /* 1. Verify Chip ID */
+    /* 1. 校验芯片 ID (BMP280 芯片特征ID值应固定为 0x58) */
     uint8_t chip_id = BMP280_ReadReg(BMP280_REG_ID);
     if (chip_id != 0x58) {
-        return 1; /* Not a BMP280 or connection error */
+        return 1; /* 芯片 ID 不符或通信错误 */
     }
 
-    /* 2. Soft Reset */
+    /* 2. 发送软复位命令 */
     BMP280_WriteReg(BMP280_REG_RESET, 0xB6);
     BMP280_DelayMs(10);
 
-    /* 3. Read calibration data */
+    /* 3. 读取出厂校准寄存器参数 */
     BMP280_ReadCalib();
 
-    /* 4. Configure sensor
-       F4 Ctrl Meas: osrs_t=1 (x1), osrs_p=5 (x16), mode=3 (normal) -> 0x37 
-       F5 Config: t_sb=2 (125ms), filter=2 (x4) -> 0x48 */
+    /* 4. 配置传感器参数
+       F4 Ctrl Meas 寄存器: osrs_t=1 (温度采样率x1), osrs_p=5 (气压采样率x16), mode=3 (Normal工作模式) -> 对应值 0x37 
+       F5 Config 寄存器: t_sb=2 (待机时间125ms), filter=2 (IIR滤波因子x4) -> 对应值 0x48 */
     BMP280_WriteReg(BMP280_REG_CONFIG, 0x48);
     BMP280_WriteReg(BMP280_REG_CTRL, 0x37);
 
@@ -131,9 +131,9 @@ uint8_t BMP280_Init(void)
 }
 
 /**
-  * @brief  Compensates the raw temperature using calibration coefficients.
-  * @param  adc_T: Raw ADC reading of temperature.
-  * @retval Temperature in Celsius (float).
+  * @brief  使用出厂校准公式对温度 ADC 原始值进行补偿。
+  * @param  adc_T: 温度通道 ADC 读数。
+  * @retval 摄氏度浮点温度值。
   */
 static float BMP280_CompensateTemp(int32_t adc_T)
 {
@@ -147,9 +147,9 @@ static float BMP280_CompensateTemp(int32_t adc_T)
 }
 
 /**
-  * @brief  Compensates the raw pressure using calibration coefficients.
-  * @param  adc_P: Raw ADC reading of pressure.
-  * @retval Pressure in Pascals (float).
+  * @brief  使用出厂校准公式对气压 ADC 原始值进行补偿。
+  * @param  adc_P: 气压通道 ADC 读数。
+  * @retval 帕斯卡 (Pa) 气压值。
   */
 static float BMP280_CompensatePress(int32_t adc_P)
 {
@@ -161,7 +161,7 @@ static float BMP280_CompensatePress(int32_t adc_P)
     var1 = (((double)calib.P3) * var1 * var1 / 524288.0 + ((double)calib.P2) * var1) / 524288.0;
     var1 = (1.0 + var1 / 32768.0) * ((double)calib.P1);
     if (var1 == 0.0) {
-        return 0.0f; /* Avoid division by zero */
+        return 0.0f; /* 避免除以零错误 */
     }
     p = 1048576.0 - (double)adc_P;
     p = (p - (var2 / 4096.0)) * 6250.0 / var1;
@@ -172,23 +172,23 @@ static float BMP280_CompensatePress(int32_t adc_P)
 }
 
 /**
-  * @brief  Reads compensated temperature and pressure from BMP280.
-  * @param  temperature: Pointer to float to store temperature in C.
-  * @param  pressure: Pointer to float to store pressure in Pa.
-  * @retval 0 = Success, 1 = Failure.
+  * @brief  从 BMP280 传感器读取气压和计算得到的环境温度。
+  * @param  temperature: 保存摄氏度温度值的浮点指针。
+  * @param  pressure: 保存帕斯卡气压值的浮点指针。
+  * @retval 0 = 成功, 1 = 失败。
   */
 uint8_t BMP280_ReadData(float *temperature, float *pressure)
 {
     uint8_t buf[6] = {0};
     
-    /* Read 6 bytes of ADC data starting from F7 (Pressure MSB) */
+    /* 连续读取从寄存器 F7 开始的 6 字节气压与温度原始数据 */
     BMP280_ReadMulti(BMP280_REG_PRESS, buf, 6);
 
-    /* Construct raw values */
+    /* 重组原始的 20 位 ADC 数据 */
     int32_t adc_P = ((int32_t)buf[0] << 12) | ((int32_t)buf[1] << 4) | ((int32_t)buf[2] >> 4);
     int32_t adc_T = ((int32_t)buf[3] << 12) | ((int32_t)buf[4] << 4) | ((int32_t)buf[5] >> 4);
 
-    /* Check if default blank values are read (indicates sensor reading failure) */
+    /* 判断读取值是否为出厂屏蔽值 (表明通信故障或测量数据未就绪) */
     if (adc_T == 0x80000 || adc_P == 0x80000) {
         return 1;
     }

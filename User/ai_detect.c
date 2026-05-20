@@ -1,11 +1,11 @@
 #include "ai_detect.h"
 
 /**
-  * @brief  Initializes the AI Detector parameters.
-  * @param  detector: Pointer to the AI_Detector structure.
-  * @param  alpha: Exponential Moving Average (EMA) smoothing factor (0.0 < alpha <= 1.0).
-  * @param  max_samples: Number of samples required during the learning phase.
-  * @retval None
+  * @brief  初始化 AI 温度自适应监测器参数。
+  * @param  detector: 指向 AI_Detector 结构体的指针。
+  * @param  alpha: 指数移动平均 (EMA) 滤波器平滑因子。
+  * @param  max_samples: 算法自适应学习期所需的采样总数。
+  * @retval 无
   */
 void AI_Init(AI_Detector *detector, float alpha, uint32_t max_samples)
 {
@@ -20,11 +20,11 @@ void AI_Init(AI_Detector *detector, float alpha, uint32_t max_samples)
 }
 
 /**
-  * @brief  Filters incoming temperature and evaluates system anomaly state.
-  * @param  detector: Pointer to the AI_Detector structure.
-  * @param  raw_temp: Raw temperature input from the sensor.
-  * @param  out_filtered_temp: Pointer to float to store the output EMA filtered value.
-  * @retval AI_STATE_LEARNING, AI_STATE_NORMAL, or AI_STATE_ANOMALY.
+  * @brief  对输入温度执行 EMA 滤波并进行自适应异常诊断。
+  * @param  detector: 指向 AI_Detector 结构体的指针。
+  * @param  raw_temp: 传感器的原始温度输入。
+  * @param  out_filtered_temp: 指向输出滤波后温度的浮点指针。
+  * @retval 系统检测状态返回值 (AI_STATE_LEARNING, AI_STATE_NORMAL, 或 AI_STATE_ANOMALY)。
   */
 uint8_t AI_Process(AI_Detector *detector, float raw_temp, float *out_filtered_temp)
 {
@@ -34,9 +34,9 @@ uint8_t AI_Process(AI_Detector *detector, float raw_temp, float *out_filtered_te
         return AI_STATE_NORMAL;
     }
 
-    /* 1. Exponential Moving Average (EMA) Filtering */
+    /* 1. EMA (指数移动平均) 数字滤波算法 */
     if (detector->learning_samples == 0) {
-        /* On first sample, initialize filter value to raw to prevent startup lag */
+        /* 上电首个样本，直接将滤波值初始化为原始输入，防止 EMA 算法初始零值漂移 */
         filtered = raw_temp;
     } else {
         filtered = (detector->alpha * raw_temp) + ((1.0f - detector->alpha) * detector->last_filtered_temp);
@@ -44,11 +44,11 @@ uint8_t AI_Process(AI_Detector *detector, float raw_temp, float *out_filtered_te
     detector->last_filtered_temp = filtered;
     *out_filtered_temp = filtered;
 
-    /* 2. Adaptive Learning Phase */
+    /* 2. 环境温度基准自适应学习阶段 */
     if (detector->is_learning_done == 0) {
         detector->learning_samples++;
         
-        /* Calculate incremental mean: mean(n) = ((n-1)*mean(n-1) + x) / n */
+        /* 递推计算样本的累加平均值: mean(n) = ((n-1)*mean(n-1) + x) / n */
         detector->baseline_temp = (((float)(detector->learning_samples - 1) * detector->baseline_temp) + filtered) 
                                   / (float)detector->learning_samples;
 
@@ -58,14 +58,14 @@ uint8_t AI_Process(AI_Detector *detector, float raw_temp, float *out_filtered_te
         return AI_STATE_LEARNING;
     }
 
-    /* 3. Monitoring & Anomaly Detection Phase */
+    /* 3. 实时异常状态监控诊断 */
     float diff = filtered - detector->baseline_temp;
     if (diff < 0.0f) {
-        diff = -diff; /* Get absolute value */
+        diff = -diff; /* 取绝对值 */
     }
 
     if (diff > 5.0f) {
-        return AI_STATE_ANOMALY; /* Deviation exceeds 5 degrees C */
+        return AI_STATE_ANOMALY; /* 温度偏离历史学习基准超过 5°C，触发异常报警 */
     }
 
     return AI_STATE_NORMAL;
