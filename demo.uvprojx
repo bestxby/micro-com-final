@@ -378,7 +378,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
               <IncludePath>.\User;.\Hardware;.\Library</IncludePath>
             </VariousControls>
@@ -478,6 +478,18 @@
         </Group>
         <Group>
           <GroupName>Library</GroupName>
+          <Files>
+            <File>
+              <FileName>startup_stm32f10x_md.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\RTE\Device\STM32F103C8\startup_stm32f10x_md.s</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32f10x.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\RTE\Device\STM32F103C8\system_stm32f10x.c</FilePath>
+            </File>
+          </Files>
         </Group>
       </Groups>
     </Target>

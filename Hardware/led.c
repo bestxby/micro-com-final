@@ -89,7 +89,7 @@ void LED_Init(void)
     TIM2->CCMR1 |= (6U << 4) | TIM_CCMR1_OC1PE;
 
     /* 4. 开启 Capture/Compare Enable Register (CCER) 的通道 1 输出 */
-    TIM2->CCER |= TIM_CCER_OC1E;
+    TIM2->CCER |= 0x0001U; /* CC1E: 通道1输出使能 */
 
     /* 5. 开启 TIM2 计数器 (CEN) */
     TIM2->CR1 |= TIM_CR1_CEN;
@@ -99,7 +99,7 @@ void LED_Init(void)
 }
 
 /* ---- 内部函数: 将 GPIO 电平写入引脚的“有效激活”电平 ---- */
-static inline void led_set_pin(const LED_Desc *led)
+static __inline void led_set_pin(const LED_Desc *led)
 {
     if (led->active_level) {
         led->port->BSRR = led->pin;
@@ -109,7 +109,7 @@ static inline void led_set_pin(const LED_Desc *led)
 }
 
 /* ---- 内部函数: 将 GPIO 电平写入引脚的“无效关闭”电平 ---- */
-static inline void led_reset_pin(const LED_Desc *led)
+static __inline void led_reset_pin(const LED_Desc *led)
 {
     if (led->active_level) {
         led->port->BRR  = led->pin;

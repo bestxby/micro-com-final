@@ -217,11 +217,12 @@ void LCD_Clear(uint16_t color)
     
     uint8_t h = color >> 8;
     uint8_t l = color & 0xFF;
-    
+    uint8_t b;
+
     for (uint32_t i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
         /* 单字节快速写入高8位 */
         uint8_t byte = h;
-        for (uint8_t b = 0; b < 8; b++) {
+        for (b = 0; b < 8; b++) {
             LCD_SCL_L();
             if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
             LCD_SCL_H();
@@ -229,7 +230,7 @@ void LCD_Clear(uint16_t color)
         }
         /* 单字节快速写入低8位 */
         byte = l;
-        for (uint8_t b = 0; b < 8; b++) {
+        for (b = 0; b < 8; b++) {
             LCD_SCL_L();
             if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
             LCD_SCL_H();
@@ -323,12 +324,13 @@ void LCD_DrawRectangle_Filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
     
     uint8_t h = color >> 8;
     uint8_t l = color & 0xFF;
+    uint8_t b;
     uint32_t pixels = (uint32_t)(x2 - x1 + 1) * (uint32_t)(y2 - y1 + 1);
-    
+
     for (uint32_t i = 0; i < pixels; i++) {
         /* 单字节快速写入高8位 */
         uint8_t byte = h;
-        for (uint8_t b = 0; b < 8; b++) {
+        for (b = 0; b < 8; b++) {
             LCD_SCL_L();
             if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
             LCD_SCL_H();
@@ -336,7 +338,7 @@ void LCD_DrawRectangle_Filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2
         }
         /* 单字节快速写入低8位 */
         byte = l;
-        for (uint8_t b = 0; b < 8; b++) {
+        for (b = 0; b < 8; b++) {
             LCD_SCL_L();
             if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
             LCD_SCL_H();
@@ -360,6 +362,7 @@ void LCD_ShowChar(uint16_t x, uint16_t y, char chr, uint16_t fc, uint16_t bc)
     if (x + 8 > LCD_WIDTH || y + 16 > LCD_HEIGHT) return;
     
     uint8_t temp;
+    uint8_t b;
     uint8_t index = chr - ' '; /* 根据 ASCII 码表偏移计算字模索引 */
     
     LCD_Address_Set(x, y, x + 7, y + 15);
@@ -374,14 +377,14 @@ void LCD_ShowChar(uint16_t x, uint16_t y, char chr, uint16_t fc, uint16_t bc)
             uint8_t l = color & 0xFF;
             
             /* 写高8位 */
-            for (uint8_t b = 0; b < 8; b++) {
+            for (b = 0; b < 8; b++) {
                 LCD_SCL_L();
                 if (h & 0x80) LCD_SDA_H(); else LCD_SDA_L();
                 LCD_SCL_H();
                 h <<= 1;
             }
             /* 写低8位 */
-            for (uint8_t b = 0; b < 8; b++) {
+            for (b = 0; b < 8; b++) {
                 LCD_SCL_L();
                 if (l & 0x80) LCD_SDA_H(); else LCD_SDA_L();
                 LCD_SCL_H();
