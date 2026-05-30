@@ -40,19 +40,19 @@
 #define LCD_HEIGHT          320
 
 /* ============================================================
- * 常用 RGB565 颜色宏
+ * 常用 RGB565 颜色宏 (已升级为更具科技感的高级霓虹配色方案)
  * ============================================================ */
-#define BLACK               0x0000
-#define WHITE               0xFFFF
-#define RED                 0xF800
-#define GREEN               0x07E0
-#define BLUE                0x001F
-#define YELLOW              0xFFE0
-#define CYAN                0x07FF
-#define MAGENTA             0xF81F
-#define GRAY                0x8410
-#define DARK_GRAY           0x3186
-#define ORANGE              0xFC00
+#define BLACK               0x0000  // 纯黑背景
+#define WHITE               0xFFFF  // 纯白文字
+#define RED                 0xF9A6  // 霓虹珊瑚红 (警报状态)
+#define GREEN               0x3666  // 祖母绿/霓虹绿 (正常状态)
+#define BLUE                0x24FF  // 霓虹电光蓝 (自适应学习状态)
+#define YELLOW              0xFEE0  // 琥珀金/霓虹黄 (提示与时间戳)
+#define CYAN                0x07FF  // 霓虹青色 (页面标题与重点强调)
+#define MAGENTA             0xF81F  // 霓虹品红
+#define GRAY                0x6B4D  // 现代中灰 (卡片细边框与次要刻度)
+#define DARK_GRAY           0x2104  // 极暗灰/板岩灰 (卡片背景填充色)
+#define ORANGE              0xFC00  // 橙色
 
 /* ============================================================
  * 公开 API

@@ -410,6 +410,11 @@
               <FilePath>.\User\anomaly_log.c</FilePath>
             </File>
             <File>
+              <FileName>game.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\game.c</FilePath>
+            </File>
+            <File>
               <FileName>anomaly_log.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\anomaly_log.h</FilePath>
