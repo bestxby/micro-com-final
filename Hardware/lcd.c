@@ -1,251 +1,175 @@
 #include "lcd.h"
 #include "font.h"
 
-/* 软件微秒级/毫秒级延时函数 */
+/* ============================================================
+ * 内部辅助: 软件延时
+ * ============================================================ */
 static void LCD_DelayMs(uint32_t ms)
 {
     volatile uint32_t count = ms * 7200;
     while (count--);
 }
 
-/* 软件模拟 SPI 发送单字节函数 */
+/* ============================================================
+ * 内部辅助: 软件模拟 SPI 发送单字节
+ * ============================================================ */
 static void LCD_Writ_Bus(uint8_t dat)
 {
     for (uint8_t i = 0; i < 8; i++) {
         LCD_SCL_L();
-        if (dat & 0x80) {
-            LCD_SDA_H();
-        } else {
-            LCD_SDA_L();
-        }
+        if (dat & 0x80) LCD_SDA_H(); else LCD_SDA_L();
         LCD_SCL_H();
         dat <<= 1;
     }
 }
 
-/* 写 LCD 控制寄存器命令 */
+/* ============================================================
+ * 内部辅助: 写命令 / 写数据 (单字节) / 写数据 (双字节)
+ * ============================================================ */
 static void LCD_WR_REG(uint8_t reg)
 {
     LCD_CS_L();
-    LCD_RS_L(); /* 写命令模式 (DC引脚置低) */
+    LCD_RS_L();
     LCD_Writ_Bus(reg);
     LCD_CS_H();
 }
 
-/* 写 LCD 8位数据 */
 static void LCD_WR_DATA(uint8_t dat)
 {
     LCD_CS_L();
-    LCD_RS_H(); /* 写数据模式 (DC引脚置高) */
+    LCD_RS_H();
     LCD_Writ_Bus(dat);
     LCD_CS_H();
 }
 
-/* 写 LCD 16位数据 */
 static void LCD_WR_DATA16(uint16_t dat)
 {
     LCD_CS_L();
-    LCD_RS_H(); /* 写数据模式 (DC引脚置高) */
+    LCD_RS_H();
     LCD_Writ_Bus(dat >> 8);
     LCD_Writ_Bus(dat & 0xFF);
     LCD_CS_H();
 }
 
+/* ============================================================
+ * 内部辅助: 连续写入 16 位像素流 (先发命令 0x2C, 再发数据)
+ *           调用前需确保已设置地址窗口且 CS=0, RS=1
+ * ============================================================ */
+static void LCD_WritePixels(uint16_t color, uint32_t count)
+{
+    uint8_t h = color >> 8;
+    uint8_t l = color & 0xFF;
+    while (count--) {
+        LCD_Writ_Bus(h);
+        LCD_Writ_Bus(l);
+    }
+}
+
+/* ============================================================
+ * 公开 API
+ * ============================================================ */
+
 /**
-  * @brief  设置 LCD 显示的坐标开窗区域。
-  * @param  x1: 起始列坐标。
-  * @param  y1: 起始行坐标。
-  * @param  x2: 结束列坐标。
-  * @param  y2: 结束行坐标。
-  * @retval 无
+  * @brief  设置显存操作窗口。
   */
 void LCD_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
-    LCD_WR_REG(0x2A); /* 列地址设置命令 */
+    LCD_WR_REG(0x2A);
     LCD_WR_DATA16(x1);
     LCD_WR_DATA16(x2);
-    LCD_WR_REG(0x2B); /* 行地址设置命令 */
+    LCD_WR_REG(0x2B);
     LCD_WR_DATA16(y1);
     LCD_WR_DATA16(y2);
-    LCD_WR_REG(0x2C); /* 开始写入显存命令 */
+    LCD_WR_REG(0x2C);
 }
 
 /**
-  * @brief  使用寄存器配置 LCD 控制引脚，并初始化显示屏控制器 (兼容 ILI9341 与 ST7789)。
-  * @param  无
-  * @retval 无
+  * @brief  初始化 ST7796S 控制器 (320×480 竖屏, RGB565, 4 线 SPI)。
   */
 void LCD_Init(void)
 {
-    /* 1. 使能 GPIOA 和 GPIOB 外设时钟 */
+    /* ---- 1. 时钟 ---- */
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
-    (void)RCC->APB2ENR; /* 刷新流水线 */
+    (void)RCC->APB2ENR;
 
-    /* 2. 配置 PA3..PA7 为 50MHz 推挽输出模式 (CNF=00, MODE=11 -> 0x3) */
+    /* ---- 2. PA3..PA7: 50MHz 推挽输出 ---- */
     GPIOA->CRL &= ~0xFFFFF000;
     GPIOA->CRL |=  0x33333000;
 
-    /* 3. 配置 PB1 为 50MHz 推挽输出模式 (CNF=00, MODE=11 -> 0x3) */
+    /* ---- 3. PA8 (LCD_DC): 50MHz 推挽输出 ---- */
+    GPIOA->CRH &= ~0x0000000F;
+    GPIOA->CRH |=  0x00000003;
+
+    /* ---- 4. PB1 (LCD_BL): 50MHz 推挽输出 ---- */
     GPIOB->CRL &= ~0x000000F0;
     GPIOB->CRL |=  0x00000030;
 
-    /* 4. 打开屏幕背光 */
+    /* ---- 5. 背光 & 复位 ---- */
     LCD_BL_H();
+    LCD_RST_L();  LCD_DelayMs(100);
+    LCD_RST_H();  LCD_DelayMs(100);
 
-    /* 5. 硬件复位脉冲 */
-    LCD_RST_L();
-    LCD_DelayMs(100);
-    LCD_RST_H();
-    LCD_DelayMs(100);
+    /* ---- 6. ST7796S 初始化序列 ---- */
+    LCD_WR_REG(0x11); LCD_DelayMs(120);   /* Sleep Out */
 
-    /* 6. 发送控制器初始化指令序列 */
-    LCD_WR_REG(0x11); /* 退出休眠模式 (Sleep Out) */
-    LCD_DelayMs(120);
+    LCD_WR_REG(0x36);
+    LCD_WR_DATA(0x68);                     /* MADCTL: 横屏 480×320, MX+MV+BGR */
 
-    LCD_WR_REG(0xCF);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0xC1);
-    LCD_WR_DATA(0x30);
+    LCD_WR_REG(0x3A);
+    LCD_WR_DATA(0x55);                     /* 16-bit RGB565 */
 
-    LCD_WR_REG(0xED);
-    LCD_WR_DATA(0x64);
-    LCD_WR_DATA(0x03);
-    LCD_WR_DATA(0x12);
-    LCD_WR_DATA(0x81);
+    /* 电源设置 */
+    LCD_WR_REG(0xC0); LCD_WR_DATA(0x23);   /* Power Control 1 */
+    LCD_WR_REG(0xC1); LCD_WR_DATA(0x10);   /* Power Control 2 */
+    LCD_WR_REG(0xC5); LCD_WR_DATA(0x3E); LCD_WR_DATA(0x28); /* VCOM */
+    LCD_WR_REG(0xC7); LCD_WR_DATA(0x86);   /* VCOM Control 2 */
 
-    LCD_WR_REG(0xE8);
-    LCD_WR_DATA(0x85);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x78);
+    /* 帧率 */
+    LCD_WR_REG(0xB1); LCD_WR_DATA(0x00); LCD_WR_DATA(0x18);
+    LCD_WR_REG(0xB6); LCD_WR_DATA(0x08); LCD_WR_DATA(0x82); LCD_WR_DATA(0x27);
 
-    LCD_WR_REG(0xCB);
-    LCD_WR_DATA(0x39);
-    LCD_WR_DATA(0x2C);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x34);
-    LCD_WR_DATA(0x02);
+    /* Gamma */
+    LCD_WR_REG(0xE0);
+    LCD_WR_DATA(0x0F); LCD_WR_DATA(0x31); LCD_WR_DATA(0x2B); LCD_WR_DATA(0x0C);
+    LCD_WR_DATA(0x0E); LCD_WR_DATA(0x08); LCD_WR_DATA(0x4E); LCD_WR_DATA(0xF1);
+    LCD_WR_DATA(0x37); LCD_WR_DATA(0x07); LCD_WR_DATA(0x10); LCD_WR_DATA(0x03);
+    LCD_WR_DATA(0x0E); LCD_WR_DATA(0x09); LCD_WR_DATA(0x00);
 
-    LCD_WR_REG(0xF7);
-    LCD_WR_DATA(0x20);
+    LCD_WR_REG(0xE1);
+    LCD_WR_DATA(0x00); LCD_WR_DATA(0x0E); LCD_WR_DATA(0x14); LCD_WR_DATA(0x03);
+    LCD_WR_DATA(0x11); LCD_WR_DATA(0x07); LCD_WR_DATA(0x31); LCD_WR_DATA(0xC1);
+    LCD_WR_DATA(0x48); LCD_WR_DATA(0x08); LCD_WR_DATA(0x0F); LCD_WR_DATA(0x0C);
+    LCD_WR_DATA(0x31); LCD_WR_DATA(0x36); LCD_WR_DATA(0x0F);
 
-    LCD_WR_REG(0xEA);
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x00);
+    /* 3-Gamma / Gamma 曲线 */
+    LCD_WR_REG(0xF2); LCD_WR_DATA(0x00);
+    LCD_WR_REG(0x26); LCD_WR_DATA(0x01);
 
-    LCD_WR_REG(0xC0); /* 电源控制 1 (Power Control 1) */
-    LCD_WR_DATA(0x23);
+    /* 其他 */
+    LCD_WR_REG(0xCF); LCD_WR_DATA(0x00); LCD_WR_DATA(0xC1); LCD_WR_DATA(0x30);
+    LCD_WR_REG(0xED); LCD_WR_DATA(0x64); LCD_WR_DATA(0x03); LCD_WR_DATA(0x12); LCD_WR_DATA(0x81);
+    LCD_WR_REG(0xE8); LCD_WR_DATA(0x85); LCD_WR_DATA(0x00); LCD_WR_DATA(0x78);
+    LCD_WR_REG(0xCB); LCD_WR_DATA(0x39); LCD_WR_DATA(0x2C); LCD_WR_DATA(0x00); LCD_WR_DATA(0x34); LCD_WR_DATA(0x02);
+    LCD_WR_REG(0xF7); LCD_WR_DATA(0x20);
+    LCD_WR_REG(0xEA); LCD_WR_DATA(0x00); LCD_WR_DATA(0x00);
 
-    LCD_WR_REG(0xC1); /* 电源控制 2 (Power Control 2) */
-    LCD_WR_DATA(0x10);
-
-    LCD_WR_REG(0xC5); /* VCOM 控制 1 (VCOM Control 1) */
-    LCD_WR_DATA(0x3E);
-    LCD_WR_DATA(0x28);
-
-    LCD_WR_REG(0xC7); /* VCOM 控制 2 (VCOM Control 2) */
-    LCD_WR_DATA(0x86);
-
-    LCD_WR_REG(0x36); /* 显存访问控制 (Memory Access Control) */
-    LCD_WR_DATA(0x08); /* 竖屏显示模式，BGR 滤光片排布 */
-
-    LCD_WR_REG(0x3A); /* 像素格式设置 (Pixel Format) */
-    LCD_WR_DATA(0x55); /* 16-bit 像素深度颜色 (RGB565) */
-
-    LCD_WR_REG(0xB1); /* 帧率控制 (Frame Rate Control) */
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x18);
-
-    LCD_WR_REG(0xB6); /* 显示输出控制 (Display Function Control) */
-    LCD_WR_DATA(0x08);
-    LCD_WR_DATA(0x82);
-    LCD_WR_DATA(0x27);
-
-    LCD_WR_REG(0xF2); /* 启用/关闭 3-Gamma 功能 */
-    LCD_WR_DATA(0x00);
-
-    LCD_WR_REG(0x26); /* 伽马曲线选择 (Gamma Curve Selected) */
-    LCD_WR_DATA(0x01);
-
-    LCD_WR_REG(0xE0); /* 正偏置伽马校正 (Positive Gamma) */
-    LCD_WR_DATA(0x0F);
-    LCD_WR_DATA(0x31);
-    LCD_WR_DATA(0x2B);
-    LCD_WR_DATA(0x0C);
-    LCD_WR_DATA(0x0E);
-    LCD_WR_DATA(0x08);
-    LCD_WR_DATA(0x4E);
-    LCD_WR_DATA(0xF1);
-    LCD_WR_DATA(0x37);
-    LCD_WR_DATA(0x07);
-    LCD_WR_DATA(0x10);
-    LCD_WR_DATA(0x03);
-    LCD_WR_DATA(0x0E);
-    LCD_WR_DATA(0x09);
-    LCD_WR_DATA(0x00);
-
-    LCD_WR_REG(0xE1); /* 负偏置伽马校正 (Negative Gamma) */
-    LCD_WR_DATA(0x00);
-    LCD_WR_DATA(0x0E);
-    LCD_WR_DATA(0x14);
-    LCD_WR_DATA(0x03);
-    LCD_WR_DATA(0x11);
-    LCD_WR_DATA(0x07);
-    LCD_WR_DATA(0x31);
-    LCD_WR_DATA(0xC1);
-    LCD_WR_DATA(0x48);
-    LCD_WR_DATA(0x08);
-    LCD_WR_DATA(0x0F);
-    LCD_WR_DATA(0x0C);
-    LCD_WR_DATA(0x31);
-    LCD_WR_DATA(0x36);
-    LCD_WR_DATA(0x0F);
-
-    LCD_WR_REG(0x29); /* 开启显示输出 (Display On) */
-    LCD_DelayMs(20);
+    LCD_WR_REG(0x29); LCD_DelayMs(20);     /* Display On */
 }
 
 /**
-  * @brief  将整个屏幕清屏填充为指定颜色。
-  * @param  color: 16位 RGB565 颜色值。
-  * @retval 无
+  * @brief  全屏填充纯色 (优化: 单次开窗 + 连续数据流)。
   */
 void LCD_Clear(uint16_t color)
 {
     LCD_Address_Set(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
     LCD_CS_L();
     LCD_RS_H();
-    
-    uint8_t h = color >> 8;
-    uint8_t l = color & 0xFF;
-    uint8_t b;
-
-    for (uint32_t i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
-        /* 单字节快速写入高8位 */
-        uint8_t byte = h;
-        for (b = 0; b < 8; b++) {
-            LCD_SCL_L();
-            if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-            LCD_SCL_H();
-            byte <<= 1;
-        }
-        /* 单字节快速写入低8位 */
-        byte = l;
-        for (b = 0; b < 8; b++) {
-            LCD_SCL_L();
-            if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-            LCD_SCL_H();
-            byte <<= 1;
-        }
-    }
+    LCD_WritePixels(color, (uint32_t)LCD_WIDTH * LCD_HEIGHT);
     LCD_CS_H();
 }
 
 /**
-  * @brief  在 LCD 上画一个像素点。
-  * @param  x: X 坐标 (0..239)。
-  * @param  y: Y 坐标 (0..319)。
-  * @param  color: RGB565 颜色值。
-  * @retval 无
+  * @brief  画点。
   */
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color)
 {
@@ -255,223 +179,121 @@ void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color)
 }
 
 /**
-  * @brief  使用 Bresenham 算法绘制一条直线。
-  * @param  x1, y1: 直线起点坐标。
-  * @param  x2, y2: 直线终点坐标。
-  * @param  color: 直线颜色值。
-  * @retval 无
+  * @brief  填充矩形区域 (优化: 单次开窗 + 连续数据流)。
   */
-void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
+void LCD_FillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 {
-    int16_t dx = (int16_t)x2 - (int16_t)x1;
-    int16_t dy = (int16_t)y2 - (int16_t)y1;
-    int16_t ux = (dx > 0) ? 1 : -1;
-    int16_t uy = (dy > 0) ? 1 : -1;
-    dx = (dx > 0) ? dx : -dx;
-    dy = (dy > 0) ? dy : -dy;
-
-    uint16_t x = x1, y = y1;
-    if (dx > dy) {
-        int16_t eps = 0;
-        for (x = x1; x != x2 + ux; x += ux) {
-            LCD_DrawPoint(x, y, color);
-            eps += dy;
-            if ((eps << 1) >= dx) {
-                y += uy;
-                eps -= dx;
-            }
-        }
-    } else {
-        int16_t eps = 0;
-        for (y = y1; y != y2 + uy; y += uy) {
-            LCD_DrawPoint(x, y, color);
-            eps += dx;
-            if ((eps << 1) >= dy) {
-                x += ux;
-                eps -= dy;
-            }
-        }
-    }
-}
-
-/**
-  * @brief  绘制空心矩形。
-  * @param  x1, y1: 矩形左上角坐标。
-  * @param  x2, y2: 矩形右下角坐标。
-  * @param  color: 矩形边框颜色。
-  * @retval 无
-  */
-void LCD_DrawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
-{
-    LCD_DrawLine(x1, y1, x2, y1, color);
-    LCD_DrawLine(x1, y1, x1, y2, color);
-    LCD_DrawLine(x1, y2, x2, y2, color);
-    LCD_DrawLine(x2, y1, x2, y2, color);
-}
-
-/**
-  * @brief  绘制填充实心矩形。
-  * @param  x1, y1: 矩形左上角坐标。
-  * @param  x2, y2: 矩形右下角坐标。
-  * @param  color: 填充颜色。
-  * @retval 无
-  */
-void LCD_DrawRectangle_Filled(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
-{
-    LCD_Address_Set(x1, y1, x2, y2);
+    if (x >= LCD_WIDTH || y >= LCD_HEIGHT) return;
+    if (x + w > LCD_WIDTH)  w = LCD_WIDTH  - x;
+    if (y + h > LCD_HEIGHT) h = LCD_HEIGHT - y;
+    LCD_Address_Set(x, y, x + w - 1, y + h - 1);
     LCD_CS_L();
     LCD_RS_H();
-    
-    uint8_t h = color >> 8;
-    uint8_t l = color & 0xFF;
-    uint8_t b;
-    uint32_t pixels = (uint32_t)(x2 - x1 + 1) * (uint32_t)(y2 - y1 + 1);
-
-    for (uint32_t i = 0; i < pixels; i++) {
-        /* 单字节快速写入高8位 */
-        uint8_t byte = h;
-        for (b = 0; b < 8; b++) {
-            LCD_SCL_L();
-            if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-            LCD_SCL_H();
-            byte <<= 1;
-        }
-        /* 单字节快速写入低8位 */
-        byte = l;
-        for (b = 0; b < 8; b++) {
-            LCD_SCL_L();
-            if (byte & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-            LCD_SCL_H();
-            byte <<= 1;
-        }
-    }
+    LCD_WritePixels(color, (uint32_t)w * h);
     LCD_CS_H();
 }
 
+/* ---- 几何绘图 ---- */
+
 /**
-  * @brief  使用 Bresenham 算法绘制空心圆。
-  * @param  x0, y0: 圆心坐标。
-  * @param  r: 半径。
-  * @param  color: 圆周颜色。
-  * @retval 无
+  * @brief  Bresenham 直线。
   */
-void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color)
 {
-    int a = 0, b = r;
-    int di = 3 - (r << 1);
-    while (a <= b) {
-        LCD_DrawPoint(x0 + a, y0 + b, color);
-        LCD_DrawPoint(x0 - a, y0 + b, color);
-        LCD_DrawPoint(x0 + a, y0 - b, color);
-        LCD_DrawPoint(x0 - a, y0 - b, color);
-        LCD_DrawPoint(x0 + b, y0 + a, color);
-        LCD_DrawPoint(x0 - b, y0 + a, color);
-        LCD_DrawPoint(x0 + b, y0 - a, color);
-        LCD_DrawPoint(x0 - b, y0 - a, color);
-        a++;
-        if (di < 0) {
-            di += (a << 2) + 6;
-        } else {
-            di += 10 + ((a - b) << 2);
-            b--;
-        }
+    int16_t dx = (x2 > x1) ? (x2 - x1) : (x1 - x2);
+    int16_t dy = (y2 > y1) ? (y2 - y1) : (y1 - y2);
+    int16_t sx = (x1 < x2) ? 1 : -1;
+    int16_t sy = (y1 < y2) ? 1 : -1;
+    int16_t err = dx - dy, e2;
+    while (1) {
+        LCD_DrawPoint(x1, y1, color);
+        if (x1 == x2 && y1 == y2) break;
+        e2 = err << 1;
+        if (e2 > -dy) { err -= dy; x1 += sx; }
+        if (e2 <  dx) { err += dx; y1 += sy; }
     }
 }
 
 /**
-  * @brief  使用对称线填充算法绘制实心圆。
-  * @param  x0, y0: 圆心坐标。
-  * @param  r: 半径。
-  * @param  color: 填充颜色。
-  * @retval 无
+  * @brief  空心矩形。
   */
-void LCD_DrawCircle_Filled(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+void LCD_DrawRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color)
 {
-    int a = 0, b = r;
-    int di = 3 - (r << 1);
+    LCD_DrawLine(x, y, x + w - 1, y, color);
+    LCD_DrawLine(x, y, x, y + h - 1, color);
+    LCD_DrawLine(x + w - 1, y, x + w - 1, y + h - 1, color);
+    LCD_DrawLine(x, y + h - 1, x + w - 1, y + h - 1, color);
+}
+
+/**
+  * @brief  空心圆。
+  */
+void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+{
+    int a = 0, b = r, di = 3 - (r << 1);
     while (a <= b) {
-        /* 通过连接对称点绘制横向线段来填充圆 */
+        LCD_DrawPoint(x0 + a, y0 + b, color); LCD_DrawPoint(x0 - a, y0 + b, color);
+        LCD_DrawPoint(x0 + a, y0 - b, color); LCD_DrawPoint(x0 - a, y0 - b, color);
+        LCD_DrawPoint(x0 + b, y0 + a, color); LCD_DrawPoint(x0 - b, y0 + a, color);
+        LCD_DrawPoint(x0 + b, y0 - a, color); LCD_DrawPoint(x0 - b, y0 - a, color);
+        a++;
+        if (di < 0) { di += (a << 2) + 6; }
+        else        { di += ((a - b) << 2) + 10; b--; }
+    }
+}
+
+/**
+  * @brief  实心圆。
+  */
+void LCD_FillCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
+{
+    int a = 0, b = r, di = 3 - (r << 1);
+    while (a <= b) {
         LCD_DrawLine(x0 - a, y0 + b, x0 + a, y0 + b, color);
         LCD_DrawLine(x0 - a, y0 - b, x0 + a, y0 - b, color);
         LCD_DrawLine(x0 - b, y0 + a, x0 + b, y0 + a, color);
         LCD_DrawLine(x0 - b, y0 - a, x0 + b, y0 - a, color);
         a++;
-        if (di < 0) {
-            di += (a << 2) + 6;
-        } else {
-            di += 10 + ((a - b) << 2);
-            b--;
-        }
+        if (di < 0) { di += (a << 2) + 6; }
+        else        { di += ((a - b) << 2) + 10; b--; }
     }
 }
 
+/* ---- 文字显示 ---- */
+
 /**
-  * @brief  在 LCD 屏幕上绘制单个 8x16 点阵的 ASCII 字符。
-  * @param  x: 字符起始 X 坐标。
-  * @param  y: 字符起始 Y 坐标。
-  * @param  chr: 要显示的字符。
-  * @param  fc: 字体颜色。
-  * @param  bc: 字符背景色 (用于无闪烁覆盖)。
-  * @retval 无
+  * @brief  显示 8×16 ASCII 字符 (带背景色)。
   */
 void LCD_ShowChar(uint16_t x, uint16_t y, char chr, uint16_t fc, uint16_t bc)
 {
     if (x + 8 > LCD_WIDTH || y + 16 > LCD_HEIGHT) return;
-    
-    uint8_t temp;
-    uint8_t b;
-    uint8_t index = chr - ' '; /* 根据 ASCII 码表偏移计算字模索引 */
-    
+    uint8_t index = chr - ' ';
     LCD_Address_Set(x, y, x + 7, y + 15);
     LCD_CS_L();
     LCD_RS_H();
-    
     for (uint8_t i = 0; i < 16; i++) {
-        temp = asc2_1608[index][i];
+        uint8_t row = asc2_1608[index][i];
         for (uint8_t j = 0; j < 8; j++) {
-            uint16_t color = (temp & 0x80) ? fc : bc;
-            uint8_t h = color >> 8;
-            uint8_t l = color & 0xFF;
-            
-            /* 写高8位 */
-            for (b = 0; b < 8; b++) {
-                LCD_SCL_L();
-                if (h & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-                LCD_SCL_H();
-                h <<= 1;
-            }
-            /* 写低8位 */
-            for (b = 0; b < 8; b++) {
-                LCD_SCL_L();
-                if (l & 0x80) LCD_SDA_H(); else LCD_SDA_L();
-                LCD_SCL_H();
-                l <<= 1;
-            }
-            temp <<= 1;
+            uint16_t color = (row & 0x80) ? fc : bc;
+            LCD_Writ_Bus(color >> 8);
+            LCD_Writ_Bus(color & 0xFF);
+            row <<= 1;
         }
     }
     LCD_CS_H();
 }
 
 /**
-  * @brief  在 LCD 上显示以空字符结尾的英文字符串。
-  * @param  x: 起始 X 坐标。
-  * @param  y: 起始 Y 坐标。
-  * @param  str: 字符串指针。
-  * @param  fc: 字体颜色。
-  * @param  bc: 字符背景色。
-  * @retval 无
+  * @brief  显示字符串 (自动换行, 超出裁剪)。
   */
 void LCD_ShowString(uint16_t x, uint16_t y, const char *str, uint16_t fc, uint16_t bc)
 {
+    uint16_t cx = x;
     while (*str) {
-        if (x + 8 > LCD_WIDTH) {
-            x = 0;
-            y += 16;
-        }
+        if (*str == '\n') { cx = x; y += 16; str++; continue; }
+        if (cx + 8 > LCD_WIDTH)  { cx = x; y += 16; }
         if (y + 16 > LCD_HEIGHT) break;
-        LCD_ShowChar(x, y, *str, fc, bc);
-        x += 8;
-        str++;
+        LCD_ShowChar(cx, y, *str, fc, bc);
+        cx += 8; str++;
     }
 }
