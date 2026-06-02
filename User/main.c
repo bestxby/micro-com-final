@@ -41,7 +41,7 @@ volatile uint8_t  last_page       = 99;
 
 /* 屏幕配置预设 (涵盖 4 个横屏与 4 个竖屏扫描方向) */
 const uint8_t madctl_presets[8] = {0x68, 0x28, 0xA8, 0xE8, 0x08, 0x48, 0x88, 0xC8};
-volatile uint8_t madctl_preset_idx = 7; // 默认为 0xC8
+volatile uint8_t madctl_preset_idx = 6; // 默认为 0x88
 
 
 /* ============================================================
