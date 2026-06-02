@@ -6,7 +6,9 @@
 #include "ai_detect.h"
 #include "anomaly_log.h"
 #include "game.h"
+#include "touch.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 /* ============================================================
@@ -180,6 +182,9 @@ static void Draw_Header(const char *title) {
     LCD_DrawLine(0, SEP_Y1, LCD_WIDTH - 1, SEP_Y1, GRAY);
     LCD_FillRect(0, SEP_Y1 + 1, LCD_WIDTH, SEP_Y2 - SEP_Y1 - 1, BLACK);
     
+    // Left vertical cyan accent bar for premium look
+    LCD_FillRect(8, TITLE_Y, 3, 16, CYAN);
+    
     LCD_ShowString(16, TITLE_Y, title, CYAN, BLACK);
     
     // 右侧科技感短斜线装饰
@@ -246,8 +251,8 @@ static void Draw_DevChart(void) {
         if (y2_val < cy + 10) y2_val = cy + 10;
         if (y2_val > cy + ch - 10) y2_val = cy + ch - 10;
 
-        LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, YELLOW);
-        LCD_FillCircle(x2, (uint16_t)y2_val, 1, YELLOW); // 绘制数据接点
+        LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, CYAN);
+        LCD_FillCircle(x2, (uint16_t)y2_val, 1, CYAN); // 绘制数据接点
     }
 }
 
@@ -290,9 +295,9 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(16, 56, 216, 100, DARK_GRAY);
             LCD_DrawRect(16, 56, 216, 100, GRAY);
-            Draw_CornerBrackets(16, 56, 216, 100, 6, GREEN);
-            Draw_TempIcon(28, 66, GREEN);
-            LCD_ShowString(42, 66, "TEMP RAW:", GREEN, DARK_GRAY);
+            Draw_CornerBrackets(16, 56, 216, 100, 6, CYAN);
+            Draw_TempIcon(28, 66, CYAN);
+            LCD_ShowString(42, 66, "TEMP RAW:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_aht20_temp);
@@ -302,7 +307,7 @@ void Display_Refresh(uint8_t force_refresh) {
             if (t < 10.0f) t = 10.0f;
             if (t > 40.0f) t = 40.0f;
             uint16_t active_segs = (uint16_t)((t - 10.0f) * 12.0f / 30.0f);
-            uint16_t bar_color = (t > 30.0f || t < 15.0f) ? RED : GREEN;
+            uint16_t bar_color = (t > 30.0f || t < 15.0f) ? RED : CYAN;
             Draw_SegmentedBar(36, 122, active_segs, 12, bar_color, BLACK);
         } else {
             LCD_ShowString(28, 90, "[ERROR]", RED, DARK_GRAY);
@@ -313,9 +318,9 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(16, 176, 216, 100, DARK_GRAY);
             LCD_DrawRect(16, 176, 216, 100, GRAY);
-            Draw_CornerBrackets(16, 176, 216, 100, 6, BLUE);
-            Draw_DropIcon(28, 186, BLUE);
-            LCD_ShowString(40, 186, "HUMIDITY:", BLUE, DARK_GRAY);
+            Draw_CornerBrackets(16, 176, 216, 100, 6, CYAN);
+            Draw_DropIcon(28, 186, CYAN);
+            LCD_ShowString(40, 186, "HUMIDITY:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f %%", test_aht20_humi);
@@ -325,7 +330,7 @@ void Display_Refresh(uint8_t force_refresh) {
             if (h < 0.0f) h = 0.0f;
             if (h > 100.0f) h = 100.0f;
             uint16_t active_segs = (uint16_t)(h * 12.0f / 100.0f);
-            Draw_SegmentedBar(36, 242, active_segs, 12, BLUE, BLACK);
+            Draw_SegmentedBar(36, 242, active_segs, 12, CYAN, BLACK);
         } else {
             LCD_ShowString(28, 210, "[ERROR]", RED, DARK_GRAY);
             Draw_SegmentedBar(36, 242, 0, 12, RED, BLACK);
@@ -337,13 +342,13 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(248, 56, 216, 100, DARK_GRAY);
             LCD_DrawRect(248, 56, 216, 100, GRAY);
-            Draw_CornerBrackets(248, 56, 216, 100, 6, YELLOW);
-            Draw_BrainIcon(260, 66, YELLOW);
-            LCD_ShowString(274, 66, "AI FILTERED:", YELLOW, DARK_GRAY);
+            Draw_CornerBrackets(248, 56, 216, 100, 6, CYAN);
+            Draw_BrainIcon(260, 66, CYAN);
+            LCD_ShowString(274, 66, "AI FILTERED:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_filtered_temp);
-            LCD_ShowString(260, 90, buf, YELLOW, DARK_GRAY);
+            LCD_ShowString(260, 90, buf, WHITE, DARK_GRAY);
             LCD_ShowString(260, 122, "(EMA alpha=0.2)", GRAY, DARK_GRAY);
         } else {
             LCD_ShowString(260, 90, "[ERROR]", RED, DARK_GRAY);
@@ -543,6 +548,7 @@ int main(void) {
     KEY_Init();
     LCD_Init();
     LCD_Clear(BLACK);
+    TP_Init();
 
     /* 传感器初始化 */
     test_aht20_init_status  = AHT20_Init();
@@ -572,6 +578,59 @@ int main(void) {
         if (key != KEY_NONE) {
             game_key = key;
         }
+
+        /* 触摸屏扫描与手势/点击处理 */
+        tp_dev.scan(0);
+        
+        static uint8_t touch_active = 0;
+        static uint16_t touch_start_x = 0;
+        static uint16_t touch_start_y = 0;
+        static uint8_t swipe_triggered = 0;
+        static uint8_t tap_triggered = 0;
+        
+        if (tp_dev.sta & TP_PRES_DOWN) {
+            if (tp_dev.x < 480 && tp_dev.y < 320) {
+                if (!touch_active) {
+                    touch_active = 1;
+                    touch_start_x = tp_dev.x;
+                    touch_start_y = tp_dev.y;
+                    swipe_triggered = 0;
+                    tap_triggered = 0;
+                } else if (!swipe_triggered) {
+                    int dx = (int)tp_dev.x - (int)touch_start_x;
+                    int dy = (int)tp_dev.y - (int)touch_start_y;
+                    
+                    // 滑动检测阈值: 80 像素
+                    if (dx > 80 && abs(dy) < 60) {
+                        // 向右滑动: 切换到上一个页面
+                        current_page = (current_page + 3) % 4;
+                        if (current_page == 3) Game_Init();
+                        Display_Refresh(1);
+                        swipe_triggered = 1;
+                    } else if (dx < -80 && abs(dy) < 60) {
+                        // 向左滑动: 切换到下一个页面
+                        current_page = (current_page + 1) % 4;
+                        if (current_page == 3) Game_Init();
+                        Display_Refresh(1);
+                        swipe_triggered = 1;
+                    }
+                }
+                
+                // 如果在游戏页面 (Page 3) 且未触发滑动，则检测 Tap 点击
+                if (current_page == 3 && !swipe_triggered && !tap_triggered) {
+                    // 点击游戏画面区域 (X: 20..460, Y: 56..286)
+                    if (tp_dev.x >= 20 && tp_dev.x <= 460 && tp_dev.y >= 56 && tp_dev.y <= 286) {
+                        game_key = 2; // 触发小鸟拍击翅膀 (KEY2)
+                        tap_triggered = 1;
+                    }
+                }
+            }
+        } else {
+            touch_active = 0;
+            swipe_triggered = 0;
+            tap_triggered = 0;
+        }
+
 
         if (key == KEY1_PRESS) {
             /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 0) */

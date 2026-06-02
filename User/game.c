@@ -182,7 +182,7 @@ void Game_Draw(uint8_t force_refresh)
         /* 1. 增量渲染副标题的得分看板 (仅当得分改变时才重绘以防闪烁) */
         if (score != last_drawn_score) {
             sprintf(text_buf, "SCORE: %2d", score);
-            LCD_ShowString(376, 34, text_buf, CYAN, BLACK);
+            LCD_ShowString(376, 28, text_buf, CYAN, BLACK);
             last_drawn_score = score;
         }
 
