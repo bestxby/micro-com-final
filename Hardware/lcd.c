@@ -157,6 +157,16 @@ void LCD_Init(void)
 }
 
 /**
+  * @brief  动态设置屏幕方向与扫描模式。
+  */
+void LCD_SetOrientation(uint8_t madctl)
+{
+    LCD_WR_REG(0x36);
+    LCD_WR_DATA(madctl);
+}
+
+
+/**
   * @brief  全屏填充纯色 (优化: 单次开窗 + 连续数据流)。
   */
 void LCD_Clear(uint16_t color)

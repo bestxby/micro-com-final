@@ -36,8 +36,13 @@ float dev_history[24] = {0.0f};    /* 24 个采样点 → 偏差折线图 */
 
 volatile uint32_t system_uptime_s = 0;
 volatile uint8_t  system_mode     = 0;    /* 0=正常, 1=异常 */
-volatile uint8_t  current_page    = 0;    /* 0=实时监测, 1=AI自适应, 2=历史日志, 3=飞鸟游戏 */
+volatile uint8_t  current_page    = 0;    /* 0=实时监测, 1=AI自适应, 2=历史日志, 3=游戏, 4=屏幕配置 */
 volatile uint8_t  last_page       = 99;
+
+/* 屏幕配置预设 (涵盖 4 个横屏与 4 个竖屏扫描方向) */
+const uint8_t madctl_presets[8] = {0x68, 0x28, 0xA8, 0xE8, 0x08, 0x48, 0x88, 0xC8};
+volatile uint8_t madctl_preset_idx = 0; // 默认为 0x68
+
 
 /* ============================================================
  * 布局常量 (480×320 横屏适配布局)
@@ -197,8 +202,8 @@ static void Draw_Header(const char *title) {
 
 /* ---- 绘制底部翻页指示点（呼吸棱形） ---- */
 static void Draw_PageDots(void) {
-    uint16_t dots[4] = {204, 224, 244, 264};
-    for (uint8_t i = 0; i < 4; i++) {
+    uint16_t dots[5] = {194, 214, 234, 254, 274};
+    for (uint8_t i = 0; i < 5; i++) {
         if (i == current_page) {
             LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, CYAN);
             LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, CYAN);
@@ -281,8 +286,10 @@ void Display_Refresh(uint8_t force_refresh) {
             Draw_Header("[2] AI BASELINE LEARNING");
         else if (current_page == 2)
             Draw_Header("[3] ANOMALY HISTORY LOGS");
-        else
+        else if (current_page == 3)
             Draw_Header("[4] FLAPPY BIRD MINI-GAME");
+        else
+            Draw_Header("[5] SCREEN CALIBRATION");
     }
 
     /* ================================================================
@@ -532,8 +539,33 @@ void Display_Refresh(uint8_t force_refresh) {
     /* ================================================================
      * PAGE 3: Flappy Bird 像素飞鸟小游戏
      * ================================================================ */
-    else {
+    else if (current_page == 3) {
         Game_Draw(force_refresh);
+    }
+    
+    /* ================================================================
+     * PAGE 4: SCREEN CALIBRATION (屏幕方向与镜像校准)
+     * ================================================================ */
+    else {
+        if (force_refresh) {
+            LCD_FillRect(20, 56, 440, 220, DARK_GRAY);
+            LCD_DrawRect(20, 56, 440, 220, GRAY);
+            Draw_CornerBrackets(20, 56, 440, 220, 8, CYAN);
+
+            LCD_ShowString(36, 72, "=== SCREEN CALIBRATION UTILITY ===", CYAN, DARK_GRAY);
+            LCD_ShowString(36, 96, "Press KEY2 to cycle orientations.", WHITE, DARK_GRAY);
+            
+            LCD_ShowString(36, 126, "Presets list:", GRAY, DARK_GRAY);
+            LCD_ShowString(36, 146, "0: 0x68 - Landscape 1 (Default)", GRAY, DARK_GRAY);
+            LCD_ShowString(36, 162, "1: 0x28 - Landscape 2 (H-Mirror)", GRAY, DARK_GRAY);
+            LCD_ShowString(36, 178, "2: 0xA8 - Landscape 3 (Rotated 180)", GRAY, DARK_GRAY);
+            LCD_ShowString(36, 194, "3: 0xE8 - Landscape 4 (V-Mirror)", GRAY, DARK_GRAY);
+            LCD_ShowString(36, 210, "4..7: Portrait presets (0x08/0x48/0x88/0xC8)", GRAY, DARK_GRAY);
+        }
+
+        sprintf(buf, "CURRENT:  [ INDEX: %d ]  ->  [ HEX: 0x%02X ]", madctl_preset_idx, madctl_presets[madctl_preset_idx]);
+        LCD_FillRect(36, 240, 400, 16, DARK_GRAY);
+        LCD_ShowString(36, 240, buf, YELLOW, DARK_GRAY);
     }
 
     /* ---- 底部信息 & 翻页点 ---- */
@@ -605,15 +637,20 @@ int main(void) {
         }
 
         if (key == KEY1_PRESS) {
-            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 0) */
-            current_page = (current_page + 1) % 4;
+            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 4 -> 0) */
+            current_page = (current_page + 1) % 5;
             if (current_page == 3) {
                 Game_Init(); /* 切到游戏页面时初始化游戏数据 */
             }
             Display_Refresh(1);
         } else if (key == KEY2_PRESS) {
-            if (current_page != 3) {
-                /* KEY2 按键 (非游戏模式): 硬件自愈重置 */
+            if (current_page == 4) {
+                /* KEY2 按键 (在屏幕校准模式): 循环切换屏幕方向与扫描配置 */
+                madctl_preset_idx = (madctl_preset_idx + 1) % 8;
+                LCD_SetOrientation(madctl_presets[madctl_preset_idx]);
+                Display_Refresh(1); /* 切换方向后必须强制全屏清除并重绘 */
+            } else if (current_page != 3) {
+                /* KEY2 按键 (其他常规页面模式): 硬件自愈重置 */
                 AI_Init(&my_detector, 0.2f, 100);
                 current_ai_state = AI_STATE_LEARNING;
                 system_mode      = 0;

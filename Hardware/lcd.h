@@ -72,6 +72,7 @@
 void LCD_Init(void);
 void LCD_Clear(uint16_t color);
 void LCD_Address_Set(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
+void LCD_SetOrientation(uint8_t madctl);
 
 /* 像素 & 填充 */
 void LCD_DrawPoint(uint16_t x, uint16_t y, uint16_t color);
