@@ -126,7 +126,7 @@ void LCD_Init(void)
 
     /* 帧率 */
     LCD_WR_REG(0xB1); LCD_WR_DATA(0x00); LCD_WR_DATA(0x18);
-    LCD_WR_REG(0xB6); LCD_WR_DATA(0x08); LCD_WR_DATA(0x82); LCD_WR_DATA(0x27);
+    LCD_WR_REG(0xB6); LCD_WR_DATA(0x08); LCD_WR_DATA(0x82); LCD_WR_DATA(0x3B); /* 0x3B = 59, (59+1)*8 = 480 行驱动 */
 
     /* Gamma */
     LCD_WR_REG(0xE0);
