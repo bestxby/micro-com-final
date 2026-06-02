@@ -113,7 +113,7 @@ void LCD_Init(void)
     LCD_WR_REG(0x11); LCD_DelayMs(120);   /* Sleep Out */
 
     LCD_WR_REG(0x36);
-    LCD_WR_DATA(0x68);                     /* MADCTL: 横屏 480×320, MX+MV+BGR */
+    LCD_WR_DATA(LCD_MADCTL_VALUE);         /* MADCTL: 采用 lcd.h 中配置的屏幕方向 */
 
     LCD_WR_REG(0x3A);
     LCD_WR_DATA(0x55);                     /* 16-bit RGB565 */
