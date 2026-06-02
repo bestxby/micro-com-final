@@ -54,6 +54,7 @@ void Game_Update(uint8_t key_pressed)
         if (key_pressed == 2) { /* KEY2 按下，游戏正式开始 */
             game_state = STATE_PLAY;
             bird_vy = -4.5f; /* 初始拍击向上的速度 */
+            Game_Draw(1); /* 立即擦除文本并重绘背景边框 */
         }
     } 
     else if (game_state == STATE_PLAY) {
@@ -169,6 +170,7 @@ void Game_Draw(uint8_t force_refresh)
         LCD_DrawLine(462, 278, 462, 288, CYAN);
         
         if (game_state == STATE_START) {
+            LCD_FillRect(376, 26, 100, 19, BLACK);
             LCD_ShowString(188, 120, "FLAPPY BIRD", YELLOW, BLACK);
             LCD_ShowString(152, 165, "Press KEY2 to FLAP", WHITE, BLACK);
             LCD_ShowString(152, 195, "Press KEY1 to EXIT", GRAY, BLACK);
@@ -179,8 +181,8 @@ void Game_Draw(uint8_t force_refresh)
     if (game_state == STATE_PLAY) {
         /* 1. 增量渲染副标题的得分看板 (仅当得分改变时才重绘以防闪烁) */
         if (score != last_drawn_score) {
-            sprintf(text_buf, "[4] GAME SCORE: %2d ", score);
-            LCD_ShowString(12, 34, text_buf, CYAN, BLACK);
+            sprintf(text_buf, "SCORE: %2d", score);
+            LCD_ShowString(376, 34, text_buf, CYAN, BLACK);
             last_drawn_score = score;
         }
 

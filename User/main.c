@@ -2,7 +2,6 @@
 #include "led.h"
 #include "key.h"
 #include "aht20.h"
-#include "bmp280.h"
 #include "lcd.h"
 #include "ai_detect.h"
 #include "anomaly_log.h"
@@ -15,17 +14,12 @@
  * ============================================================ */
 volatile float test_aht20_temp   = 0.0f;
 volatile float test_aht20_humi   = 0.0f;
-volatile float test_bmp280_temp  = 0.0f;
-volatile float test_bmp280_press = 0.0f;
 
 volatile uint8_t test_aht20_init_status  = 1;
-volatile uint8_t test_bmp280_init_status = 1;
 
 volatile uint8_t aht20_healthy  = 1;
-volatile uint8_t bmp280_healthy = 1;
 
 uint8_t aht20_fail_cnt  = 0;
-uint8_t bmp280_fail_cnt = 0;
 
 AI_Detector     my_detector;
 AnomalyLogBuffer my_log_buffer;
@@ -36,13 +30,8 @@ float dev_history[24] = {0.0f};    /* 24 个采样点 → 偏差折线图 */
 
 volatile uint32_t system_uptime_s = 0;
 volatile uint8_t  system_mode     = 0;    /* 0=正常, 1=异常 */
-volatile uint8_t  current_page    = 0;    /* 0=实时监测, 1=AI自适应, 2=历史日志, 3=游戏, 4=屏幕配置 */
+volatile uint8_t  current_page    = 0;    /* 0=实时监测, 1=AI自适应, 2=历史日志, 3=游戏 */
 volatile uint8_t  last_page       = 99;
-
-/* 屏幕配置预设 (涵盖 4 个横屏与 4 个竖屏扫描方向) */
-const uint8_t madctl_presets[8] = {0x68, 0x28, 0xA8, 0xE8, 0x08, 0x48, 0x88, 0xC8};
-volatile uint8_t madctl_preset_idx = 6; // 默认为 0x88
-
 
 /* ============================================================
  * 布局常量 (480×320 横屏适配布局)
@@ -142,7 +131,7 @@ static void Draw_SegmentedBar(uint16_t x, uint16_t y, uint16_t active_segs, uint
 
 /* ---- 获取当前状态主色调 ---- */
 static uint16_t TopBarBg(void) {
-    if (!aht20_healthy || !bmp280_healthy) return RED;
+    if (!aht20_healthy) return RED;
     if (current_ai_state == AI_STATE_ANOMALY) return RED;
     if (current_ai_state == AI_STATE_LEARNING) return BLUE;
     return DARK_GRAY;
@@ -161,7 +150,7 @@ static void Draw_TopBar(void) {
     
     char buf[40];
     uint16_t text_color;
-    if (!aht20_healthy || !bmp280_healthy) {
+    if (!aht20_healthy) {
         strcpy(buf, " SENSOR ERROR ");
         text_color = RED;
     } else if (current_ai_state == AI_STATE_ANOMALY) {
@@ -202,8 +191,8 @@ static void Draw_Header(const char *title) {
 
 /* ---- 绘制底部翻页指示点（呼吸棱形） ---- */
 static void Draw_PageDots(void) {
-    uint16_t dots[5] = {194, 214, 234, 254, 274};
-    for (uint8_t i = 0; i < 5; i++) {
+    uint16_t dots[4] = {210, 230, 250, 270};
+    for (uint8_t i = 0; i < 4; i++) {
         if (i == current_page) {
             LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, CYAN);
             LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, CYAN);
@@ -288,8 +277,6 @@ void Display_Refresh(uint8_t force_refresh) {
             Draw_Header("[3] ANOMALY HISTORY LOGS");
         else if (current_page == 3)
             Draw_Header("[4] FLAPPY BIRD MINI-GAME");
-        else
-            Draw_Header("[5] SCREEN CALIBRATION");
     }
 
     /* ================================================================
@@ -299,115 +286,93 @@ void Display_Refresh(uint8_t force_refresh) {
         
         // ------------------ 左侧栏 ------------------
         
-        // Card 1: Temperature Raw
+        // Card 1: Temperature Raw (Y: 56..156, height 100)
         if (force_refresh) {
-            LCD_FillRect(16, 56, 216, 68, DARK_GRAY);
-            LCD_DrawRect(16, 56, 216, 68, GRAY);
-            Draw_CornerBrackets(16, 56, 216, 68, 6, GREEN);
-            Draw_TempIcon(28, 62, GREEN);
-            LCD_ShowString(42, 62, "Temp Raw:", CYAN, DARK_GRAY);
+            LCD_FillRect(16, 56, 216, 100, DARK_GRAY);
+            LCD_DrawRect(16, 56, 216, 100, GRAY);
+            Draw_CornerBrackets(16, 56, 216, 100, 6, GREEN);
+            Draw_TempIcon(28, 66, GREEN);
+            LCD_ShowString(42, 66, "TEMP RAW:", GREEN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_aht20_temp);
-            LCD_ShowString(28, 80, buf, WHITE, DARK_GRAY);
+            LCD_ShowString(28, 90, buf, WHITE, DARK_GRAY);
             
             float t = test_aht20_temp;
             if (t < 10.0f) t = 10.0f;
             if (t > 40.0f) t = 40.0f;
             uint16_t active_segs = (uint16_t)((t - 10.0f) * 12.0f / 30.0f);
             uint16_t bar_color = (t > 30.0f || t < 15.0f) ? RED : GREEN;
-            Draw_SegmentedBar(28, 102, active_segs, 12, bar_color, BLACK);
+            Draw_SegmentedBar(36, 122, active_segs, 12, bar_color, BLACK);
         } else {
-            LCD_ShowString(28, 80, "[ERROR]", RED, DARK_GRAY);
-            Draw_SegmentedBar(28, 102, 0, 12, RED, BLACK);
+            LCD_ShowString(28, 90, "[ERROR]", RED, DARK_GRAY);
+            Draw_SegmentedBar(36, 122, 0, 12, RED, BLACK);
         }
 
-        // Card 2: Humidity
+        // Card 2: Humidity (Y: 176..276, height 100)
         if (force_refresh) {
-            LCD_FillRect(16, 132, 216, 68, DARK_GRAY);
-            LCD_DrawRect(16, 132, 216, 68, GRAY);
-            Draw_CornerBrackets(16, 132, 216, 68, 6, BLUE);
-            Draw_DropIcon(28, 138, BLUE);
-            LCD_ShowString(40, 138, "Humidity:", CYAN, DARK_GRAY);
+            LCD_FillRect(16, 176, 216, 100, DARK_GRAY);
+            LCD_DrawRect(16, 176, 216, 100, GRAY);
+            Draw_CornerBrackets(16, 176, 216, 100, 6, BLUE);
+            Draw_DropIcon(28, 186, BLUE);
+            LCD_ShowString(40, 186, "HUMIDITY:", BLUE, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f %%", test_aht20_humi);
-            LCD_ShowString(28, 156, buf, WHITE, DARK_GRAY);
+            LCD_ShowString(28, 210, buf, WHITE, DARK_GRAY);
             
             float h = test_aht20_humi;
             if (h < 0.0f) h = 0.0f;
             if (h > 100.0f) h = 100.0f;
             uint16_t active_segs = (uint16_t)(h * 12.0f / 100.0f);
-            Draw_SegmentedBar(28, 178, active_segs, 12, BLUE, BLACK);
+            Draw_SegmentedBar(36, 242, active_segs, 12, BLUE, BLACK);
         } else {
-            LCD_ShowString(28, 156, "[ERROR]", RED, DARK_GRAY);
-            Draw_SegmentedBar(28, 178, 0, 12, RED, BLACK);
-        }
-
-        // Card 3: Pressure
-        if (force_refresh) {
-            LCD_FillRect(16, 208, 216, 68, DARK_GRAY);
-            LCD_DrawRect(16, 208, 216, 68, GRAY);
-            Draw_CornerBrackets(16, 208, 216, 68, 6, CYAN);
-            Draw_GaugeIcon(28, 214, CYAN);
-            LCD_ShowString(44, 214, "Pressure:", CYAN, DARK_GRAY);
-        }
-        if (bmp280_healthy) {
-            sprintf(buf, "%6.0f Pa", test_bmp280_press);
-            LCD_ShowString(28, 238, buf, WHITE, DARK_GRAY);
-        } else {
-            LCD_ShowString(28, 238, "[ERROR]", RED, DARK_GRAY);
+            LCD_ShowString(28, 210, "[ERROR]", RED, DARK_GRAY);
+            Draw_SegmentedBar(36, 242, 0, 12, RED, BLACK);
         }
 
         // ------------------ 右侧栏 ------------------
         
-        // Card 4: AI Filtered Temp
+        // Card 3: AI Filtered Temp (Y: 56..156, height 100)
         if (force_refresh) {
-            LCD_FillRect(248, 56, 216, 68, DARK_GRAY);
-            LCD_DrawRect(248, 56, 216, 68, GRAY);
-            Draw_CornerBrackets(248, 56, 216, 68, 6, YELLOW);
-            Draw_BrainIcon(260, 62, YELLOW);
-            LCD_ShowString(274, 62, "AI Filtered:", CYAN, DARK_GRAY);
+            LCD_FillRect(248, 56, 216, 100, DARK_GRAY);
+            LCD_DrawRect(248, 56, 216, 100, GRAY);
+            Draw_CornerBrackets(248, 56, 216, 100, 6, YELLOW);
+            Draw_BrainIcon(260, 66, YELLOW);
+            LCD_ShowString(274, 66, "AI FILTERED:", YELLOW, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_filtered_temp);
-            LCD_ShowString(260, 80, buf, YELLOW, DARK_GRAY);
-            LCD_ShowString(260, 100, "(EMA alpha=0.2)", GRAY, DARK_GRAY);
+            LCD_ShowString(260, 90, buf, YELLOW, DARK_GRAY);
+            LCD_ShowString(260, 122, "(EMA alpha=0.2)", GRAY, DARK_GRAY);
         } else {
-            LCD_ShowString(260, 80, "[ERROR]", RED, DARK_GRAY);
+            LCD_ShowString(260, 90, "[ERROR]", RED, DARK_GRAY);
         }
 
-        // Card 5: System Status & Health Info
+        // Card 4: System Health Info (Y: 176..276, height 100)
         if (force_refresh) {
-            LCD_FillRect(248, 132, 216, 144, DARK_GRAY);
-            LCD_DrawRect(248, 132, 216, 144, GRAY);
-            Draw_CornerBrackets(248, 132, 216, 144, 6, CYAN);
-            LCD_ShowString(260, 138, "System Health:", CYAN, DARK_GRAY);
-            LCD_ShowString(260, 156, "AHT20  :", GRAY, DARK_GRAY);
-            LCD_ShowString(260, 174, "BMP280 :", GRAY, DARK_GRAY);
-            LCD_ShowString(260, 198, "AI State:", CYAN, DARK_GRAY);
+            LCD_FillRect(248, 176, 216, 100, DARK_GRAY);
+            LCD_DrawRect(248, 176, 216, 100, GRAY);
+            Draw_CornerBrackets(248, 176, 216, 100, 6, CYAN);
+            LCD_ShowString(260, 186, "SYSTEM HEALTH:", CYAN, DARK_GRAY);
+            LCD_ShowString(260, 208, "AHT20  :", GRAY, DARK_GRAY);
+            LCD_ShowString(260, 230, "AI STATE:", CYAN, DARK_GRAY);
         }
         
-        LCD_ShowString(332, 156, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? GREEN : RED, DARK_GRAY);
-        LCD_FillCircle(322, 162, 3, aht20_healthy ? GREEN : RED);
+        LCD_ShowString(332, 208, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? GREEN : RED, DARK_GRAY);
+        LCD_FillCircle(322, 214, 3, aht20_healthy ? GREEN : RED);
         
-        LCD_ShowString(332, 174, bmp280_healthy ? "ONLINE " : "OFFLINE", bmp280_healthy ? GREEN : RED, DARK_GRAY);
-        LCD_FillCircle(322, 180, 3, bmp280_healthy ? GREEN : RED);
-        
-        if (!aht20_healthy || !bmp280_healthy) {
-            LCD_ShowString(260, 216, "FAULT/SENSOR ERR", RED, DARK_GRAY);
+        if (!aht20_healthy) {
+            LCD_ShowString(260, 248, "FAULT/SENSOR ERR", RED, DARK_GRAY);
         } else if (current_ai_state == AI_STATE_LEARNING) {
             uint8_t pct = (my_detector.learning_samples * 100) / 100;
             sprintf(buf, "LEARNING (%3d%%)", pct);
-            LCD_ShowString(260, 216, buf, BLUE, DARK_GRAY);
+            LCD_ShowString(260, 248, buf, BLUE, DARK_GRAY);
         } else if (current_ai_state == AI_STATE_NORMAL) {
-            LCD_ShowString(260, 216, "MONITOR NORMAL  ", GREEN, DARK_GRAY);
+            LCD_ShowString(260, 248, "MONITOR NORMAL  ", GREEN, DARK_GRAY);
         } else {
-            LCD_ShowString(260, 216, "ANOMALY ALARM!! ", RED, DARK_GRAY);
+            LCD_ShowString(260, 248, "ANOMALY ALARM!! ", RED, DARK_GRAY);
         }
-        
-        sprintf(buf, "ID: GROUP 05");
-        LCD_ShowString(260, 246, buf, GRAY, DARK_GRAY);
     }
 
     /* ================================================================
@@ -529,8 +494,7 @@ void Display_Refresh(uint8_t force_refresh) {
                     sprintf(buf, "Base: %5.2f C -> Curr: %5.2f C", ev->baseline_temp, ev->current_temp);
                     LCD_ShowString(52, row_y + 26, buf, RED, DARK_GRAY);
 
-                    sprintf(buf, "Press: %6.0f Pa", ev->current_press);
-                    LCD_ShowString(280, row_y + 6, buf, GRAY, DARK_GRAY);
+
                 }
             }
         }
@@ -541,31 +505,6 @@ void Display_Refresh(uint8_t force_refresh) {
      * ================================================================ */
     else if (current_page == 3) {
         Game_Draw(force_refresh);
-    }
-    
-    /* ================================================================
-     * PAGE 4: SCREEN CALIBRATION (屏幕方向与镜像校准)
-     * ================================================================ */
-    else {
-        if (force_refresh) {
-            LCD_FillRect(20, 56, 440, 220, DARK_GRAY);
-            LCD_DrawRect(20, 56, 440, 220, GRAY);
-            Draw_CornerBrackets(20, 56, 440, 220, 8, CYAN);
-
-            LCD_ShowString(36, 72, "=== SCREEN CALIBRATION UTILITY ===", CYAN, DARK_GRAY);
-            LCD_ShowString(36, 96, "Press KEY2 to cycle orientations.", WHITE, DARK_GRAY);
-            
-            LCD_ShowString(36, 126, "Presets list:", GRAY, DARK_GRAY);
-            LCD_ShowString(36, 146, "0: 0x68 - Landscape 1 (Default)", GRAY, DARK_GRAY);
-            LCD_ShowString(36, 162, "1: 0x28 - Landscape 2 (H-Mirror)", GRAY, DARK_GRAY);
-            LCD_ShowString(36, 178, "2: 0xA8 - Landscape 3 (Rotated 180)", GRAY, DARK_GRAY);
-            LCD_ShowString(36, 194, "3: 0xE8 - Landscape 4 (V-Mirror)", GRAY, DARK_GRAY);
-            LCD_ShowString(36, 210, "4..7: Portrait presets (0x08/0x48/0x88/0xC8)", GRAY, DARK_GRAY);
-        }
-
-        sprintf(buf, "CURRENT:  [ INDEX: %d ]  ->  [ HEX: 0x%02X ]", madctl_preset_idx, madctl_presets[madctl_preset_idx]);
-        LCD_FillRect(36, 240, 400, 16, DARK_GRAY);
-        LCD_ShowString(36, 240, buf, YELLOW, DARK_GRAY);
     }
 
     /* ---- 底部信息 & 翻页点 ---- */
@@ -608,8 +547,6 @@ int main(void) {
     /* 传感器初始化 */
     test_aht20_init_status  = AHT20_Init();
     aht20_healthy           = (test_aht20_init_status  == 0);
-    test_bmp280_init_status = BMP280_Init();
-    bmp280_healthy          = (test_bmp280_init_status == 0);
 
     /* AI & 日志初始化 (适配 MAX_ANOMALY_LOGS 为 7) */
     AI_Init(&my_detector, 0.2f, 100);
@@ -637,29 +574,21 @@ int main(void) {
         }
 
         if (key == KEY1_PRESS) {
-            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 4 -> 0) */
-            current_page = (current_page + 1) % 5;
+            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 0) */
+            current_page = (current_page + 1) % 4;
             if (current_page == 3) {
                 Game_Init(); /* 切到游戏页面时初始化游戏数据 */
             }
             Display_Refresh(1);
         } else if (key == KEY2_PRESS) {
-            if (current_page == 4) {
-                /* KEY2 按键 (在屏幕校准模式): 循环切换屏幕方向与扫描配置 */
-                madctl_preset_idx = (madctl_preset_idx + 1) % 8;
-                LCD_SetOrientation(madctl_presets[madctl_preset_idx]);
-                Display_Refresh(1); /* 切换方向后必须强制全屏清除并重绘 */
-            } else if (current_page != 3) {
+            if (current_page != 3) {
                 /* KEY2 按键 (其他常规页面模式): 硬件自愈重置 */
                 AI_Init(&my_detector, 0.2f, 100);
                 current_ai_state = AI_STATE_LEARNING;
                 system_mode      = 0;
                 aht20_fail_cnt   = 0;
-                bmp280_fail_cnt  = 0;
                 test_aht20_init_status  = AHT20_Init();
                 aht20_healthy           = (test_aht20_init_status  == 0);
-                test_bmp280_init_status = BMP280_Init();
-                bmp280_healthy          = (test_bmp280_init_status == 0);
                 LED_Off(0);
                 Display_Refresh(1);
             }
@@ -684,20 +613,6 @@ int main(void) {
                 }
             }
 
-            /* BMP280 */
-            if (!bmp280_healthy) {
-                if (BMP280_Init() == 0) { bmp280_healthy = 1; test_bmp280_init_status = 0; bmp280_fail_cnt = 0; }
-            }
-            if (bmp280_healthy) {
-                float t, p;
-                if (BMP280_ReadData(&t, &p) == 0) {
-                    test_bmp280_temp = t; test_bmp280_press = p; bmp280_fail_cnt = 0;
-                } else {
-                    bmp280_fail_cnt++;
-                    if (bmp280_fail_cnt >= 3) bmp280_healthy = 0;
-                }
-            }
-
             /* AI 突变检测 */
             if (aht20_healthy) {
                 float filt;
@@ -710,12 +625,11 @@ int main(void) {
 
                 if (current_ai_state != AI_STATE_ANOMALY && ns == AI_STATE_ANOMALY)
                     Log_Add(&my_log_buffer, system_uptime_s,
-                            my_detector.baseline_temp, filt, test_bmp280_press);
+                            my_detector.baseline_temp, filt, 0.0f);
                 current_ai_state = ns;
             }
 
-            system_mode = (current_ai_state == AI_STATE_ANOMALY ||
-                           !aht20_healthy || !bmp280_healthy);
+            system_mode = (current_ai_state == AI_STATE_ANOMALY || !aht20_healthy);
             ui_dirty = 1;
         }
 
