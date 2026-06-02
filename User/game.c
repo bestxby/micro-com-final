@@ -154,6 +154,20 @@ void Game_Draw(uint8_t force_refresh)
         LCD_DrawRect(20, 56, 441, 231, GRAY);
         LCD_DrawRect(19, 55, 443, 233, GRAY); /* 双线高级边框 */
         
+        // 绘制外框的科技感青色折角
+        // 左上
+        LCD_DrawLine(19, 55, 29, 55, CYAN);
+        LCD_DrawLine(19, 55, 19, 65, CYAN);
+        // 右上
+        LCD_DrawLine(452, 55, 462, 55, CYAN);
+        LCD_DrawLine(462, 55, 462, 65, CYAN);
+        // 左下
+        LCD_DrawLine(19, 278, 19, 288, CYAN);
+        LCD_DrawLine(19, 288, 29, 288, CYAN);
+        // 右下
+        LCD_DrawLine(452, 288, 462, 288, CYAN);
+        LCD_DrawLine(462, 278, 462, 288, CYAN);
+        
         if (game_state == STATE_START) {
             LCD_ShowString(188, 120, "FLAPPY BIRD", YELLOW, BLACK);
             LCD_ShowString(152, 165, "Press KEY2 to FLAP", WHITE, BLACK);

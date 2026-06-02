@@ -51,56 +51,159 @@ volatile uint8_t  last_page       = 99;
 #define PAGE_DOT_Y     308
 
 /* ============================================================
- * 内部辅助
+ * 内部辅助与 HUD 科技感绘图函数
  * ============================================================ */
 void Delay(__IO uint32_t nCount) {
     for (; nCount != 0; nCount--);
 }
 
-/* ---- 获取当前顶部状态栏背景色 ---- */
+/* 绘制四角科技感折角边框 */
+static void Draw_CornerBrackets(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t len, uint16_t color) {
+    // 左上角
+    LCD_DrawLine(x, y, x + len, y, color);
+    LCD_DrawLine(x, y, x, y + len, color);
+    // 右上角
+    LCD_DrawLine(x + w - 1 - len, y, x + w - 1, y, color);
+    LCD_DrawLine(x + w - 1, y, x + w - 1, y + len, color);
+    // 左下角
+    LCD_DrawLine(x, y + h - 1 - len, x, y + h - 1, color);
+    LCD_DrawLine(x, y + h - 1, x + len, y + h - 1, color);
+    // 右下角
+    LCD_DrawLine(x + w - 1 - len, y + h - 1, x + w - 1, y + h - 1, color);
+    LCD_DrawLine(x + w - 1, y + h - 1 - len, x + w - 1, y + h - 1, color);
+}
+
+/* 绘制像素温度计图标 */
+static void Draw_TempIcon(uint16_t x, uint16_t y, uint16_t color) {
+    LCD_DrawLine(x + 2, y, x + 4, y, color);
+    LCD_DrawLine(x + 2, y, x + 2, y + 8, color);
+    LCD_DrawLine(x + 4, y, x + 4, y + 8, color);
+    LCD_DrawCircle(x + 3, y + 11, 3, color);
+    LCD_FillCircle(x + 3, y + 11, 2, RED);
+    LCD_DrawLine(x + 3, y + 3, x + 3, y + 9, RED);
+}
+
+/* 绘制像素水滴图标 */
+static void Draw_DropIcon(uint16_t x, uint16_t y, uint16_t color) {
+    LCD_DrawLine(x + 3, y, x, y + 6, color);
+    LCD_DrawLine(x + 3, y, x + 6, y + 6, color);
+    LCD_DrawCircle(x + 3, y + 7, 3, color);
+    LCD_FillCircle(x + 3, y + 7, 1, BLUE);
+}
+
+/* 绘制气压表图标 */
+static void Draw_GaugeIcon(uint16_t x, uint16_t y, uint16_t color) {
+    LCD_DrawCircle(x + 6, y + 6, 6, color);
+    LCD_DrawLine(x + 6, y + 6, x + 9, y + 3, CYAN);
+    LCD_DrawPoint(x + 6, y + 6, color);
+}
+
+/* 绘制大脑 (AI) 节点图标 */
+static void Draw_BrainIcon(uint16_t x, uint16_t y, uint16_t color) {
+    LCD_DrawLine(x + 3, y + 1, x + 1, y + 6, GRAY);
+    LCD_DrawLine(x + 3, y + 1, x + 7, y + 4, GRAY);
+    LCD_DrawLine(x + 1, y + 6, x + 5, y + 10, GRAY);
+    LCD_DrawLine(x + 7, y + 4, x + 5, y + 10, GRAY);
+    LCD_DrawLine(x + 1, y + 6, x + 7, y + 4, GRAY);
+    LCD_FillCircle(x + 3, y + 1, 1, color);
+    LCD_FillCircle(x + 1, y + 6, 1, color);
+    LCD_FillCircle(x + 7, y + 4, 1, color);
+    LCD_FillCircle(x + 5, y + 10, 1, color);
+}
+
+/* 绘制点虚线（实现科技示波网格） */
+static void Draw_DottedLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color) {
+    if (x1 == x2) {
+        for (uint16_t y = y1; y <= y2; y += 4) {
+            LCD_DrawPoint(x1, y, color);
+            if (y + 1 <= y2) LCD_DrawPoint(x1, y + 1, color);
+        }
+    } else if (y1 == y2) {
+        for (uint16_t x = x1; x <= x2; x += 4) {
+            LCD_DrawPoint(x, y1, color);
+            if (x + 1 <= x2) LCD_DrawPoint(x + 1, y1, color);
+        }
+    }
+}
+
+/* 绘制分段式进度条 */
+static void Draw_SegmentedBar(uint16_t x, uint16_t y, uint16_t active_segs, uint16_t total_segs, uint16_t active_color, uint16_t inactive_color) {
+    for (uint16_t i = 0; i < total_segs; i++) {
+        uint16_t sx = x + i * 15;
+        uint16_t color = (i < active_segs) ? active_color : inactive_color;
+        LCD_FillRect(sx, y, 12, 6, color);
+    }
+}
+
+/* ---- 获取当前状态主色调 ---- */
 static uint16_t TopBarBg(void) {
     if (!aht20_healthy || !bmp280_healthy) return RED;
     if (current_ai_state == AI_STATE_ANOMALY) return RED;
     if (current_ai_state == AI_STATE_LEARNING) return BLUE;
-    return DARK_GRAY;  /* 正常: 板岩灰/深蓝 */
+    return DARK_GRAY;
 }
 
-/* ---- 绘制顶部状态栏 ---- */
+/* ---- 绘制顶部状态栏（科技徽章风格） ---- */
 static void Draw_TopBar(void) {
     uint16_t bg = TopBarBg();
-    LCD_FillRect(0, 0, LCD_WIDTH, TOP_BAR_H, bg);
-
+    
+    // 清空背景
+    LCD_FillRect(0, 0, LCD_WIDTH, TOP_BAR_H, BLACK);
+    
+    // 霓虹底部双色线
+    uint16_t line_color = (bg == RED) ? RED : ((bg == BLUE) ? BLUE : CYAN);
+    LCD_DrawLine(0, TOP_BAR_H - 1, LCD_WIDTH - 1, TOP_BAR_H - 1, line_color);
+    
     char buf[40];
-    if (!aht20_healthy || !bmp280_healthy)
-        strcpy(buf, "!! SENSOR DISCONNECTED !!");
-    else if (current_ai_state == AI_STATE_ANOMALY)
-        strcpy(buf, "!! ANOMALY DETECTED !!");
-    else if (current_ai_state == AI_STATE_LEARNING)
-        strcpy(buf, "** LEARNING BASELINE **");
-    else
-        strcpy(buf, "** SYSTEM NORMAL **");
+    uint16_t text_color;
+    if (!aht20_healthy || !bmp280_healthy) {
+        strcpy(buf, " SENSOR ERROR ");
+        text_color = RED;
+    } else if (current_ai_state == AI_STATE_ANOMALY) {
+        strcpy(buf, " ANOMALY ALARM ");
+        text_color = RED;
+    } else if (current_ai_state == AI_STATE_LEARNING) {
+        strcpy(buf, " AI LEARNING ");
+        text_color = BLUE;
+    } else {
+        strcpy(buf, " SYSTEM SAFE ");
+        text_color = GREEN;
+    }
 
-    uint16_t fg = (bg == RED || bg == BLUE) ? WHITE : GREEN;
-    uint16_t x  = (LCD_WIDTH - (uint16_t)strlen(buf) * 8) / 2;
-    LCD_ShowString(x, 4, buf, fg, bg);
+    uint16_t text_len = (uint16_t)strlen(buf);
+    uint16_t pill_w = text_len * 8 + 12;
+    uint16_t pill_h = 16;
+    uint16_t pill_x = (LCD_WIDTH - pill_w) / 2;
+    uint16_t pill_y = (TOP_BAR_H - pill_h) / 2;
+    
+    LCD_DrawRect(pill_x, pill_y, pill_w, pill_h, text_color);
+    Draw_CornerBrackets(pill_x, pill_y, pill_w, pill_h, 3, text_color);
+    LCD_ShowString(pill_x + 6, pill_y + 1, buf, text_color, BLACK);
 }
 
-/* ---- 绘制副标题 & 分隔线 ---- */
+/* ---- 绘制副标题（带有科技几何装饰线） ---- */
 static void Draw_Header(const char *title) {
-    LCD_DrawLine(0, SEP_Y1, LCD_WIDTH - 1, SEP_Y1, GRAY);   /* 上分隔线 */
+    LCD_DrawLine(0, SEP_Y1, LCD_WIDTH - 1, SEP_Y1, GRAY);
     LCD_FillRect(0, SEP_Y1 + 1, LCD_WIDTH, SEP_Y2 - SEP_Y1 - 1, BLACK);
-    LCD_ShowString(12, TITLE_Y, title, CYAN, BLACK);
-    LCD_DrawLine(0, SEP_Y2, LCD_WIDTH - 1, SEP_Y2, GRAY);   /* 下分隔线 */
+    
+    LCD_ShowString(16, TITLE_Y, title, CYAN, BLACK);
+    
+    // 右侧科技感短斜线装饰
+    LCD_DrawLine(LCD_WIDTH - 60, TITLE_Y + 4, LCD_WIDTH - 24, TITLE_Y + 4, GRAY);
+    LCD_DrawLine(LCD_WIDTH - 24, TITLE_Y + 4, LCD_WIDTH - 20, TITLE_Y, GRAY);
+    
+    LCD_DrawLine(0, SEP_Y2, LCD_WIDTH - 1, SEP_Y2, GRAY);
 }
 
-/* ---- 绘制底部翻页指示点 ---- */
+/* ---- 绘制底部翻页指示点（呼吸棱形） ---- */
 static void Draw_PageDots(void) {
     uint16_t dots[4] = {204, 224, 244, 264};
     for (uint8_t i = 0; i < 4; i++) {
         if (i == current_page) {
             LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, CYAN);
+            LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, CYAN);
         } else {
-            LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, BLACK);
+            LCD_FillCircle(dots[i], PAGE_DOT_Y, 2, BLACK);
             LCD_DrawCircle(dots[i], PAGE_DOT_Y, 3, GRAY);
         }
     }
@@ -109,52 +212,48 @@ static void Draw_PageDots(void) {
 /* ---- 底部系统信息 ---- */
 static void Draw_BottomInfo(void) {
     char buf[24];
-    sprintf(buf, "UPTIME: %5d s", system_uptime_s);
+    sprintf(buf, "SYS-UP: %5ds", system_uptime_s);
     LCD_FillRect(0, BOTTOM_Y, 150, 16, BLACK);
     LCD_ShowString(16, BOTTOM_Y, buf, GRAY, BLACK);
 
-    sprintf(buf, "GROUP 05");
+    sprintf(buf, "G-05 HUD");
     uint16_t x = LCD_WIDTH - (uint16_t)strlen(buf) * 8 - 16;
     LCD_FillRect(x, BOTTOM_Y, 80, 16, BLACK);
     LCD_ShowString(x, BOTTOM_Y, buf, GRAY, BLACK);
 }
 
-/* ---- Page 1: 偏差折线图 (24 个采样点, 完美契合右侧卡片) ---- */
+/* ---- Page 1: 偏差网格折线图（示波器风格） ---- */
 static void Draw_DevChart(void) {
     uint16_t cx = 216, cy = 56, cw = 248, ch = 220;
-    
-    // 零线 (Y=166)
     uint16_t zero_y = cy + ch / 2;
     
-    /* 绘制微弱的网格线，实现示波器效果 */
-    // 1. 水平辅助网格线
-    LCD_DrawLine(cx + 6, zero_y - 45, cx + cw - 7, zero_y - 45, DARK_GRAY);  /* +3.0C 辅助线 */
-    LCD_DrawLine(cx + 6, zero_y + 45, cx + cw - 7, zero_y + 45, DARK_GRAY);  /* -3.0C 辅助线 */
+    // 绘制示波器点虚线网格
+    Draw_DottedLine(cx + 6, zero_y - 45, cx + cw - 7, zero_y - 45, DARK_GRAY);  /* +3.0C */
+    Draw_DottedLine(cx + 6, zero_y + 45, cx + cw - 7, zero_y + 45, DARK_GRAY);  /* -3.0C */
     
-    // 2. 垂直辅助网格线
     for (uint16_t gx = cx + 30; gx < cx + cw - 10; gx += 38) {
-        LCD_DrawLine(gx, cy + 10, gx, cy + ch - 10, DARK_GRAY);
+        Draw_DottedLine(gx, cy + 10, gx, cy + ch - 10, DARK_GRAY);
     }
     
-    LCD_DrawLine(cx + 6, zero_y, cx + cw - 7, zero_y, GRAY);       /* 零偏差基准线 */
-    LCD_DrawLine(cx + 6, cy + 10, cx + 6, cy + ch - 10, GRAY);    /* 左侧轴 */
-    LCD_DrawLine(cx + cw - 6, cy + 10, cx + cw - 6, cy + ch - 10, GRAY);  /* 右侧轴 */
+    Draw_DottedLine(cx + 6, zero_y, cx + cw - 7, zero_y, GRAY);       /* 零偏差线 */
+    LCD_DrawLine(cx + 6, cy + 10, cx + 6, cy + ch - 10, GRAY);         /* 左轴 */
+    LCD_DrawLine(cx + cw - 6, cy + 10, cx + cw - 6, cy + ch - 10, GRAY); /* 右轴 */
 
-    /* 折线绘制 */
-    float scale = 15.0f;   /* 比例: 1°C = 15 像素 */
+    /* 数据折线绘制 */
+    float scale = 15.0f;
     for (uint8_t i = 0; i < 23; i++) {
         uint16_t x1 = cx + 12 + i * 10;
         uint16_t x2 = cx + 12 + (i + 1) * 10;
         float y1_val = (float)zero_y - dev_history[i]   * scale;
         float y2_val = (float)zero_y - dev_history[i+1] * scale;
 
-        // 绘图界限裁剪保护
         if (y1_val < cy + 10) y1_val = cy + 10;
         if (y1_val > cy + ch - 10) y1_val = cy + ch - 10;
         if (y2_val < cy + 10) y2_val = cy + 10;
         if (y2_val > cy + ch - 10) y2_val = cy + ch - 10;
 
         LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, YELLOW);
+        LCD_FillCircle(x2, (uint16_t)y2_val, 1, YELLOW); // 绘制数据接点
     }
 }
 
@@ -186,10 +285,8 @@ void Display_Refresh(uint8_t force_refresh) {
             Draw_Header("[4] FLAPPY BIRD MINI-GAME");
     }
 
-    uint16_t y;
-
     /* ================================================================
-     * PAGE 0: 实时监测 (卡片式栅格布局: X左侧[16..232] 右侧[248..464])
+     * PAGE 0: 实时监测 (HUD 两栏卡片网格布局)
      * ================================================================ */
     if (current_page == 0) {
         
@@ -199,28 +296,32 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(16, 56, 216, 68, DARK_GRAY);
             LCD_DrawRect(16, 56, 216, 68, GRAY);
-            LCD_ShowString(28, 62, "Temp Raw:", CYAN, DARK_GRAY);
+            Draw_CornerBrackets(16, 56, 216, 68, 6, GREEN);
+            Draw_TempIcon(28, 62, GREEN);
+            LCD_ShowString(42, 62, "Temp Raw:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_aht20_temp);
             LCD_ShowString(28, 80, buf, WHITE, DARK_GRAY);
             
-            // 简单进度条
             float t = test_aht20_temp;
             if (t < 10.0f) t = 10.0f;
             if (t > 40.0f) t = 40.0f;
-            uint16_t w = (uint16_t)((t - 10.0f) * 6.0f); // 10..40度映射到0..180px
-            LCD_FillRect(28, 102, 180, 8, BLACK);
-            LCD_FillRect(28, 102, w, 8, (t > 30.0f || t < 15.0f) ? RED : GREEN);
+            uint16_t active_segs = (uint16_t)((t - 10.0f) * 12.0f / 30.0f);
+            uint16_t bar_color = (t > 30.0f || t < 15.0f) ? RED : GREEN;
+            Draw_SegmentedBar(28, 102, active_segs, 12, bar_color, BLACK);
         } else {
             LCD_ShowString(28, 80, "[ERROR]", RED, DARK_GRAY);
+            Draw_SegmentedBar(28, 102, 0, 12, RED, BLACK);
         }
 
         // Card 2: Humidity
         if (force_refresh) {
             LCD_FillRect(16, 132, 216, 68, DARK_GRAY);
             LCD_DrawRect(16, 132, 216, 68, GRAY);
-            LCD_ShowString(28, 138, "Humidity:", CYAN, DARK_GRAY);
+            Draw_CornerBrackets(16, 132, 216, 68, 6, BLUE);
+            Draw_DropIcon(28, 138, BLUE);
+            LCD_ShowString(40, 138, "Humidity:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f %%", test_aht20_humi);
@@ -229,18 +330,20 @@ void Display_Refresh(uint8_t force_refresh) {
             float h = test_aht20_humi;
             if (h < 0.0f) h = 0.0f;
             if (h > 100.0f) h = 100.0f;
-            uint16_t w = (uint16_t)(h * 1.8f); // 0..100% 映射到0..180px
-            LCD_FillRect(28, 178, 180, 8, BLACK);
-            LCD_FillRect(28, 178, w, 8, BLUE);
+            uint16_t active_segs = (uint16_t)(h * 12.0f / 100.0f);
+            Draw_SegmentedBar(28, 178, active_segs, 12, BLUE, BLACK);
         } else {
             LCD_ShowString(28, 156, "[ERROR]", RED, DARK_GRAY);
+            Draw_SegmentedBar(28, 178, 0, 12, RED, BLACK);
         }
 
         // Card 3: Pressure
         if (force_refresh) {
             LCD_FillRect(16, 208, 216, 68, DARK_GRAY);
             LCD_DrawRect(16, 208, 216, 68, GRAY);
-            LCD_ShowString(28, 214, "Pressure:", CYAN, DARK_GRAY);
+            Draw_CornerBrackets(16, 208, 216, 68, 6, CYAN);
+            Draw_GaugeIcon(28, 214, CYAN);
+            LCD_ShowString(44, 214, "Pressure:", CYAN, DARK_GRAY);
         }
         if (bmp280_healthy) {
             sprintf(buf, "%6.0f Pa", test_bmp280_press);
@@ -255,7 +358,9 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(248, 56, 216, 68, DARK_GRAY);
             LCD_DrawRect(248, 56, 216, 68, GRAY);
-            LCD_ShowString(260, 62, "AI Filtered Temp:", CYAN, DARK_GRAY);
+            Draw_CornerBrackets(248, 56, 216, 68, 6, YELLOW);
+            Draw_BrainIcon(260, 62, YELLOW);
+            LCD_ShowString(274, 62, "AI Filtered:", CYAN, DARK_GRAY);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_filtered_temp);
@@ -269,15 +374,18 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(248, 132, 216, 144, DARK_GRAY);
             LCD_DrawRect(248, 132, 216, 144, GRAY);
+            Draw_CornerBrackets(248, 132, 216, 144, 6, CYAN);
             LCD_ShowString(260, 138, "System Health:", CYAN, DARK_GRAY);
             LCD_ShowString(260, 156, "AHT20  :", GRAY, DARK_GRAY);
             LCD_ShowString(260, 174, "BMP280 :", GRAY, DARK_GRAY);
-            
             LCD_ShowString(260, 198, "AI State:", CYAN, DARK_GRAY);
         }
         
-        LCD_ShowString(324, 156, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? GREEN : RED, DARK_GRAY);
-        LCD_ShowString(324, 174, bmp280_healthy ? "ONLINE " : "OFFLINE", bmp280_healthy ? GREEN : RED, DARK_GRAY);
+        LCD_ShowString(332, 156, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? GREEN : RED, DARK_GRAY);
+        LCD_FillCircle(322, 162, 3, aht20_healthy ? GREEN : RED);
+        
+        LCD_ShowString(332, 174, bmp280_healthy ? "ONLINE " : "OFFLINE", bmp280_healthy ? GREEN : RED, DARK_GRAY);
+        LCD_FillCircle(322, 180, 3, bmp280_healthy ? GREEN : RED);
         
         if (!aht20_healthy || !bmp280_healthy) {
             LCD_ShowString(260, 216, "FAULT/SENSOR ERR", RED, DARK_GRAY);
@@ -291,12 +399,12 @@ void Display_Refresh(uint8_t force_refresh) {
             LCD_ShowString(260, 216, "ANOMALY ALARM!! ", RED, DARK_GRAY);
         }
         
-        sprintf(buf, "Board ID: GROUP 05");
+        sprintf(buf, "ID: GROUP 05");
         LCD_ShowString(260, 246, buf, GRAY, DARK_GRAY);
     }
 
     /* ================================================================
-     * PAGE 1: AI自适应基准学习 (左侧栏[16..200] 右侧趋势图[216..464])
+     * PAGE 1: AI自适应基准学习 (左栏 HUD 卡片 + 右栏趋势图)
      * ================================================================ */
     else if (current_page == 1) {
         
@@ -304,11 +412,15 @@ void Display_Refresh(uint8_t force_refresh) {
         if (force_refresh) {
             LCD_FillRect(16, 56, 184, 220, DARK_GRAY);
             LCD_DrawRect(16, 56, 184, 220, GRAY);
+            Draw_CornerBrackets(16, 56, 184, 220, 6, CYAN);
             
-            LCD_ShowString(24, 62, "Baseline Temp:", CYAN, DARK_GRAY);
-            LCD_ShowString(24, 96, "Filtered Temp:", CYAN, DARK_GRAY);
+            Draw_TempIcon(24, 62, GREEN);
+            LCD_ShowString(38, 62, "Baseline Temp:", CYAN, DARK_GRAY);
+            
+            Draw_BrainIcon(24, 96, YELLOW);
+            LCD_ShowString(38, 96, "Filtered Temp:", CYAN, DARK_GRAY);
+            
             LCD_ShowString(24, 130, "Deviation:", CYAN, DARK_GRAY);
-            
             LCD_ShowString(24, 204, "AI Progress:", CYAN, DARK_GRAY);
         }
         
@@ -351,37 +463,36 @@ void Display_Refresh(uint8_t force_refresh) {
         LCD_ShowString(24, 222, buf, WHITE, DARK_GRAY);
         
         {
-            LCD_DrawRect(24, 244, 152, 12, GRAY);
             uint32_t cur = my_detector.learning_samples;
             uint32_t max = my_detector.max_learning_samples;
             if (cur > max) cur = max;
-            uint16_t pw = (uint16_t)(cur * 148 / max);
+            uint16_t active_segs = (uint16_t)(cur * 10 / max);
             uint16_t pc = my_detector.is_learning_done ? GREEN : BLUE;
-            if (pw > 0) LCD_FillRect(26, 246, pw, 8, pc);
-            if (pw < 148) LCD_FillRect(26 + pw, 246, 148 - pw, 8, BLACK);
+            Draw_SegmentedBar(24, 244, active_segs, 10, pc, BLACK);
         }
 
         // ------------------ 右侧趋势图卡片 ------------------
         if (force_refresh) {
             LCD_FillRect(216, 56, 248, 220, DARK_GRAY);
             LCD_DrawRect(216, 56, 248, 220, GRAY);
+            Draw_CornerBrackets(216, 56, 248, 220, 6, GRAY);
             LCD_ShowString(228, 62, "Deviation Trend (+/-5 C)", CYAN, DARK_GRAY);
         }
         Draw_DevChart();
     }
 
     /* ================================================================
-     * PAGE 2: 历史日志 (横屏优化：高画质时间轴，限制绘制最新4条防溢出)
+     * PAGE 2: 历史日志 (科技感时空节点布局)
      * ================================================================ */
     else if (current_page == 2) {
         if (my_log_buffer.count == 0) {
             if (force_refresh) {
-                LCD_ShowString(112, 150, "NO ANOMALY LOGS RECORDED", GRAY, BLACK);
+                LCD_ShowString(120, 150, "NO ANOMALY LOGS RECORDED", GRAY, BLACK);
             }
         } else {
-            /* 1. 先绘制时间轴垂直轴线 */
+            /* 1. 先绘制点虚线时间轴垂直线 */
             if (force_refresh) {
-                LCD_DrawLine(24, 56, 24, 276, GRAY);
+                Draw_DottedLine(24, 56, 24, 276, GRAY);
             }
             
             /* 2. 遍历环形缓冲区绘制历史异常记录 */
@@ -394,19 +505,21 @@ void Display_Refresh(uint8_t force_refresh) {
                 uint16_t row_y = 56 + i * 54; /* 4个卡片，高度48，间距6 */
 
                 if (force_refresh) {
-                    /* 时间轴节点 */
+                    /* 双圈闪烁时间轴节点 */
                     LCD_DrawLine(24, row_y + 24, 42, row_y + 24, GRAY);
-                    LCD_FillCircle(24, row_y + 24, 3, RED);
+                    LCD_FillCircle(24, row_y + 24, 2, RED);
+                    LCD_DrawCircle(24, row_y + 24, 5, RED);
 
-                    /* 右侧日志卡片背景与细灰色边框 */
+                    /* 右侧日志卡片背景与细灰色边框，配合红角标 */
                     LCD_FillRect(42, row_y, 422, 48, DARK_GRAY);
                     LCD_DrawRect(42, row_y, 422, 48, GRAY);
+                    Draw_CornerBrackets(42, row_y, 422, 48, 4, RED);
 
                     /* 卡片内部信息 */
-                    sprintf(buf, "#%d [UPTIME: %5d s]", i + 1, ev->timestamp_s);
+                    sprintf(buf, "#%d [TIME: %d s]", i + 1, ev->timestamp_s);
                     LCD_ShowString(52, row_y + 6, buf, YELLOW, DARK_GRAY);
 
-                    sprintf(buf, "Baseline: %5.2f C -> Current: %5.2f C", ev->baseline_temp, ev->current_temp);
+                    sprintf(buf, "Base: %5.2f C -> Curr: %5.2f C", ev->baseline_temp, ev->current_temp);
                     LCD_ShowString(52, row_y + 26, buf, RED, DARK_GRAY);
 
                     sprintf(buf, "Press: %6.0f Pa", ev->current_press);
@@ -439,8 +552,8 @@ static void Draw_Beacon(void) {
         tick = 0;
         char s[2] = {sym[idx], '\0'};
         uint16_t bg = TopBarBg();
-        uint16_t fg = (bg == RED || bg == BLUE) ? WHITE : GREEN;
-        LCD_ShowString(LCD_WIDTH - 16, 4, s, fg, bg);
+        uint16_t fg = (bg == RED) ? RED : ((bg == BLUE) ? BLUE : GREEN);
+        LCD_ShowString(LCD_WIDTH - 16, 4, s, fg, BLACK);
         idx = (idx + 1) & 3;
     }
 }
