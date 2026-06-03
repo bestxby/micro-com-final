@@ -39,11 +39,12 @@
     position: fixed;
     top: 50%; left: 50%;
     transform-origin: top left;
-    will-change: transform;
+    will-change: transform, opacity;
     background: #f8fafc;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border-radius: 12px;
     overflow: hidden;
+    transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
   iframe {
     width: 100%;
@@ -155,30 +156,54 @@
   const counter = document.getElementById('counter');
   const printStack = document.getElementById('printStack');
   const storageKey = 'deck-index-' + location.pathname;
-  let current = 0;
+  let currentScale = 1;
+  let currentX = 0;
+  let currentY = 0;
+  let isNavigating = false;
 
   stage.style.width  = W + 'px';
   stage.style.height = H + 'px';
 
   function fit() {
-    const s = Math.min(window.innerWidth / W, window.innerHeight / H);
-    const x = (window.innerWidth  - W * s) / 2;
-    const y = (window.innerHeight - H * s) / 2;
-    stage.style.transform = `translate(${x}px, ${y}px) scale(${s})`;
+    currentScale = Math.min(window.innerWidth / W, window.innerHeight / H);
+    currentX = (window.innerWidth  - W * currentScale) / 2;
+    currentY = (window.innerHeight - H * currentScale) / 2;
+    if (!isNavigating) {
+      stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+    }
     stage.style.top = '0';
     stage.style.left = '0';
   }
 
   function show(idx) {
     if (idx < 0 || idx >= deck.length) return;
+    isNavigating = true;
     current = idx;
-    frame.src = deck[idx].file;
-    counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
-    try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
-    if (location.hash !== '#' + (idx + 1)) {
-      history.replaceState(null, '', '#' + (idx + 1));
-    }
+    
+    // Trigger transition: fade out and slide down slightly
+    stage.style.opacity = '0';
+    stage.style.transform = `translate(${currentX}px, ${currentY + 15 * currentScale}px) scale(${currentScale})`;
+    
+    setTimeout(() => {
+      frame.src = deck[idx].file;
+      counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
+      try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
+      if (location.hash !== '#' + (idx + 1)) {
+        history.replaceState(null, '', '#' + (idx + 1));
+      }
+    }, 200); // Wait for fade-out to complete
   }
+
+  frame.addEventListener('load', () => {
+    if (isNavigating) {
+      // Trigger transition: fade in and slide back to position
+      stage.style.opacity = '1';
+      stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
+      setTimeout(() => {
+        isNavigating = false;
+      }, 350); // Match transition duration
+    }
+  });
 
   function next() { show(Math.min(current + 1, deck.length - 1)); }
   function prev() { show(Math.max(current - 1, 0)); }

@@ -121,13 +121,13 @@
     <p class="slide-subtitle">Exponential Moving Average Filter</p>
     
     <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>去噪原理</strong>：温湿度传感器读数受外界空气对流、电路杂散噪声等高频瞬时扰动影响。为防止 AI 算法因单次噪点误报，引入指数移动平均低通平滑滤波算法。</p>
+      <p>• <strong>去噪原理</strong>：温湿度传感器读数受外界高频瞬时扰动影响。为防止 AI 算法误报，引入一阶 IIR 指数移动平均平滑滤波算法。</p>
       
       <div class="formula-card">
         <span class="formula" style="font-size: 28px;">T<sub>f</sub>[n] = &alpha; &middot; T<sub>raw</sub>[n] + (1 - &alpha;) &middot; T<sub>f</sub>[n-1]</span>
       </div>
       
-      <p>• <strong>参数设计</strong>：取平滑权重系数 <span class="formula" style="color: var(--brand-primary); font-weight: bold;">&alpha; = 0.2</span>。该配置在“有效滤除毛刺抖动”与“保留温度变化响应度”之间取得了最佳平衡。</p>
+      <p>• <strong>参数设计</strong>：取平滑系数 <span class="formula" style="color: var(--brand-primary); font-weight: bold;">&alpha; = 0.2</span>。在采样率 <span class="formula">f<sub>s</sub> = 10Hz</span> 下，对应的截止频率 <span class="formula">f<sub>c</sub> &asymp; 0.356Hz</span>，有效滤除高频毛刺，同时保留系统对真实温度快速响应的灵敏度。</p>
     </div>
   </div>
 
@@ -152,18 +152,25 @@
         <span class="y-axis-label y-low formula">20°C</span>
         <span class="x-axis-label">时间 (秒)</span>
         
-        <svg class="chart-svg">
+        <svg class="chart-svg" viewBox="0 0 740 320" preserveAspectRatio="none">
           <defs>
             <linearGradient id="gradientLine" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stop-color="#06B6D4" />
               <stop offset="100%" stop-color="#8B5CF6" />
             </linearGradient>
+            <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.18" />
+              <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0" />
+            </linearGradient>
           </defs>
           
           <!-- Grid helper lines -->
-          <line x1="0" y1="100" x2="100%" y2="100" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
-          <line x1="0" y1="200" x2="100%" y2="200" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
+          <line x1="0" y1="100" x2="740" y2="100" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
+          <line x1="0" y1="200" x2="740" y2="200" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
           
+          <!-- Filtered Area Gradient Fill -->
+          <path d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95 L 720,320 L 0,320 Z" fill="url(#areaGradient)" />
+
           <!-- Raw Noisy Temperature Wave (grey, jagged) -->
           <path class="wave-path circuit-line" stroke="#94A3B8" stroke-width="2" opacity="0.6"
                 d="M 0,250 L 40,240 L 80,260 L 120,225 L 160,255 L 200,210 L 240,245 L 280,180 L 320,205 L 360,150 L 400,165 L 440,110 L 480,140 L 520,115 L 560,90 L 600,120 L 640,85 L 680,105 L 720,80" />

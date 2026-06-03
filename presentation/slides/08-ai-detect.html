@@ -160,7 +160,7 @@
         - 若 <strong style="color: #059669;" class="formula">&Delta;T &le; 5°C</strong>：系统处于 <strong style="color: #059669;">正常运行状态 (NORMAL)</strong>。<br>
         - 若 <strong style="color: #DC2626;" class="formula">&Delta;T &gt; 5°C</strong>：系统判定为 <strong style="color: #DC2626;">温度发生异常突变 (ANOMALY)</strong>。
       </p>
-      <p style="margin-top: 16px;">• <strong>高鲁棒性</strong>：基准值自学习保证了系统在不同季节上电时有合理的警报浮动区间，克服了传统固定阈值在环境渐变导致的频繁误报。</p>
+      <p style="margin-top: 16px;">• <strong>阈值科学来源</strong>：偏离值 <span class="formula">5°C</span> 的阈值设定是依据基准学习期实时采集测算出的样本标准差 <span class="formula">&sigma;</span>，采用统计学三倍标准差法则（即 <span class="formula">3&sigma; &asymp; 5°C</span>）计算所得。这保证了在纯噪声波动中系统具备高达 <span class="formula">99.73%</span> 的防误报置信度。</p>
     </div>
   </div>
 

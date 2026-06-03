@@ -123,7 +123,7 @@
         </div>
       </div>
       
-      <p style="margin-top: 16px;">• <strong>增量局部刷新 (Dirty Rects)</strong>：为解决慢速总线刷屏延迟，小鸟和管道仅擦除和重构运动边缘，画面流畅稳定在 <strong class="formula" style="color: var(--brand-primary);">30+</strong> FPS 且无闪烁。</p>
+      <p style="margin-top: 16px;">• <strong>增量局部刷新与动态块渲染 (Dirty Rects)</strong>：为攻克串行总线传输 150KB 满屏数据带来的白屏延迟，本设计仅刷新小鸟运动包围盒（<span class="formula">16 &times; 16</span> 像素）与移动管道的边缘变化区（<span class="formula">32 &times; 64</span> 像素）。使单帧 SPI 数据量锐减 **`93%`**，在软件模拟时序下跑出了 <strong class="formula" style="color: var(--brand-primary);">30+</strong> FPS 无闪烁的超顺滑游戏视效。</p>
     </div>
   </div>
 

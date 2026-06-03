@@ -136,19 +136,33 @@
     
     <div class="mini-chart delay-3">
       <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">温度突变触发曲线 <span class="formula">&Delta;T &gt; 5°C</span></div>
-      <svg class="chart-svg">
-        <!-- Lines -->
-        <line x1="0" y1="60" x2="100%" y2="60" class="baseline-line" /> <!-- Baseline 25C -->
-        <line x1="0" y1="20" x2="100%" y2="20" class="threshold-line" /> <!-- Threshold 30C -->
+      <svg class="chart-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cyanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06B6D4" />
+            <stop offset="100%" stop-color="#8B5CF6" />
+          </linearGradient>
+          <linearGradient id="alertAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#EF4444" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#EF4444" stop-opacity="0.0" />
+          </linearGradient>
+        </defs>
         
-        <text x="5" y="52" fill="#64748B" font-size="11" font-weight="bold" class="formula">基准 25.0°C</text>
-        <text x="5" y="12" fill="#EF4444" font-size="11" font-weight="bold" class="formula">阀值 30.0°C</text>
+        <!-- Red Alert Area Gradient Fill -->
+        <path d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8 L 400,80 L 0,80 Z" fill="url(#alertAreaGrad)" />
+
+        <!-- Lines -->
+        <line x1="0" y1="60" x2="400" y2="60" class="baseline-line" /> <!-- Baseline 25C -->
+        <line x1="0" y1="20" x2="400" y2="20" class="threshold-line" /> <!-- Threshold 30C -->
+        
+        <text x="5" y="52" fill="#64748B" font-size="7" font-weight="bold" class="formula">基准 25.0°C</text>
+        <text x="5" y="12" fill="#EF4444" font-size="7" font-weight="bold" class="formula">阀值 30.0°C</text>
         
         <!-- Temp curve shooting up -->
         <path class="temp-path circuit-line" stroke="url(#cyanPurpleGrad)" 
               d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8" />
-        <circle cx="300" cy="15" r="5" fill="#EF4444" class="glowing-node" />
-        <text x="310" y="25" fill="#EF4444" font-size="11" font-weight="bold">异常触发!</text>
+        <circle cx="300" cy="15" r="3" fill="#EF4444" class="glowing-node" />
+        <text x="310" y="25" fill="#EF4444" font-size="7" font-weight="bold">异常触发!</text>
       </svg>
     </div>
   </div>

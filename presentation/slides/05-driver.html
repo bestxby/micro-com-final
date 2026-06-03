@@ -126,8 +126,8 @@
     <p class="slide-subtitle">Software I2C & Multi-Sensor Interface</p>
     
     <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;">
-      <p>• <strong>GPIO 模拟开漏时序</strong>：克服硬件 I2C 容易死锁卡死的弊端，自主实现精准的 Start、Stop、SendByte 和 ReadByte 微秒级延时时序。</p>
-      <p style="margin-top: 10px;">• <strong>一总线双节点采集</strong>：在 PB6 (SCL) 和 PB7 (SDA) 组成的模拟总线上同时并联 AHT20 温湿度传感器与 BMP280 气压温度传感器，动态交替采样。</p>
+      <p>• <strong>GPIO 模拟开漏时序</strong>：规避 STM32F1xx 硬件 I2C 著名的 `BUSY` 标志硬件死锁 Bug。模拟开漏输出便于在总线异常挂死（SDA 被从机拉低）时，由主机自动发送 9 个 SCL 脉冲强行复位释放总线。</p>
+      <p style="margin-top: 10px;">• <strong>一总线双节点采集</strong>：在 <span class="formula">PB6 (SCL)</span> 与 <span class="formula">PB7 (SDA)</span> 组成的模拟总线上并联 AHT20 与 BMP280 传感器，通过独立 I2C 设备地址轮询，兼顾引脚利用率与稳定度。</p>
     </div>
     
     <div class="code-block delay-2">
