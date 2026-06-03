@@ -226,7 +226,7 @@
   
   .gauge-pointer {
     position: absolute;
-    bottom: 38px;
+    bottom: 42px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 15;
@@ -236,12 +236,12 @@
     transition: left 0.1s linear; /* Smooth linear tracking */
   }
   .pointer-bubble {
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 800;
     background: #0F172A;
     color: #fff;
-    padding: 6px 14px;
-    border-radius: 8px;
+    padding: 8px 16px;
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     white-space: nowrap;
     position: relative;
@@ -250,10 +250,10 @@
   .pointer-bubble::after {
     content: "";
     position: absolute;
-    bottom: -6px;
+    bottom: -8px;
     left: 50%;
     transform: translateX(-50%);
-    border-width: 6px 6px 0;
+    border-width: 8px 8px 0;
     border-style: solid;
     border-color: #0F172A transparent;
     display: block;
@@ -268,48 +268,59 @@
     border-color: #EF4444 transparent !important;
   }
 
-  .gauge-labels-row {
+  .gauge-zones-row {
     position: relative;
     width: 100%;
-    height: 48px;
-    margin-top: 8px;
-    font-size: 15px;
+    height: 36px;
+    margin-top: 14px;
+    font-size: 24px; /* Big, very readable */
+    font-weight: 900;
+  }
+  .gauge-zones-row span {
+    position: absolute;
+    text-align: center;
+    white-space: nowrap;
+    transform: translateX(-50%);
+  }
+  .zone-left {
+    left: 9.375%; /* Center of left anomaly zone */
+    color: #EF4444 !important;
+  }
+  .zone-center {
+    left: 50%; /* Center of normal zone */
+    color: #10B981 !important;
+  }
+  .zone-right {
+    left: 90.625%; /* Center of right anomaly zone */
+    color: #EF4444 !important;
+  }
+
+  .gauge-bounds-row {
+    position: relative;
+    width: 100%;
+    height: 36px;
+    margin-top: 6px;
+    font-size: 22px; /* Very readable */
     font-weight: bold;
     color: var(--text-muted);
   }
-  .gauge-labels-row span {
+  .gauge-bounds-row span {
     position: absolute;
     text-align: center;
-    line-height: 1.3;
-  }
-  .label-left {
-    left: 0;
-    color: #EF4444 !important;
-    font-weight: 900;
-  }
-  .label-mid-left {
-    left: 18.75%;
+    white-space: nowrap;
     transform: translateX(-50%);
-    color: #10B981 !important;
-    font-weight: 900;
   }
-  .label-center {
-    left: 50%;
-    transform: translateX(-50%);
+  .bound-left {
+    left: 18.75%; /* Exactly at -5°C boundary */
+    color: #0F172A !important;
+  }
+  .bound-center {
+    left: 50%; /* Center baseline */
     color: var(--text-primary) !important;
-    font-size: 16px !important;
-    font-weight: 900;
   }
-  .label-mid-right {
-    left: 81.25%;
-    transform: translateX(-50%);
-    color: #10B981 !important;
-    font-weight: 900;
-  }
-  .label-right {
-    right: 0;
-    color: #EF4444 !important;
-    font-weight: 900;
+  .bound-right {
+    left: 81.25%; /* Exactly at +5°C boundary */
+    color: #0F172A !important;
   }
 </style>
 </head>
@@ -401,13 +412,18 @@
         </div>
       </div>
       
-      <!-- Gauge Labels with exact alignment -->
-      <div class="gauge-labels-row formula">
-        <span class="label-left">&Delta;T &gt; 5°C<br>异常区</span>
-        <span class="label-mid-left">-5°C 边界</span>
-        <span class="label-center">基准 &mu;<sub>base</sub><br>(0°C 偏差)</span>
-        <span class="label-mid-right">+5°C 边界</span>
-        <span class="label-right">&Delta;T &gt; 5°C<br>异常区</span>
+      <!-- Gauge Labels Row 1: Zones (异常区 / 正常区 / 异常区) -->
+      <div class="gauge-zones-row">
+        <span class="zone-left">异常区</span>
+        <span class="zone-center">正常区</span>
+        <span class="zone-right">异常区</span>
+      </div>
+      
+      <!-- Gauge Labels Row 2: Boundaries & Baseline (-5°C / 基准 / +5°C) -->
+      <div class="gauge-bounds-row formula">
+        <span class="bound-left">-5°C</span>
+        <span class="bound-center">基准 &mu;<sub>base</sub></span>
+        <span class="bound-right">+5°C</span>
       </div>
     </div>
   </div>
