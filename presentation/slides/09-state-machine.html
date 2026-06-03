@@ -36,8 +36,8 @@
   
   .fsm-node {
     position: absolute;
-    width: 110px;
-    height: 110px;
+    width: 140px; /* Expanded width */
+    height: 140px; /* Expanded height */
     border-radius: 99px;
     background: #fff;
     border: 2px solid #E2E8F0;
@@ -45,26 +45,26 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 18px; /* Larger font size */
     font-weight: 800;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     z-index: 5;
     transition: all 0.5s ease;
     text-align: center;
-    padding: 10px;
+    padding: 15px;
   }
   .fsm-node span {
-    font-size: 11px;
+    font-size: 13px; /* Larger font size */
     color: var(--text-muted);
     font-weight: normal;
-    margin-top: 4px;
+    margin-top: 6px;
   }
   
   /* Repositioned Nodes to fit larger container */
-  .node-init { top: 40px; left: 265px; }
-  .node-learn { top: 220px; left: 265px; }
-  .node-normal { top: 420px; left: 80px; }
-  .node-anomaly { top: 420px; left: 450px; }
+  .node-init { top: 40px; left: 250px; }
+  .node-learn { top: 240px; left: 250px; }
+  .node-normal { top: 440px; left: 80px; }
+  .node-anomaly { top: 440px; left: 420px; }
   
   /* Active states style */
   .node-active {
@@ -157,19 +157,19 @@
         </defs>
         
         <!-- Init -> Learning -->
-        <path id="arrow1" class="arrow-line" d="M 320,150 L 320,214" />
+        <path id="arrow1" class="arrow-line" d="M 320,180 L 320,236" />
         
         <!-- Learning -> Normal -->
-        <path id="arrow2" class="arrow-line" d="M 283,315 L 182,410" />
+        <path id="arrow2" class="arrow-line" d="M 275,363 L 195,457" />
         
         <!-- Normal -> Anomaly -->
-        <path id="arrow3" class="arrow-line" d="M 190,465 L 444,465" />
+        <path id="arrow3" class="arrow-line" d="M 220,490 L 414,490" />
         
         <!-- Anomaly -> Normal (KEY2 Press) -->
-        <path id="arrow4" class="arrow-line" d="M 450,485 L 196,485" />
+        <path id="arrow4" class="arrow-line" d="M 420,520 L 226,520" />
         
         <!-- Anomaly -> Learning (Re-learn command) -->
-        <path id="arrow5" class="arrow-line" d="M 468,435 L 357,315" />
+        <path id="arrow5" class="arrow-line" d="M 445,457 L 365,363" />
       </svg>
       
       <!-- Nodes -->
