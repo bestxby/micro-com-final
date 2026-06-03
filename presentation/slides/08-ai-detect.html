@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>08 AI监测与异常判定 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .detect-card {
+    width: 100%;
+    max-width: 500px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 36px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: relative;
+  }
+  
+  .alert-banner {
+    width: 100%;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 800;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.5s ease;
+  }
+  .banner-normal {
+    background: #D1FAE5;
+    color: #059669;
+    border: 1px solid #A7F3D0;
+  }
+  .banner-anomaly {
+    background: #FEE2E2;
+    color: #DC2626;
+    border: 1px solid #FCA5A5;
+    animation: flashAlert 0.8s infinite alternate;
+  }
+  @keyframes flashAlert {
+    from { opacity: 0.8; box-shadow: 0 0 10px rgba(220, 38, 38, 0.2); }
+    to { opacity: 1; box-shadow: 0 0 25px rgba(220, 38, 38, 0.6); }
+  }
+  
+  /* Threshold Visual Gauge */
+  .gauge-container {
+    position: relative;
+    width: 100%;
+    height: 100px;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .gauge-bar {
+    width: 100%;
+    height: 24px;
+    background: #E2E8F0;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .normal-zone {
+    position: absolute;
+    left: 25%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(52, 211, 153, 0.4), rgba(52, 211, 153, 0.8), rgba(52, 211, 153, 0.4));
+    border-left: 2px dashed #059669;
+    border-right: 2px dashed #059669;
+  }
+  .anomaly-zone-left {
+    position: absolute;
+    left: 0;
+    width: 25%;
+    height: 100%;
+    background: rgba(239, 68, 68, 0.3);
+  }
+  .anomaly-zone-right {
+    position: absolute;
+    right: 0;
+    width: 25%;
+    height: 100%;
+    background: rgba(239, 68, 68, 0.3);
+  }
+  
+  .gauge-pointer {
+    position: absolute;
+    width: 20px;
+    height: 40px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--text-primary);
+    border-radius: 4px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    font-weight: bold;
+    transition: left 3.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .gauge-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-family: monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">自适应智能异常监测机制</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">AI 智能监测与<span class="highlight-gradient">异常判定</span></h1>
+    <p class="slide-subtitle">Threshold Model & Anomaly Detection Decision</p>
+    
+    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary);">
+      <p>• <strong>差值决策模型</strong>：系统锁定均值基准 &mu;<sub>base</sub> 后，进入高频监测模式。读取当前平滑滤波温度 T<sub>f</sub>，并计算绝对偏差：</p>
+      <p style="margin: 12px 0 12px 30px; font-weight: bold; color: var(--brand-primary); font-size: 20px;">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</p>
+      
+      <p>• <strong>判定边界</strong>：</p>
+      <p style="margin-left: 20px; line-height: 1.8;">
+        - 若 <strong style="color: #059669;">&Delta;T &le; 5°C</strong>：系统处于 <strong style="color: #059669;">正常运行状态 (NORMAL)</strong>。<br>
+        - 若 <strong style="color: #DC2626;">&Delta;T &gt; 5°C</strong>：系统判定为 <strong style="color: #DC2626;">温度发生异常突变 (ANOMALY)</strong>。
+      </p>
+      <p style="margin-top: 12px;">• <strong>高鲁棒性</strong>：基准值自学习保证了系统在不同季节上电时有合理的警报浮动区间，克服了传统固定阈值在环境渐变导致的频繁误报。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="detect-card delay-2">
+      <div class="alert-banner banner-normal" id="statusBanner">SYSTEM STATE: NORMAL</div>
+      
+      <div class="gauge-container">
+        <div class="gauge-bar">
+          <div class="anomaly-zone-left"></div>
+          <div class="normal-zone"></div>
+          <div class="anomaly-zone-right"></div>
+        </div>
+        <div class="gauge-pointer" id="gaugePointer" style="left: 50%;">T<sub>f</sub></div>
+      </div>
+      
+      <div class="gauge-labels">
+        <span>&Delta;T &gt; 5°C (异常)</span>
+        <span>&mu;<sub>base</sub> (基准)</span>
+        <span>&Delta;T &gt; 5°C (异常)</span>
+      </div>
+      
+      <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); font-weight: bold;">
+        <span>偏差值: <strong id="devVal" style="color: var(--text-primary);">0.0</strong> °C</span>
+        <span>实时判定: <strong id="decisionText" style="color: #059669;">正常</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">07. AI监测与异常判定</div>
+  <div class="slide-number">Page 8 / 12</div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const pointer = document.getElementById('gaugePointer');
+    const banner = document.getElementById('statusBanner');
+    const devVal = document.getElementById('devVal');
+    const decisionText = document.getElementById('decisionText');
+    
+    // Simulate pointer sliding to Anomaly after 1.5s
+    setTimeout(() => {
+      // 1. Slide pointer to the right anomaly zone (e.g. 85%)
+      pointer.style.left = '85%';
+      
+      // 2. Animate devVal and decision text change
+      let currentDev = 0.0;
+      const targetDev = 7.2;
+      const steps = 50;
+      let step = 0;
+      
+      const interval = setInterval(() => {
+        step++;
+        currentDev = (targetDev * (step / steps));
+        devVal.innerText = currentDev.toFixed(1);
+        
+        if (currentDev > 5.0) {
+          // Switch to Anomaly styling
+          banner.className = 'alert-banner banner-anomaly';
+          banner.innerText = 'SYSTEM STATE: ANOMALY DETECTED';
+          decisionText.innerText = '异常突变';
+          decisionText.style.color = '#DC2626';
+        }
+        
+        if (step >= steps) {
+          clearInterval(interval);
+        }
+      }, 40);
+      
+    }, 1500);
+  });
+</script>
+
+</body>
+</html>

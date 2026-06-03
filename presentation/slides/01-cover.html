@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>01 封面 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  body {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+  .cover-card {
+    position: relative;
+    width: 1000px;
+    padding: 60px 40px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .mcu-badge {
+    padding: 8px 18px;
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--brand-primary);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 99px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .main-title {
+    font-size: 58px;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+  }
+  .subtitle {
+    font-size: 24px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-bottom: 48px;
+  }
+  .author-info {
+    display: flex;
+    gap: 32px;
+    font-size: 16px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .author-info span strong {
+    color: var(--text-primary);
+  }
+  /* Drawing border lines around cover card */
+  .border-svg {
+    position: absolute;
+    top: -4px; left: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    pointer-events: none;
+  }
+  .border-rect {
+    width: 100%;
+    height: 100%;
+    rx: 24px;
+    fill: none;
+    stroke: url(#cyanPurpleGrad);
+    stroke-width: 4px;
+    stroke-dasharray: 4000;
+    stroke-dashoffset: 4000;
+    animation: drawPath 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.5s;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="cover-card animate-fade-in-up">
+  <svg class="border-svg">
+    <defs>
+      <linearGradient id="cyanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#06B6D4" />
+        <stop offset="100%" stop-color="#8B5CF6" />
+      </linearGradient>
+    </defs>
+    <rect class="border-rect" x="2" y="2" width="calc(100% - 4px)" height="calc(100% - 4px)" />
+  </svg>
+
+  <div class="mcu-badge">STM32F103C8T6 COMPREHENSIVE DESIGN</div>
+  <h1 class="main-title">环境温度自适应异常监测系统</h1>
+  <p class="subtitle">微机原理与嵌入式系统实验综合设计期末汇报</p>
+  
+  <div class="author-info">
+    <span>课程：<strong>微机原理与嵌入式系统实验</strong></span>
+    <span>学校：<strong>中山大学</strong></span>
+    <span>班级：<strong>电子信息科学与技术</strong></span>
+  </div>
+</div>
+
+<script>
+  // Add a slight tilt hover effect to the cover card
+  const card = document.querySelector('.cover-card');
+  document.addEventListener('mousemove', (e) => {
+    const x = (window.innerWidth / 2 - e.clientX) / 40;
+    const y = (window.innerHeight / 2 - e.clientY) / 40;
+    card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+  });
+</script>
+
+</body>
+</html>

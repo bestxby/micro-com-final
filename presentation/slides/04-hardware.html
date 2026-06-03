@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>04 硬件接口与引脚分配 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+  }
+  .mcu-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+  }
+  .mcu-table th, .mcu-table td {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 14px;
+  }
+  .mcu-table th {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--brand-primary);
+    font-weight: 800;
+  }
+  .mcu-table tr {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  }
+  .mcu-table tr:last-child {
+    border-bottom: none;
+  }
+  .mcu-table tr:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .pin-badge {
+    background: #E2E8F0;
+    color: #475569;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .img-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: var(--glass-shadow);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-card img {
+    max-width: 100%;
+    max-height: 480px;
+    border-radius: 8px;
+    object-fit: contain;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">STM32 硬件引脚接线分配</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">硬件接口与<span class="highlight-gradient">引脚规划</span></h1>
+    <p class="slide-subtitle">Hardware Connections & Pin Mapping</p>
+    
+    <table class="mcu-table">
+      <thead>
+        <tr>
+          <th>外设模块</th>
+          <th>引脚功能</th>
+          <th>STM32 管脚</th>
+          <th>引脚工作模式描述</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>I2C 传感器总线</strong></td>
+          <td>SCL / SDA</td>
+          <td><span class="pin-badge">PB6</span> / <span class="pin-badge">PB7</span></td>
+          <td>软件模拟 I²C 开漏输出，适配 AHT20 & BMP280</td>
+        </tr>
+        <tr>
+          <td><strong>TFT-LCD 屏幕</strong></td>
+          <td>CLK / MOSI / CS / RS</td>
+          <td><span class="pin-badge">PA5</span> / <span class="pin-badge">PA7</span> / <span class="pin-badge">PA4</span> / <span class="pin-badge">PA8</span></td>
+          <td>软件 SPI 屏幕驱动（PA3-RST复位，PB1-BL背光控制）</td>
+        </tr>
+        <tr>
+          <td><strong>XPT2046 触屏</strong></td>
+          <td>TCS / DIN / DO / CLK / IRQ</td>
+          <td><span class="pin-badge">PB4</span> / <span class="pin-badge">PB3</span> / <span class="pin-badge">PA1</span> / <span class="pin-badge">PA8</span> / <span class="pin-badge">PA0</span></td>
+          <td>位带加速 SPI 触屏控制（PB3/PB4 解除 JTAG 调试占用）</td>
+        </tr>
+        <tr>
+          <td><strong>报警指示 LED</strong></td>
+          <td>PC13 (闪烁) / PA0 (PWM)</td>
+          <td><span class="pin-badge">PC13</span> / <span class="pin-badge">PA0</span> / <span class="pin-badge">PA1</span> / <span class="pin-badge">PA2</span></td>
+          <td>TIM2_CH1 PWM 呼吸灯 (PA0) | 学习 (PA1) | 监测 (PA2)</td>
+        </tr>
+        <tr>
+          <td><strong>用户按键</strong></td>
+          <td>KEY1 (翻页) / KEY2 (重置)</td>
+          <td><span class="pin-badge">PB0</span> / <span class="pin-badge">PB8</span></td>
+          <td>GPIO 上拉输入模式，按键中断扫描</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="right-col">
+    <div class="img-card delay-2">
+      <!-- Embed the extracted AHT20/BMP280 sensor wiring image -->
+      <img src="../shared/images/sensor_wiring.png" alt="AHT20/BMP280 Sensor Wiring Schematic">
+    </div>
+    <div style="font-size: 14px; color: var(--text-muted); font-weight: 600; font-style: italic;">
+      图 4.1：实验指导书中温湿度/气压传感器在开发箱上的引脚排线示意图
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">03. 硬件接口与引脚分配</div>
+  <div class="slide-number">Page 4 / 12</div>
+</div>
+
+</body>
+</html>

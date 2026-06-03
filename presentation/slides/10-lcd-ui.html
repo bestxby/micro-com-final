@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>10 屏幕交互与飞鸟游戏 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 0.95;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1.05;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+  }
+  
+  .layout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+  }
+  .layout-item {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .layout-item h4 {
+    font-size: 15px;
+    font-weight: bold;
+    color: var(--brand-primary);
+    margin-bottom: 4px;
+  }
+  .layout-item p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  
+  .video-card {
+    width: 100%;
+    height: 320px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--glass-shadow);
+  }
+  
+  .double-img-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    height: 140px;
+    align-items: center;
+    justify-content: center;
+  }
+  .sub-img-card {
+    flex: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: var(--glass-shadow);
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sub-img-card img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">480×320 LCD 触屏人机交互</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">图形交互与<span class="highlight-gradient">Flappy Bird 游戏</span></h1>
+    <p class="slide-subtitle">LCD Screen UI Pages & Flappy Bird Pixel Engine</p>
+    
+    <div style="font-size: 15px; line-height: 1.5; color: var(--text-secondary);">
+      <p>• <strong>手势划屏翻页</strong>：基于 XPT2046 电阻式触屏控制器与 Cortex-M3 位带读写 SPI 时序，支持高灵敏度左划、右划手势进行多页无缝切换。</p>
+      
+      <div class="layout-grid">
+        <div class="layout-item">
+          <h4>Page 0: 环境监测页</h4>
+          <p>Slate 暗灰色两栏布局，一屏展现温湿度、气压、AI 滤波值与在线状态。</p>
+        </div>
+        <div class="layout-item">
+          <h4>Page 1: 自适应折线页</h4>
+          <p>左侧显示 AI 均值与偏差，右侧利用 LCD 高速绘制 24 点示波偏差折线图。</p>
+        </div>
+        <div class="layout-item">
+          <h4>Page 2: 霓虹日志页</h4>
+          <p>以精美的垂直时间轴，显示最新 7 条异常日志快照（发生时间/基准/异常值）。</p>
+        </div>
+        <div class="layout-item">
+          <h4>Page 3: 飞鸟游戏页</h4>
+          <p>内置经典 Flappy Bird 游戏。轻触屏幕中央区域即可起飞，物理按键与触屏双重操作。</p>
+        </div>
+      </div>
+      
+      <p style="margin-top: 12px;">• <strong>增量局部刷新 (Dirty Rects)</strong>：为解决慢速总线刷屏延迟，小鸟和管道仅擦除和重构运动边缘，画面流畅稳定在 <strong style="color: var(--brand-primary);">30+ FPS</strong> 且无闪烁。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <!-- Video container for user's LCD demo -->
+    <div class="video-card delay-2">
+      <div class="video-placeholder-container">
+        <video controls autoplay muted loop>
+          <source src="../shared/videos/lcd_demo.mp4" type="video/mp4">
+          <div class="video-fallback-msg">
+            🎥 [请在此处替换为您的演示视频：lcd_demo.mp4]<br>
+            通过划屏切换监测界面和玩飞鸟小游戏演示
+          </div>
+        </video>
+      </div>
+    </div>
+    
+    <div class="double-img-row delay-3">
+      <div class="sub-img-card">
+        <!-- Embed XPT2046 SPI Touch controller schematic -->
+        <img src="../shared/images/touch_spi.png" alt="XPT2046 SPI Touch Connections">
+      </div>
+      <div style="flex: 1; font-size: 13px; color: var(--text-muted); font-weight: 600; line-height: 1.4;">
+        图 10.1：实验指导书中 XPT2046 触屏控制器引脚接口参考图。<br>
+        右侧视频区域在您放入实际视频后会自动播放。
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">09. 屏幕交互与飞鸟游戏</div>
+  <div class="slide-number">Page 10 / 12</div>
+</div>
+
+</body>
+</html>

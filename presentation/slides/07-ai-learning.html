@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>07 AI自适应均值学习 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .formula-card {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px dashed rgba(139, 92, 246, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;
+    text-align: center;
+    color: var(--brand-primary);
+    font-weight: bold;
+  }
+  
+  .learning-panel {
+    width: 100%;
+    max-width: 500px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .state-badge {
+    align-self: center;
+    padding: 6px 16px;
+    background: #FEF3C7;
+    color: #D97706;
+    border: 1px solid #FDE68A;
+    border-radius: 99px;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    animation: flash 1.5s infinite alternate;
+  }
+  
+  @keyframes flash {
+    0% { opacity: 0.7; }
+    100% { opacity: 1; box-shadow: 0 0 10px rgba(217, 119, 6, 0.2); }
+  }
+  
+  .large-value {
+    font-size: 84px;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+  
+  .progress-container {
+    width: 100%;
+    height: 12px;
+    background: #E2E8F0;
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--brand-gradient);
+    border-radius: 99px;
+    box-shadow: 0 0 8px var(--brand-secondary);
+    transition: width 3.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">自适应 AI 均值拟合学习</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">核心特色：<span class="highlight-gradient">AI 自适应学习</span></h1>
+    <p class="slide-subtitle">Unsupervised AI Baseline Learning Phase</p>
+    
+    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary);">
+      <p>• <strong>免校准自适应机制</strong>：系统不需要人工写死特定温度阈值。在上电初期设置自学习模式（前 100 次采样，约 150 秒），自动捕获现场环境的基准温度。</p>
+      
+      <div class="formula-card">
+        &mu;<sub>base</sub>[n] = (1 - 1/n) &middot; &mu;<sub>base</sub>[n-1] + (1/n) &middot; T<sub>f</sub>[n]
+      </div>
+      
+      <p>• <strong>递推均值拟合</strong>：算法通过动态增量式均值公式，逐步收敛并计算当前室内/温室环境的准确基底基准值。</p>
+      <p style="margin-top: 10px;">• <strong>状态控制指示</strong>：学习期间，LED3 指示灯保持常亮，开发板 LED2 呼吸灯自动激活进入 TIM2 PWM 呼吸过渡模式，交互清晰。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="learning-panel delay-2">
+      <div class="state-badge" id="learningState">LEARNING IN PROGRESS...</div>
+      
+      <div>
+        <div class="large-value"><span id="tempValue">22.0</span>°C</div>
+        <div style="font-size: 14px; color: var(--text-muted); font-weight: bold; margin-top: 4px;">当前拟合环境基准值 (Baseline Mean)</div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar" id="learningProgress"></div>
+      </div>
+      
+      <div class="stat-row">
+        <span>采样点收敛进度: <strong style="color: var(--text-primary);" id="sampleCount">0</strong> / 100</span>
+        <span>学习精度: <strong style="color: var(--brand-secondary);" id="accuracyValue">0%</strong></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">06. AI自适应均值学习</div>
+  <div class="slide-number">Page 7 / 12</div>
+</div>
+
+<script>
+  // Dynamic simulation of the AI Learning phase
+  window.addEventListener('load', () => {
+    const tempValue = document.getElementById('tempValue');
+    const sampleCount = document.getElementById('sampleCount');
+    const accuracyValue = document.getElementById('accuracyValue');
+    const progressBar = document.getElementById('learningProgress');
+    const stateBadge = document.getElementById('learningState');
+    
+    setTimeout(() => {
+      // Trigger CSS Transition for Progress Bar
+      progressBar.style.width = '100%';
+      
+      // Animate Numbers
+      let sample = 0;
+      let temp = 22.0;
+      const targetTemp = 25.4;
+      
+      const interval = setInterval(() => {
+        sample += 1;
+        temp += (targetTemp - temp) * (1 / (101 - sample));
+        
+        tempValue.innerText = temp.toFixed(1);
+        sampleCount.innerText = sample;
+        accuracyValue.innerText = sample + '%';
+        
+        if (sample >= 100) {
+          clearInterval(interval);
+          stateBadge.innerText = "BASELINE LOCKED";
+          stateBadge.style.background = "#D1FAE5";
+          stateBadge.style.color = "#059669";
+          stateBadge.style.borderColor = "#A7F3D0";
+          stateBadge.style.animation = "none";
+        }
+      }, 30); // Quick animation
+    }, 800);
+  });
+</script>
+
+</body>
+</html>

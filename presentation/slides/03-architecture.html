@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>03 系统总体架构 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    gap: 40px;
+  }
+  .arch-list {
+    margin-top: 24px;
+  }
+  .arch-item {
+    margin-bottom: 20px;
+  }
+  .arch-item h3 {
+    font-size: 20px;
+    font-weight: 800;
+    margin-bottom: 6px;
+    color: var(--brand-primary);
+  }
+  .arch-item p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .stack-container {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 20px;
+    width: 380px;
+    z-index: 10;
+  }
+  .stack-layer {
+    padding: 16px 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    box-shadow: var(--glass-shadow);
+    text-align: center;
+    font-weight: bold;
+    color: var(--text-primary);
+    font-size: 18px;
+    transition: all 0.3s ease;
+  }
+  .stack-layer:hover {
+    transform: scale(1.05) translateX(10px);
+    border-color: var(--brand-secondary);
+    color: var(--brand-secondary);
+  }
+  .layer-app { border-left: 5px solid #A78BFA; }
+  .layer-algo { border-left: 5px solid #8B5CF6; }
+  .layer-driver { border-left: 5px solid #06B6D4; }
+  .layer-hw { border-left: 5px solid #0EA5E9; }
+
+  /* Particle Flow Pipeline */
+  .flow-pipe {
+    position: relative;
+    width: 40px;
+    height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .pipe-line {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    background: rgba(226, 232, 240, 0.8);
+    border-radius: 2px;
+    z-index: 1;
+  }
+  .pipe-line-glow {
+    position: absolute;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to top, var(--brand-secondary), var(--brand-primary));
+    border-radius: 2px;
+    opacity: 0.2;
+    z-index: 2;
+  }
+  .particle {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: var(--brand-secondary);
+    border-radius: 99px;
+    box-shadow: 0 0 10px var(--brand-secondary), 0 0 20px var(--brand-secondary);
+    z-index: 3;
+    animation: flowUp 2.5s infinite linear;
+  }
+  .particle-2 {
+    animation-delay: 1.25s;
+  }
+
+  @keyframes flowUp {
+    0% {
+      bottom: 0px;
+      opacity: 0;
+      transform: scale(0.6);
+      background: var(--brand-secondary);
+      box-shadow: 0 0 8px var(--brand-secondary);
+    }
+    15% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    50% {
+      background: var(--brand-primary);
+      box-shadow: 0 0 12px var(--brand-primary);
+    }
+    85% {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    100% {
+      bottom: 380px;
+      opacity: 0;
+      transform: scale(0.6);
+      background: var(--brand-primary);
+      box-shadow: 0 0 8px var(--brand-primary);
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">系统模块化分层设计</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">系统总体<span class="highlight-gradient">分层架构</span></h1>
+    <p class="slide-subtitle">Modular Layered Architecture</p>
+    
+    <div class="arch-list">
+      <div class="arch-item">
+        <h3>应用控制层 (Application Layer)</h3>
+        <p>运行核心状态控制机，管理多页触摸图形界面调度、时钟/异常日志记录，并提供飞鸟小游戏娱乐后台。</p>
+      </div>
+      <div class="arch-item">
+        <h3>算法与逻辑层 (Algorithm Layer)</h3>
+        <p>数据去噪平滑（EMA）与 AI 统计均值学习算法，实现环境温度基线自学习，自适应确定监测报警阈值。</p>
+      </div>
+      <div class="arch-item">
+        <h3>外设与接口驱动层 (Driver Layer)</h3>
+        <p>软模拟 I2C、ST7796S SPI 屏幕驱动、位带高速 XPT2046 触摸屏驱动、呼吸灯 TIM2 CH1 PWM 配置。</p>
+      </div>
+      <div class="arch-item">
+        <h3>硬件基础层 (Hardware Layer)</h3>
+        <p>基于 STM32F103 最小系统板，外接 AHT20 温湿度、BMP280 温度气压、液晶显示屏、按键、LED 指示灯。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="flow-pipe">
+      <div class="pipe-line"></div>
+      <div class="pipe-line-glow"></div>
+      <div class="particle"></div>
+      <div class="particle-2"></div>
+    </div>
+    
+    <div class="stack-container">
+      <div class="stack-layer layer-hw delay-1">硬件层 (Hardware Layer)</div>
+      <div class="stack-layer layer-driver delay-2">驱动层 (Driver Layer)</div>
+      <div class="stack-layer layer-algo delay-3">算法层 (Algorithm Layer)</div>
+      <div class="stack-layer layer-app delay-4">应用层 (Application Layer)</div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">02. 系统总体架构</div>
+  <div class="slide-number">Page 3 / 12</div>
+</div>
+
+</body>
+</html>

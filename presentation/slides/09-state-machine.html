@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>09 系统主状态机 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1.1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+  
+  /* State Machine Graph */
+  .fsm-container {
+    position: relative;
+    width: 540px;
+    height: 480px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+  }
+  
+  .fsm-node {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    border-radius: 99px;
+    background: #fff;
+    border: 2px solid #E2E8F0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 800;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    z-index: 5;
+    transition: all 0.5s ease;
+    text-align: center;
+    padding: 10px;
+  }
+  .fsm-node span {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: normal;
+    margin-top: 4px;
+  }
+  
+  /* Positions */
+  .node-init { top: 40px; left: 215px; }
+  .node-learn { top: 180px; left: 215px; }
+  .node-normal { top: 320px; left: 80px; }
+  .node-anomaly { top: 320px; left: 350px; }
+  
+  /* Active states style */
+  .node-active {
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+    transform: scale(1.1);
+  }
+  .node-active-anomaly {
+    border-color: var(--alert-red) !important;
+    box-shadow: 0 0 25px rgba(239, 68, 68, 0.5) !important;
+    transform: scale(1.1);
+  }
+  
+  /* Connector Arrows */
+  .arrow-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .arrow-line {
+    stroke: #CBD5E1;
+    stroke-width: 2px;
+    fill: none;
+    marker-end: url(#arrow);
+    transition: stroke 0.5s ease, stroke-width 0.5s ease;
+  }
+  .arrow-active {
+    stroke: var(--brand-secondary);
+    stroke-width: 3px;
+  }
+  .arrow-active-alert {
+    stroke: var(--alert-red);
+    stroke-width: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">系统核心运行逻辑调度</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">系统核心<span class="highlight-gradient">主状态机</span></h1>
+    <p class="slide-subtitle">System Main Finite State Machine (FSM)</p>
+    
+    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px;">
+      <p>• <strong>INIT (初始化)</strong>：系统上电复位，校验 I2C 传感器与屏驱动，成功后自动跳转进入学习期。</p>
+      <p>• <strong>LEARNING (基准学习)</strong>：采样前 100 次，拟合环境稳定均值 &mu;<sub>base</sub>。LED3 常亮，LED2 呈 PWM 缓速呼吸状态。</p>
+      <p>• <strong>MONITOR NORMAL (正常监测)</strong>：锁定基准后周期监测。若偏差 &Delta;T &le; 5°C，系统处于安全态。LED4 常亮，LED2 PWM 呼吸。</p>
+      <p>• <strong>MONITOR ANOMALY (异常告警)</strong>：若温湿度异常突变（&Delta;T &gt; 5°C）或传感器断线，关闭呼吸灯，PC13 与 LED3/LED4 进入 5Hz 急促爆闪报警模式。按 KEY2 键消音复位。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="fsm-container delay-2">
+      <!-- Arrows SVG -->
+      <svg class="arrow-svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#CBD5E1" id="arrowPath" />
+          </marker>
+        </defs>
+        
+        <!-- Init -> Learning -->
+        <path id="arrow1" class="arrow-line" d="M 270,150 L 270,178" />
+        
+        <!-- Learning -> Normal -->
+        <path id="arrow2" class="arrow-line" d="M 230,285 L 170,320" />
+        
+        <!-- Normal -> Anomaly -->
+        <path id="arrow3" class="arrow-line" d="M 190,360 L 345,360" />
+        
+        <!-- Anomaly -> Normal (KEY2 Press) -->
+        <path id="arrow4" class="arrow-line" d="M 350,380 L 190,380" />
+        
+        <!-- Anomaly -> Learning (Re-learn command) -->
+        <path id="arrow5" class="arrow-line" d="M 360,320 L 295,275" />
+      </svg>
+      
+      <!-- Nodes -->
+      <div id="nodeInit" class="fsm-node node-init">INIT<span>上电初始化</span></div>
+      <div id="nodeLearn" class="fsm-node node-learn">LEARNING<span>自学习 (150s)</span></div>
+      <div id="nodeNormal" class="fsm-node node-normal">NORMAL<span>正常监测</span></div>
+      <div id="nodeAnomaly" class="fsm-node node-anomaly">ANOMALY<span>异常告警闪烁</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">08. 系统主状态机</div>
+  <div class="slide-number">Page 9 / 12</div>
+</div>
+
+<script>
+  window.addEventListener('load', () => {
+    const nodes = {
+      init: document.getElementById('nodeInit'),
+      learn: document.getElementById('nodeLearn'),
+      normal: document.getElementById('nodeNormal'),
+      anomaly: document.getElementById('nodeAnomaly')
+    };
+    
+    const arrows = {
+      1: document.getElementById('arrow1'),
+      2: document.getElementById('arrow2'),
+      3: document.getElementById('arrow3'),
+      4: document.getElementById('arrow4'),
+      5: document.getElementById('arrow5')
+    };
+    
+    // Cycle active state automatically to demonstrate transitions
+    let step = 0;
+    
+    function resetFSM() {
+      Object.values(nodes).forEach(n => n.className = n.className.replace(' node-active', '').replace(' node-active-anomaly', ''));
+      Object.values(arrows).forEach(a => a.className.baseVal = 'arrow-line');
+    }
+    
+    function transition() {
+      resetFSM();
+      if (step === 0) {
+        nodes.init.className += ' node-active';
+        arrows[1].className.baseVal = 'arrow-line arrow-active';
+      } else if (step === 1) {
+        nodes.learn.className += ' node-active';
+        arrows[2].className.baseVal = 'arrow-line arrow-active';
+      } else if (step === 2) {
+        nodes.normal.className += ' node-active';
+        arrows[3].className.baseVal = 'arrow-line arrow-active-alert';
+      } else if (step === 3) {
+        nodes.anomaly.className += ' node-active-anomaly';
+        arrows[4].className.baseVal = 'arrow-line arrow-active';
+      }
+      
+      step = (step + 1) % 4;
+    }
+    
+    transition();
+    setInterval(transition, 2500);
+  });
+</script>
+
+</body>
+</html>

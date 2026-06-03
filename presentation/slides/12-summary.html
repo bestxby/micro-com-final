@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>12 总结与展望 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  .summary-list {
+    list-style: none;
+    margin-top: 16px;
+  }
+  .summary-list li {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    position: relative;
+    padding-left: 28px;
+  }
+  .summary-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--brand-secondary);
+    font-weight: bold;
+    font-size: 18px;
+  }
+  
+  .outlook-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--glass-shadow);
+  }
+  .outlook-card h4 {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    margin-bottom: 6px;
+  }
+  .outlook-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+  
+  .thanks-box {
+    margin-top: 24px;
+    padding: 24px;
+    background: var(--brand-gradient);
+    border-radius: 16px;
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+  }
+  .thanks-box h3 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">环境温度监测系统综合设计</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">设计总结与<span class="highlight-gradient">创新亮点</span></h1>
+    <p class="slide-subtitle">Project Highlights & Key Contributions</p>
+    
+    <ul class="summary-list">
+      <li><strong>软硬件协同集成度高</strong>：打通模拟 I2C、ST7796S LCD 屏及触控 XPT2046 位带 SPI 底层时序，实现稳定可靠的多点人机手势交互。</li>
+      <li><strong>轻量级片上 AI 算法</strong>：以极少的代码行在 STM32F103 片上跑通 EMA 数据平滑与增量均值自适应学习，解决了硬性静态警报阈值误报痛点。</li>
+      <li><strong>Dirty Rects 局部重绘</strong>：实现了高效的 Flappy Bird 小游戏像素刷新引擎，突破慢速 SPI 屏幕总线画屏延迟瓶颈，实现 30+ FPS 无闪烁运行。</li>
+      <li><strong>故障自愈与高容错性</strong>：设计了 I2C 总线传感器热插拔实时检测与通信重连程序，保证了异常或物理断线后系统 1.5s 内自重构恢复。</li>
+    </ul>
+  </div>
+
+  <div class="right-col">
+    <div class="outlook-card delay-2">
+      <h4>未来展望 1：CAN / RS485 多节点网络组网</h4>
+      <p>将单节点测温拓宽至分布式，使用 CAN 总线连接多室外测温副板，系统主机进行多点环境均值校准及融合决策。</p>
+    </div>
+    
+    <div class="outlook-card delay-3">
+      <h4>未来展望 2：TinyML 片上机器学习升级</h4>
+      <p>在 STM32 芯片上移植运行更复杂的轻量级决策树或片上神经网络，预测多参数空气湿度/温度异常趋势。</p>
+    </div>
+    
+    <div class="outlook-card delay-4">
+      <h4>未来展望 3：低功耗睡眠监测与 RTC 唤醒</h4>
+      <p>引入 STM32 Stop/Standby 低功耗休眠机制，由内部 RTC 定时唤醒传感器采集，降低整体平均工作功耗，实现干电池长期供电。</p>
+    </div>
+    
+    <div class="thanks-box delay-5">
+      <h3>谢谢观看，请老师批评指正！</h3>
+      <div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">THANK YOU FOR WATCHING</div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">11. 总结与展望</div>
+  <div class="slide-number">Page 12 / 12</div>
+</div>
+
+</body>
+</html>
