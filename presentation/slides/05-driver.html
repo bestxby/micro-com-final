@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>05 底层驱动与模拟I2C - 期末汇报</title>
+<title>05 I²C协议栈设计与多传感器总线驱动 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css">
 <style>
   .left-col {
@@ -117,17 +117,17 @@
     <div class="logo-icon"></div>
     <div class="logo-text">MCU & Embedded System</div>
   </div>
-  <div class="slide-meta">底层 I2C 外设驱动设计</div>
+  <div class="slide-meta">模拟 I²C 串行通信时序与驱动</div>
 </div>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="left-col">
-    <h1 class="slide-title">模拟 I2C 与<span class="highlight-gradient">多传感器驱动</span></h1>
-    <p class="slide-subtitle">Software I2C & Multi-Sensor Interface</p>
+    <h1 class="slide-title">I²C协议栈设计与<span class="highlight-gradient">多传感器总线驱动</span></h1>
+    <p class="slide-subtitle">I²C Protocol Stack & Multi-Sensor Bus Driver</p>
     
     <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;">
-      <p>• <strong>GPIO 模拟开漏时序</strong>：规避 STM32F1xx 硬件 I2C 著名的 `BUSY` 标志硬件死锁 Bug。模拟开漏输出便于在总线异常挂死（SDA 被从机拉低）时，由主机自动发送 9 个 SCL 脉冲强行复位释放总线。</p>
-      <p style="margin-top: 10px;">• <strong>一总线双节点采集</strong>：在 <span class="formula">PB6 (SCL)</span> 与 <span class="formula">PB7 (SDA)</span> 组成的模拟总线上并联 AHT20 与 BMP280 传感器，通过独立 I2C 设备地址轮询，兼顾引脚利用率与稳定度。</p>
+      <p>• <strong>GPIO 模拟开漏时序</strong>：避开 STM32F103 硬件 I²C 控制器在多主/复杂状态下极易发生的 <span class="formula">BUSY</span> 标志死锁硬件缺陷。基于软件模拟开漏输出，在发生从机拉死 <span class="formula">SDA</span> 的异常挂死状况时，主机可自主输出 <span class="formula">9</span> 个 <span class="formula">SCL</span> 时钟脉冲强行复位从机状态机，实现总线硬件级自愈。</p>
+      <p style="margin-top: 10px;">• <strong>总线级多传感器并联</strong>：于 <span class="formula">PB6 (SCL)</span> 与 <span class="formula">PB7 (SDA)</span> 构建的模拟总线上挂载 AHT20 与 BMP280 感知芯片。通过独特的 <span class="formula">7-bit</span> 物理从机地址进行轮询时分复用寻址，在极简的物理拓扑结构下实现双参数高稳定度并发采集。</p>
     </div>
     
     <div class="code-block delay-2">
@@ -143,14 +143,14 @@
 
   <div class="right-col">
     <div class="timing-card delay-3">
-      <div style="font-size: 14px; font-weight: bold; color: var(--text-primary);">模拟 I2C 驱动波形参考 (SCL & SDA)</div>
+      <div style="font-size: 14px; font-weight: bold; color: var(--text-primary);">I²C 总线模拟物理层通信波形分析</div>
       <img src="../shared/images/i2c_timing.png" alt="I2C Waveform Schematic">
     </div>
     
     <div class="waveform-container delay-4">
       <div class="scan-line"></div>
-      <div class="wave-label label-scl">SCL (CLK)</div>
-      <div class="wave-label label-sda">SDA (DATA)</div>
+      <div class="wave-label label-scl">SCL (Clock)</div>
+      <div class="wave-label label-sda">SDA (Data)</div></div>
       <svg class="wave-svg" viewBox="0 0 600 120" preserveAspectRatio="none">
         <!-- SCL clock line -->
         <path class="wave-path scl-path" d="M 80,35 L 120,35 L 120,15 L 150,15 L 150,35 L 190,35 L 190,15 L 220,15 L 220,35 L 260,35 L 260,15 L 290,15 L 290,35 L 330,35 L 330,15 L 360,15 L 360,35 L 400,35 L 400,15 L 430,15 L 430,35 L 470,35 L 470,15 L 500,15 L 500,35 L 540,35 M 540,35 L 580,35" />
@@ -162,7 +162,7 @@
 </div>
 
 <div class="slide-footer">
-  <div class="section-name">04. 底层驱动与模拟I2C</div>
+  <div class="section-name">04. I²C协议栈设计与多传感器总线驱动</div>
   <div class="slide-number">Page 5 / 12</div>
 </div>
 

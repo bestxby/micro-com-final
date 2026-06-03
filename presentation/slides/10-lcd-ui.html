@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>10 屏幕交互与飞鸟游戏 - 期末汇报</title>
+<title>10 图形液晶人机接口与增量脏矩形渲染优化 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css">
 <style>
   .left-col {
@@ -93,37 +93,37 @@
     <div class="logo-icon"></div>
     <div class="logo-text">MCU & Embedded System</div>
   </div>
-  <div class="slide-meta">480×320 LCD 触屏人机交互</div>
+  <div class="slide-meta">480×320 像素图形显示与高帧率引擎</div>
 </div>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="left-col">
-    <h1 class="slide-title">图形交互与<span class="highlight-gradient">Flappy Bird 游戏</span></h1>
-    <p class="slide-subtitle">LCD Screen UI Pages & Flappy Bird Pixel Engine</p>
+    <h1 class="slide-title">图形人机接口与<span class="highlight-gradient">增量脏矩形渲染优化</span></h1>
+    <p class="slide-subtitle">TFT-LCD Graphical Interface & Incremental Dirty Rects Optimization</p>
     
     <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>手势划屏翻页</strong>：基于 XPT2046 电阻式触屏控制器与 Cortex-M3 位带读写 SPI 时序，支持高灵敏度左划、右划手势进行多页无缝切换。</p>
+      <p>• <strong>手势滑动页面调度</strong>：利用 XPT2046 电阻式触摸控制器，基于 GPIO 位带（Bit-banding）加速的高速软件 SPI 时序，构建手势识别有限状态机。支持水平方向高灵敏度划屏操作，实现多页面的平滑物理切换。</p>
       
       <div class="layout-grid">
         <div class="layout-item">
-          <h4>Page 0: 环境监测页</h4>
-          <p>Slate 暗灰色两栏布局，一屏展现温湿度、气压、AI 滤波值与在线状态。</p>
+          <h4>Page 0: 环境状态综合监测</h4>
+          <p>采用双栏对称式暗色布局，融合展现温湿度、大气压强、低通滤波估计值及感知网络拓扑状态。</p>
         </div>
         <div class="layout-item">
-          <h4>Page 1: 自适应折线页</h4>
-          <p>左侧显示 AI 均值与偏差，右侧利用 LCD 高速绘制 24 点示波偏差折线图。</p>
+          <h4>Page 1: 时变自适应趋势折线图</h4>
+          <p>左侧区域数字标定基准均值与偏差限度，右侧区域实时渲染包含 <span class="formula">24</span> 个样本点的时域偏差示波曲线。</p>
         </div>
         <div class="layout-item">
-          <h4>Page 2: 霓虹日志页</h4>
-          <p>以精美的垂直时间轴，显示最新 7 条异常日志快照（发生时间/基准/异常值）。</p>
+          <h4>Page 2: 告警历史事件追踪日志</h4>
+          <p>基于垂直时序线拓扑，滚动暂存最新 <span class="formula">7</span> 条温控超限异常事件的特征快照（触发时间/环境基准/瞬态偏差值）。</p>
         </div>
         <div class="layout-item">
-          <h4>Page 3: 飞鸟游戏页</h4>
-          <p>内置经典 Flappy Bird 游戏。轻触屏幕中央区域即可起飞，物理按键与触屏双重操作。</p>
+          <h4>Page 3: 物理与虚拟交互验证（Flappy Bird）</h4>
+          <p>集成经典像素级物理引擎游戏，利用液晶触摸域或物理实体按键发出升力脉冲指令，作为人机通道极值响应速率的辅助验证平台。</p>
         </div>
       </div>
       
-      <p style="margin-top: 16px;">• <strong>增量局部刷新与动态块渲染 (Dirty Rects)</strong>：为攻克串行总线传输 150KB 满屏数据带来的白屏延迟，本设计仅刷新小鸟运动包围盒（<span class="formula">16 &times; 16</span> 像素）与移动管道的边缘变化区（<span class="formula">32 &times; 64</span> 像素）。使单帧 SPI 数据量锐减 **`93%`**，在软件模拟时序下跑出了 <strong class="formula" style="color: var(--brand-primary);">30+</strong> FPS 无闪烁的超顺滑游戏视效。</p>
+      <p style="margin-top: 16px;">• <strong>增量脏矩形渲染机制（Dirty Rects）</strong>：针对串行 SPI 总线带宽瓶颈（若全屏刷新 <span class="formula">480 &times; 320 &times; 16-bit</span> 像素需单帧传输约 <span class="formula">300KB</span> 负荷而导致白屏闪烁的缺陷），本系统独创了增量脏矩形更新算法。仅对动态像素包围盒（如小鸟运动域 <span class="formula">16 &times; 16</span> 像素、滑动管道边界 <span class="formula">32 &times; 64</span> 像素）实施局部刷新。该优化将单帧通信负荷锐减 <strong><span class="formula">93%</span></strong>，促使在软件模拟 SPI 时序下的画面渲染速率稳定在 <span class="formula">30</span> FPS 以上，彻底消除了视觉刷新闪烁。</p>
     </div>
   </div>
 
@@ -147,15 +147,14 @@
         <img src="../shared/images/touch_spi.png" alt="XPT2046 SPI Touch Connections">
       </div>
       <div style="flex: 1; font-size: 13px; color: var(--text-muted); font-weight: 600; line-height: 1.4;">
-        图 10.1：实验指导书中 XPT2046 触屏控制器引脚接口参考图。<br>
-        右侧视频区域在您放入实际视频后会自动播放。
+        图 10.1：电阻式触摸控制器 XPT2046 总线引脚约束与硬件演示视频
       </div>
     </div>
   </div>
 </div>
 
 <div class="slide-footer">
-  <div class="section-name">09. 屏幕交互与飞鸟游戏</div>
+  <div class="section-name">09. 图形液晶人机接口与增量脏矩形渲染优化</div>
   <div class="slide-number">Page 10 / 12</div>
 </div>
 

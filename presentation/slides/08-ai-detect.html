@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>08 AI监测与异常判定 - 期末汇报</title>
+<title>08 统计决策边界与自适应异常判定 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css">
 <style>
   .left-col {
@@ -143,30 +143,30 @@
     <div class="logo-icon"></div>
     <div class="logo-text">MCU & Embedded System</div>
   </div>
-  <div class="slide-meta">自适应智能异常监测机制</div>
+  <div class="slide-meta">基于统计推断的温度突变检测模型</div>
 </div>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="left-col">
-    <h1 class="slide-title">AI 智能监测与<span class="highlight-gradient">异常判定</span></h1>
-    <p class="slide-subtitle">Threshold Model & Anomaly Detection Decision</p>
+    <h1 class="slide-title">统计决策边界与<span class="highlight-gradient">自适应异常判定</span></h1>
+    <p class="slide-subtitle">Statistical Decision Boundary & Adaptive Anomaly Detection</p>
     
     <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>差值决策模型</strong>：系统锁定均值基准 <span class="formula">&mu;<sub>base</sub></span> 后，进入高频监测模式。读取当前平滑滤波温度 <span class="formula">T<sub>f</sub></span>，并计算绝对偏差：</p>
+      <p>• <strong>绝对偏差评估模型</strong>：系统锁定均值基准量 <span class="formula">&mu;<sub>base</sub></span> 后，无缝转入实时监测模态。连续读取当前低通滤波温度 <span class="formula">T<sub>f</sub></span> 并解算其实时绝对温差偏离度：</p>
       <p style="margin: 12px 0 12px 30px; font-weight: bold; color: var(--brand-primary); font-size: 26px;"><span class="formula">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</span></p>
       
-      <p>• <strong>判定边界</strong>：</p>
+      <p>• <strong>置信度决策准则</strong>：</p>
       <p style="margin-left: 20px; line-height: 2.0; font-size: 19px;">
-        - 若 <strong style="color: #059669;" class="formula">&Delta;T &le; 5°C</strong>：系统处于 <strong style="color: #059669;">正常运行状态 (NORMAL)</strong>。<br>
-        - 若 <strong style="color: #DC2626;" class="formula">&Delta;T &gt; 5°C</strong>：系统判定为 <strong style="color: #DC2626;">温度发生异常突变 (ANOMALY)</strong>。
+        - 若 <strong style="color: #059669;" class="formula">&Delta;T &le; 5°C</strong>：判定系统处于 <strong style="color: #059669;">正常温控稳态 (NORMAL)</strong>。<br>
+        - 若 <strong style="color: #DC2626;" class="formula">&Delta;T &gt; 5°C</strong>：判定系统触发 <strong style="color: #DC2626;">环境温度瞬态异常突变 (ANOMALY)</strong>。
       </p>
-      <p style="margin-top: 16px;">• <strong>阈值科学来源</strong>：偏离值 <span class="formula">5°C</span> 的阈值设定是依据基准学习期实时采集测算出的样本标准差 <span class="formula">&sigma;</span>，采用统计学三倍标准差法则（即 <span class="formula">3&sigma; &asymp; 5°C</span>）计算所得。这保证了在纯噪声波动中系统具备高达 <span class="formula">99.73%</span> 的防误报置信度。</p>
+      <p style="margin-top: 16px;">• <strong>阈值参数的数理学术来源</strong>：突变偏差门限值设定为 <span class="formula">5°C</span> 并非经验值，而是基于系统在基准学习期间实时解算出的温度总体标准差估计量 <span class="formula">&sigma;</span>。根据统计学中的 <span class="formula">3&sigma;</span>（三倍标准差）概率边界准则（即 <span class="formula">3&sigma; &asymp; 5°C</span>），当温度波动由高频随机白噪声主导时，该边界能够提供高达 <span class="formula">99.73%</span> 的防误判置信水平，从而确保系统决策的统计严密性。</p>
     </div>
   </div>
 
   <div class="right-col">
     <div class="detect-card delay-2">
-      <div class="alert-banner banner-normal" id="statusBanner">SYSTEM STATE: NORMAL</div>
+      <div class="alert-banner banner-normal" id="statusBanner">DETECTION STATUS: NORMAL</div>
       
       <div class="gauge-container">
         <div class="gauge-bar">
@@ -184,15 +184,15 @@
       </div>
       
       <div style="display: flex; justify-content: space-between; font-size: 16px; color: var(--text-muted); font-weight: bold;">
-        <span>偏差值 <span class="formula">&Delta;T</span>: <strong id="devVal" style="color: var(--text-primary);" class="formula">0.0</strong> °C</span>
-        <span>实时判定: <strong id="decisionText" style="color: #059669;">正常</strong></span>
+        <span>实时绝对偏差 <span class="formula">&Delta;T</span>: <strong id="devVal" style="color: var(--text-primary);" class="formula">0.0</strong> °C</span>
+        <span>决策推断: <strong id="decisionText" style="color: #059669;">正常 (稳态)</strong></span>
       </div>
     </div>
   </div>
 </div>
 
 <div class="slide-footer">
-  <div class="section-name">07. AI监测与异常判定</div>
+  <div class="section-name">07. 统计决策边界与自适应异常判定</div>
   <div class="slide-number">Page 8 / 12</div>
 </div>
 
@@ -221,9 +221,8 @@
         
         if (currentDev > 5.0) {
           // Switch to Anomaly styling
-          banner.className = 'alert-banner banner-anomaly';
-          banner.innerText = 'SYSTEM STATE: ANOMALY DETECTED';
-          decisionText.innerText = '异常突变';
+          banner.innerText = 'DETECTION STATUS: ANOMALY TRIGGERED';
+          decisionText.innerText = '异常 (瞬态突变)';
           decisionText.style.color = '#DC2626';
         }
         

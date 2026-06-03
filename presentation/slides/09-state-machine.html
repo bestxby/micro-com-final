@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>09 系统主状态机 - 期末汇报</title>
+<title>09 有限状态机(FSM)控制状态转移逻辑 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css">
 <style>
   .left-col {
@@ -124,19 +124,19 @@
     <div class="logo-icon"></div>
     <div class="logo-text">MCU & Embedded System</div>
   </div>
-  <div class="slide-meta">系统核心运行逻辑调度</div>
+  <div class="slide-meta">系统核心控制模态转移逻辑</div>
 </div>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="left-col">
-    <h1 class="slide-title">系统核心<span class="highlight-gradient">主状态机</span></h1>
-    <p class="slide-subtitle">System Main Finite State Machine (FSM)</p>
+    <h1 class="slide-title">有限状态机控制<span class="highlight-gradient">状态转移逻辑</span></h1>
+    <p class="slide-subtitle">Finite State Machine (FSM) Control State Transitions</p>
     
     <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px; margin-top: 24px;">
-      <p style="margin-bottom: 8px;">• <strong>INIT (初始化)</strong>：系统上电复位，校验 I2C 传感器与屏驱动，成功后自动跳转进入学习期。</p>
-      <p style="margin-bottom: 8px;">• <strong>LEARNING (基准学习)</strong>：采样前 <span class="formula">100</span> 次，递推拟合环境均值基底 <span class="formula">&mu;<sub>base</sub></span>。LED3 常亮，LED2 呈 PWM 缓速呼吸。</p>
-      <p style="margin-bottom: 8px;">• <strong>MONITOR NORMAL (正常监测)</strong>：锁定基准周期采样。若偏差 <span class="formula">&Delta;T &le; 5°C</span>，系统安全。LED4 常亮，LED2 呼吸。</p>
-      <p>• <strong>MONITOR ANOMALY (异常告警)</strong>：若温度突变（<span class="formula">&Delta;T &gt; 5°C</span>）或传感器掉线，关闭呼吸灯，PC13 告警 LED 与 LED3/LED4 开启 <span class="formula">5Hz</span> 高频爆闪报警。按 KEY2 键消音复位。</p>
+      <p style="margin-bottom: 8px;">• <strong>INIT (系统上电初始化)</strong>：系统硬复位启动，执行外部总线硬件自检（I²C 寻址校验与 ST7796S 控制器握手）。若校验无误，系统程序控制链自动跃迁至自适应学习阶段。</p>
+      <p style="margin-bottom: 8px;">• <strong>LEARNING (基准演化学习)</strong>：执行前 <span class="formula">100</span> 次温度数据帧的连续采样，通过增量递推滤波器求解环境温度基底均值估计量 <span class="formula">&mu;<sub>base</sub></span>。此时物理层控制 LED3 指示灯保持高电平常亮，LED2 激活 PWM 硬件通道输出正弦呼吸特征波形。</p>
+      <p style="margin-bottom: 8px;">• <strong>MONITOR NORMAL (稳态温度监测)</strong>：基准锁存后，系统进入实时监视轮询。在此状态下，若运算出的绝对温差偏差值满足条件 <span class="formula">&Delta;T &le; 5°C</span>，表明受测物理场处于安全域。此时，LED4 保持常亮以表征稳态，LED2 延续 PWM 低频呼吸指示。</p>
+      <p style="margin-top: 8px;">• <strong>MONITOR ANOMALY (瞬态异常告警)</strong>：当绝对偏差超越安全边界 <span class="formula">&Delta;T &gt; 5°C</span>，或判定传感器发生物理链路丢失（I²C 寻址超时无应答）时，系统立刻关断 PWM 呼吸灯输出，并控制 PC13 GPIO 管脚连同指示灯 LED3 与 LED4 以 <span class="formula">5Hz</span> 的周期性频率高频爆闪进行物理警示。通过检测 KEY2 GPIO 外部中断信号可实现人工报警复位。</p>
     </div>
   </div>
 
@@ -173,16 +173,16 @@
       </svg>
       
       <!-- Nodes -->
-      <div id="nodeInit" class="fsm-node node-init">INIT<span>上电初始化</span></div>
-      <div id="nodeLearn" class="fsm-node node-learn">LEARNING<span>自学习 (150s)</span></div>
-      <div id="nodeNormal" class="fsm-node node-normal">NORMAL<span>正常监测</span></div>
-      <div id="nodeAnomaly" class="fsm-node node-anomaly">ANOMALY<span>异常告警闪烁</span></div>
+      <div id="nodeInit" class="fsm-node node-init">INIT<span>硬件自检初始化</span></div>
+      <div id="nodeLearn" class="fsm-node node-learn">LEARNING<span>基准演化学习 (150s)</span></div>
+      <div id="nodeNormal" class="fsm-node node-normal">NORMAL<span>稳态监测模式</span></div>
+      <div id="nodeAnomaly" class="fsm-node node-anomaly">ANOMALY<span>瞬态异常爆闪</span></div>
     </div>
   </div>
 </div>
 
 <div class="slide-footer">
-  <div class="section-name">08. 系统主状态机</div>
+  <div class="section-name">08. 有限状态机(FSM)控制状态转移逻辑</div>
   <div class="slide-number">Page 9 / 12</div>
 </div>
 
