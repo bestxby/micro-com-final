@@ -9,27 +9,30 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-top: 40px;
   }
   
   .detect-card {
     width: 100%;
-    max-width: 500px;
+    max-width: 600px; /* Expanded width */
+    height: 600px; /* Grander height */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 36px;
+    padding: 48px;
     box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    justify-content: space-between; /* Spaced out layout */
     position: relative;
   }
   
@@ -149,15 +152,15 @@
     <p class="slide-subtitle">Threshold Model & Anomaly Detection Decision</p>
     
     <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>差值决策模型</strong>：系统锁定均值基准 &mu;<sub>base</sub> 后，进入高频监测模式。读取当前平滑滤波温度 T<sub>f</sub>，并计算绝对偏差：</p>
-      <p style="margin: 12px 0 12px 30px; font-weight: bold; color: var(--brand-primary); font-size: 20px;">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</p>
+      <p>• <strong>差值决策模型</strong>：系统锁定均值基准 <span class="formula">&mu;<sub>base</sub></span> 后，进入高频监测模式。读取当前平滑滤波温度 <span class="formula">T<sub>f</sub></span>，并计算绝对偏差：</p>
+      <p style="margin: 12px 0 12px 30px; font-weight: bold; color: var(--brand-primary); font-size: 24px;"><span class="formula">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</span></p>
       
       <p>• <strong>判定边界</strong>：</p>
-      <p style="margin-left: 20px; line-height: 1.8;">
-        - 若 <strong style="color: #059669;">&Delta;T &le; 5°C</strong>：系统处于 <strong style="color: #059669;">正常运行状态 (NORMAL)</strong>。<br>
-        - 若 <strong style="color: #DC2626;">&Delta;T &gt; 5°C</strong>：系统判定为 <strong style="color: #DC2626;">温度发生异常突变 (ANOMALY)</strong>。
+      <p style="margin-left: 20px; line-height: 2.0; font-size: 16px;">
+        - 若 <strong style="color: #059669;" class="formula">&Delta;T &le; 5°C</strong>：系统处于 <strong style="color: #059669;">正常运行状态 (NORMAL)</strong>。<br>
+        - 若 <strong style="color: #DC2626;" class="formula">&Delta;T &gt; 5°C</strong>：系统判定为 <strong style="color: #DC2626;">温度发生异常突变 (ANOMALY)</strong>。
       </p>
-      <p style="margin-top: 12px;">• <strong>高鲁棒性</strong>：基准值自学习保证了系统在不同季节上电时有合理的警报浮动区间，克服了传统固定阈值在环境渐变导致的频繁误报。</p>
+      <p style="margin-top: 16px;">• <strong>高鲁棒性</strong>：基准值自学习保证了系统在不同季节上电时有合理的警报浮动区间，克服了传统固定阈值在环境渐变导致的频繁误报。</p>
     </div>
   </div>
 
@@ -171,17 +174,17 @@
           <div class="normal-zone"></div>
           <div class="anomaly-zone-right"></div>
         </div>
-        <div class="gauge-pointer" id="gaugePointer" style="left: 50%;">T<sub>f</sub></div>
+        <div class="gauge-pointer formula" id="gaugePointer" style="left: 50%;">T<sub>f</sub></div>
       </div>
       
-      <div class="gauge-labels">
-        <span>&Delta;T &gt; 5°C (异常)</span>
-        <span>&mu;<sub>base</sub> (基准)</span>
-        <span>&Delta;T &gt; 5°C (异常)</span>
+      <div class="gauge-labels formula" style="font-size: 13px;">
+        <span>&Delta;T &gt; 5°C</span>
+        <span>&mu;<sub>base</sub></span>
+        <span>&Delta;T &gt; 5°C</span>
       </div>
       
-      <div style="display: flex; justify-content: space-between; font-size: 14px; color: var(--text-muted); font-weight: bold;">
-        <span>偏差值: <strong id="devVal" style="color: var(--text-primary);">0.0</strong> °C</span>
+      <div style="display: flex; justify-content: space-between; font-size: 16px; color: var(--text-muted); font-weight: bold;">
+        <span>偏差值 <span class="formula">&Delta;T</span>: <strong id="devVal" style="color: var(--text-primary);" class="formula">0.0</strong> °C</span>
         <span>实时判定: <strong id="decisionText" style="color: #059669;">正常</strong></span>
       </div>
     </div>

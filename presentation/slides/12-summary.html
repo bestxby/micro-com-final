@@ -9,27 +9,29 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 20px;
+    justify-content: flex-start;
+    gap: 24px;
+    padding-top: 40px;
   }
   
   .summary-list {
     list-style: none;
-    margin-top: 16px;
+    margin-top: 32px; /* Increased margin */
   }
   .summary-list li {
-    font-size: 16px;
-    line-height: 1.6;
+    font-size: 18px; /* Larger font size */
+    line-height: 1.8;
     color: var(--text-secondary);
-    margin-bottom: 16px;
+    margin-bottom: 24px; /* More spacing */
     position: relative;
-    padding-left: 28px;
+    padding-left: 32px;
   }
   .summary-list li::before {
     content: "✓";
@@ -37,39 +39,39 @@
     left: 0;
     color: var(--brand-secondary);
     font-weight: bold;
-    font-size: 18px;
+    font-size: 20px;
   }
   
   .outlook-card {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 20px 24px; /* Increased padding */
     box-shadow: var(--glass-shadow);
   }
   .outlook-card h4 {
-    font-size: 16px;
+    font-size: 18px; /* Larger title */
     font-weight: 800;
     color: var(--brand-primary);
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .outlook-card p {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.5;
   }
   
   .thanks-box {
-    margin-top: 24px;
-    padding: 24px;
+    margin-top: 36px; /* Larger margin */
+    padding: 32px; /* Taller padding */
     background: var(--brand-gradient);
     border-radius: 16px;
     color: #fff;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
+    box-shadow: 0 15px 35px rgba(139, 92, 246, 0.25);
   }
   .thanks-box h3 {
-    font-size: 24px;
+    font-size: 28px; /* Grander title */
     font-weight: 800;
     letter-spacing: 0.05em;
   }
@@ -95,8 +97,8 @@
     <ul class="summary-list">
       <li><strong>软硬件协同集成度高</strong>：打通模拟 I2C、ST7796S LCD 屏及触控 XPT2046 位带 SPI 底层时序，实现稳定可靠的多点人机手势交互。</li>
       <li><strong>轻量级片上 AI 算法</strong>：以极少的代码行在 STM32F103 片上跑通 EMA 数据平滑与增量均值自适应学习，解决了硬性静态警报阈值误报痛点。</li>
-      <li><strong>Dirty Rects 局部重绘</strong>：实现了高效的 Flappy Bird 小游戏像素刷新引擎，突破慢速 SPI 屏幕总线画屏延迟瓶颈，实现 30+ FPS 无闪烁运行。</li>
-      <li><strong>故障自愈与高容错性</strong>：设计了 I2C 总线传感器热插拔实时检测与通信重连程序，保证了异常或物理断线后系统 1.5s 内自重构恢复。</li>
+      <li><strong>Dirty Rects 局部重绘</strong>：实现了高效的 Flappy Bird 小游戏像素刷新引擎，突破慢速 SPI 屏幕总线画屏延迟瓶颈，实现 <span class="formula">30+</span> FPS 无闪烁运行。</li>
+      <li><strong>故障自愈与高容错性</strong>：设计了 I2C 总线传感器热插拔实时检测与通信重连程序，保证了异常或物理断线后系统 <span class="formula">1.5s</span> 内自重构恢复。</li>
     </ul>
   </div>
 
@@ -118,7 +120,7 @@
     
     <div class="thanks-box delay-5">
       <h3>谢谢观看，请老师批评指正！</h3>
-      <div style="font-size: 13px; opacity: 0.8; margin-top: 4px;">THANK YOU FOR WATCHING</div>
+      <div style="font-size: 14px; opacity: 0.8; margin-top: 4px;">THANK YOU FOR WATCHING</div>
     </div>
   </div>
 </div>

@@ -9,29 +9,31 @@
     flex: 1.1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 0.9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    padding-top: 40px;
   }
   .mcu-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 16px;
-    background: rgba(255, 255, 255, 0.4);
+    margin-top: 36px; /* Increased margin */
+    background: rgba(255, 255, 255, 0.45);
     border-radius: 12px;
     overflow: hidden;
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    border: 1px solid var(--card-border);
   }
   .mcu-table th, .mcu-table td {
-    padding: 10px 14px;
+    padding: 18px 24px; /* Increased padding */
     text-align: left;
-    font-size: 14px;
+    font-size: 17px; /* Grander font size */
   }
   .mcu-table th {
     background: rgba(139, 92, 246, 0.1);
@@ -50,7 +52,7 @@
   .pin-badge {
     background: #E2E8F0;
     color: #475569;
-    padding: 2px 8px;
+    padding: 4px 10px; /* Larger badge */
     border-radius: 4px;
     font-weight: bold;
     font-family: monospace;
@@ -59,7 +61,7 @@
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 16px;
-    padding: 16px;
+    padding: 20px;
     box-shadow: var(--glass-shadow);
     width: 100%;
     display: flex;
@@ -68,7 +70,7 @@
   }
   .img-card img {
     max-width: 100%;
-    max-height: 480px;
+    max-height: 520px; /* Grander image display */
     border-radius: 8px;
     object-fit: contain;
   }

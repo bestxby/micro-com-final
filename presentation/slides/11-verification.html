@@ -9,42 +9,44 @@
     flex: 0.95;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1.05;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+    padding-top: 40px;
   }
   
   .alarm-card {
     background: rgba(239, 68, 68, 0.05);
     border: 1px dashed rgba(239, 68, 68, 0.3);
     border-radius: 12px;
-    padding: 16px 20px;
-    margin-top: 16px;
+    padding: 20px 24px; /* Increased padding */
+    margin-top: 24px;
   }
   .alarm-card h4 {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 800;
     color: var(--alert-red);
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
   .alarm-card p {
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.5;
   }
   
   .video-card {
     width: 100%;
-    height: 320px;
+    height: 450px; /* Expanded height */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 16px;
@@ -54,11 +56,11 @@
   
   .mini-chart {
     width: 100%;
-    height: 140px;
+    height: 180px; /* Expanded height */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 12px;
-    padding: 12px;
+    padding: 16px 20px;
     box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
@@ -67,9 +69,9 @@
   }
   .chart-svg {
     position: absolute;
-    top: 30px; left: 20px;
+    top: 40px; left: 20px;
     width: calc(100% - 40px);
-    height: calc(100% - 45px);
+    height: calc(100% - 55px);
     overflow: visible;
   }
   .threshold-line {
@@ -106,15 +108,15 @@
     <h1 class="slide-title">效果测试与<span class="highlight-gradient">警报声光联调</span></h1>
     <p class="slide-subtitle">System Verification & Dynamic Alarm Test</p>
     
-    <div style="font-size: 15px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>温控触发实验流程</strong>：上电锁温（基准锁定为 25°C）后，实验现场通过哈气或手部覆盖加热传感器。当监测温度升至 30.1°C 时，偏差 &Delta;T 达到 5.1°C，越过阈值临界点。</p>
+    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary);">
+      <p>• <strong>温控触发实验流程</strong>：上电锁温（基准锁定为 <span class="formula">25°C</span>）后，实验现场通过哈气或手部覆盖加热传感器。当监测温度升至 <span class="formula">30.1°C</span> 时，偏差 <span class="formula">&Delta;T</span> 达到 <span class="formula">5.1°C</span>，越过阈值临界点。</p>
       
       <div class="alarm-card">
-        <h4>🚨 5Hz 强声光报警联动逻辑</h4>
-        <p>TIM2_CH1 呼吸灯直接切断熄灭；PC13 告警 LED 开启 5Hz 高频闪烁；LED3 与 LED4 指示灯开启红蓝警灯交替爆闪模式，同时有源蜂鸣器以高频鸣叫警告。</p>
+        <h4>🚨 <span class="formula">5Hz</span> 强声光报警联动逻辑</h4>
+        <p>TIM2_CH1 呼吸灯直接切断熄灭；PC13 告警 LED 开启 <span class="formula">5Hz</span> 高频闪烁；LED3 与 LED4 指示灯开启红蓝警灯交替爆闪模式，同时有源蜂鸣器以高频鸣叫警告。</p>
       </div>
       
-      <p style="margin-top: 14px;">• <strong>异常快照追加</strong>：系统判定异常瞬间，当前温湿度、气压、均值和时间戳会以增量形式写入 AnomalyLog 环形队列（Ring Buffer），用户翻页至 LCD Page 2 可直接查阅异常日志。</p>
+      <p style="margin-top: 20px;">• <strong>异常快照追加</strong>：系统判定异常瞬间，当前温湿度、气压、均值和时间戳会以增量形式写入 AnomalyLog 环形队列（Ring Buffer），用户翻页至 LCD Page 2 可直接查阅异常日志。</p>
     </div>
   </div>
 
@@ -133,20 +135,20 @@
     </div>
     
     <div class="mini-chart delay-3">
-      <div style="font-size: 12px; font-weight: bold; color: var(--text-primary);">温度突变触发曲线 &Delta;T &gt; 5°C</div>
+      <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">温度突变触发曲线 <span class="formula">&Delta;T &gt; 5°C</span></div>
       <svg class="chart-svg">
         <!-- Lines -->
         <line x1="0" y1="60" x2="100%" y2="60" class="baseline-line" /> <!-- Baseline 25C -->
         <line x1="0" y1="20" x2="100%" y2="20" class="threshold-line" /> <!-- Threshold 30C -->
         
-        <text x="5" y="55" fill="#64748B" font-size="10" font-weight="bold">基准 25.0°C</text>
-        <text x="5" y="15" fill="#EF4444" font-size="10" font-weight="bold">阀值 30.0°C</text>
+        <text x="5" y="52" fill="#64748B" font-size="11" font-weight="bold" class="formula">基准 25.0°C</text>
+        <text x="5" y="12" fill="#EF4444" font-size="11" font-weight="bold" class="formula">阀值 30.0°C</text>
         
         <!-- Temp curve shooting up -->
         <path class="temp-path circuit-line" stroke="url(#cyanPurpleGrad)" 
               d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8" />
         <circle cx="300" cy="15" r="5" fill="#EF4444" class="glowing-node" />
-        <text x="310" y="25" fill="#EF4444" font-size="10" font-weight="bold">异常触发!</text>
+        <text x="310" y="25" fill="#EF4444" font-size="11" font-weight="bold">异常触发!</text>
       </svg>
     </div>
   </div>

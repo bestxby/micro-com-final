@@ -9,21 +9,24 @@
     flex: 0.9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1.1;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
+    padding-top: 40px;
+    height: 100%;
   }
   
   /* State Machine Graph */
   .fsm-container {
     position: relative;
-    width: 540px;
-    height: 480px;
+    width: 640px; /* Expanded width */
+    height: 600px; /* Grander height */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
@@ -57,11 +60,11 @@
     margin-top: 4px;
   }
   
-  /* Positions */
-  .node-init { top: 40px; left: 215px; }
-  .node-learn { top: 180px; left: 215px; }
-  .node-normal { top: 320px; left: 80px; }
-  .node-anomaly { top: 320px; left: 350px; }
+  /* Repositioned Nodes to fit larger container */
+  .node-init { top: 40px; left: 265px; }
+  .node-learn { top: 220px; left: 265px; }
+  .node-normal { top: 420px; left: 80px; }
+  .node-anomaly { top: 420px; left: 450px; }
   
   /* Active states style */
   .node-active {
@@ -84,6 +87,11 @@
     z-index: 2;
     pointer-events: none;
   }
+  @keyframes arrowFlow {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
   .arrow-line {
     stroke: #CBD5E1;
     stroke-width: 2px;
@@ -94,10 +102,16 @@
   .arrow-active {
     stroke: var(--brand-secondary);
     stroke-width: 3px;
+    stroke-dasharray: 8 6;
+    animation: arrowFlow 0.8s linear infinite;
+    marker-end: url(#arrow-active) !important;
   }
   .arrow-active-alert {
     stroke: var(--alert-red);
     stroke-width: 3px;
+    stroke-dasharray: 8 6;
+    animation: arrowFlow 0.8s linear infinite;
+    marker-end: url(#arrow-alert) !important;
   }
 </style>
 </head>
@@ -118,11 +132,11 @@
     <h1 class="slide-title">系统核心<span class="highlight-gradient">主状态机</span></h1>
     <p class="slide-subtitle">System Main Finite State Machine (FSM)</p>
     
-    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px;">
-      <p>• <strong>INIT (初始化)</strong>：系统上电复位，校验 I2C 传感器与屏驱动，成功后自动跳转进入学习期。</p>
-      <p>• <strong>LEARNING (基准学习)</strong>：采样前 100 次，拟合环境稳定均值 &mu;<sub>base</sub>。LED3 常亮，LED2 呈 PWM 缓速呼吸状态。</p>
-      <p>• <strong>MONITOR NORMAL (正常监测)</strong>：锁定基准后周期监测。若偏差 &Delta;T &le; 5°C，系统处于安全态。LED4 常亮，LED2 PWM 呼吸。</p>
-      <p>• <strong>MONITOR ANOMALY (异常告警)</strong>：若温湿度异常突变（&Delta;T &gt; 5°C）或传感器断线，关闭呼吸灯，PC13 与 LED3/LED4 进入 5Hz 急促爆闪报警模式。按 KEY2 键消音复位。</p>
+    <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary); display: flex; flex-direction: column; gap: 14px; margin-top: 24px;">
+      <p style="margin-bottom: 8px;">• <strong>INIT (初始化)</strong>：系统上电复位，校验 I2C 传感器与屏驱动，成功后自动跳转进入学习期。</p>
+      <p style="margin-bottom: 8px;">• <strong>LEARNING (基准学习)</strong>：采样前 <span class="formula">100</span> 次，递推拟合环境均值基底 <span class="formula">&mu;<sub>base</sub></span>。LED3 常亮，LED2 呈 PWM 缓速呼吸。</p>
+      <p style="margin-bottom: 8px;">• <strong>MONITOR NORMAL (正常监测)</strong>：锁定基准周期采样。若偏差 <span class="formula">&Delta;T &le; 5°C</span>，系统安全。LED4 常亮，LED2 呼吸。</p>
+      <p>• <strong>MONITOR ANOMALY (异常告警)</strong>：若温度突变（<span class="formula">&Delta;T &gt; 5°C</span>）或传感器掉线，关闭呼吸灯，PC13 告警 LED 与 LED3/LED4 开启 <span class="formula">5Hz</span> 高频爆闪报警。按 KEY2 键消音复位。</p>
     </div>
   </div>
 
@@ -131,25 +145,31 @@
       <!-- Arrows SVG -->
       <svg class="arrow-svg">
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 0 L 10 5 L 0 10 z" fill="#CBD5E1" id="arrowPath" />
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#CBD5E1" />
+          </marker>
+          <marker id="arrow-active" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#06B6D4" />
+          </marker>
+          <marker id="arrow-alert" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#EF4444" />
           </marker>
         </defs>
         
         <!-- Init -> Learning -->
-        <path id="arrow1" class="arrow-line" d="M 270,150 L 270,178" />
+        <path id="arrow1" class="arrow-line" d="M 320,150 L 320,214" />
         
         <!-- Learning -> Normal -->
-        <path id="arrow2" class="arrow-line" d="M 230,285 L 170,320" />
+        <path id="arrow2" class="arrow-line" d="M 283,315 L 182,410" />
         
         <!-- Normal -> Anomaly -->
-        <path id="arrow3" class="arrow-line" d="M 190,360 L 345,360" />
+        <path id="arrow3" class="arrow-line" d="M 190,465 L 444,465" />
         
         <!-- Anomaly -> Normal (KEY2 Press) -->
-        <path id="arrow4" class="arrow-line" d="M 350,380 L 190,380" />
+        <path id="arrow4" class="arrow-line" d="M 450,485 L 196,485" />
         
         <!-- Anomaly -> Learning (Re-learn command) -->
-        <path id="arrow5" class="arrow-line" d="M 360,320 L 295,275" />
+        <path id="arrow5" class="arrow-line" d="M 468,435 L 357,315" />
       </svg>
       
       <!-- Nodes -->
@@ -183,35 +203,126 @@
       5: document.getElementById('arrow5')
     };
     
-    // Cycle active state automatically to demonstrate transitions
-    let step = 0;
-    
     function resetFSM() {
-      Object.values(nodes).forEach(n => n.className = n.className.replace(' node-active', '').replace(' node-active-anomaly', ''));
-      Object.values(arrows).forEach(a => a.className.baseVal = 'arrow-line');
+      Object.values(nodes).forEach(n => {
+        n.classList.remove('node-active');
+        n.classList.remove('node-active-anomaly');
+      });
+      Object.values(arrows).forEach(a => {
+        a.classList.remove('arrow-active');
+        a.classList.remove('arrow-active-alert');
+      });
     }
     
-    function transition() {
+    const steps = [
+      {
+        name: 'init_active',
+        duration: 1500,
+        action: () => {
+          nodes.init.classList.add('node-active');
+        }
+      },
+      {
+        name: 'init_to_learn',
+        duration: 1000,
+        action: () => {
+          nodes.init.classList.add('node-active');
+          arrows[1].classList.add('arrow-active');
+        }
+      },
+      {
+        name: 'learn_active',
+        duration: 2000,
+        action: () => {
+          nodes.learn.classList.add('node-active');
+        }
+      },
+      {
+        name: 'learn_to_normal',
+        duration: 1000,
+        action: () => {
+          nodes.learn.classList.add('node-active');
+          arrows[2].classList.add('arrow-active');
+        }
+      },
+      {
+        name: 'normal_active',
+        duration: 2000,
+        action: () => {
+          nodes.normal.classList.add('node-active');
+        }
+      },
+      {
+        name: 'normal_to_anomaly',
+        duration: 1000,
+        action: () => {
+          nodes.normal.classList.add('node-active');
+          arrows[3].classList.add('arrow-active-alert');
+        }
+      },
+      {
+        name: 'anomaly_active',
+        duration: 2500,
+        action: () => {
+          nodes.anomaly.classList.add('node-active-anomaly');
+        }
+      },
+      {
+        name: 'anomaly_to_normal',
+        duration: 1200,
+        action: () => {
+          nodes.anomaly.classList.add('node-active-anomaly');
+          arrows[4].classList.add('arrow-active');
+        }
+      },
+      {
+        name: 'normal_active_2',
+        duration: 2000,
+        action: () => {
+          nodes.normal.classList.add('node-active');
+        }
+      },
+      {
+        name: 'normal_to_anomaly_2',
+        duration: 1000,
+        action: () => {
+          nodes.normal.classList.add('node-active');
+          arrows[3].classList.add('arrow-active-alert');
+        }
+      },
+      {
+        name: 'anomaly_active_2',
+        duration: 2000,
+        action: () => {
+          nodes.anomaly.classList.add('node-active-anomaly');
+        }
+      },
+      {
+        name: 'anomaly_to_learn',
+        duration: 1200,
+        action: () => {
+          nodes.anomaly.classList.add('node-active-anomaly');
+          arrows[5].classList.add('arrow-active');
+        }
+      }
+    ];
+
+    let currentStep = 0;
+    
+    function runNextStep() {
       resetFSM();
-      if (step === 0) {
-        nodes.init.className += ' node-active';
-        arrows[1].className.baseVal = 'arrow-line arrow-active';
-      } else if (step === 1) {
-        nodes.learn.className += ' node-active';
-        arrows[2].className.baseVal = 'arrow-line arrow-active';
-      } else if (step === 2) {
-        nodes.normal.className += ' node-active';
-        arrows[3].className.baseVal = 'arrow-line arrow-active-alert';
-      } else if (step === 3) {
-        nodes.anomaly.className += ' node-active-anomaly';
-        arrows[4].className.baseVal = 'arrow-line arrow-active';
+      const step = steps[currentStep];
+      step.action();
+      
+      currentStep++;
+      if (currentStep >= steps.length) {
+        currentStep = 2; // Loop back to learn_active
       }
       
-      step = (step + 1) % 4;
+      setTimeout(runNextStep, step.duration);
     }
     
-    transition();
-    setInterval(transition, 2500);
+    runNextStep();
   });
 </script>
 

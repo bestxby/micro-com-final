@@ -9,26 +9,29 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
-    gap: 20px;
+    gap: 30px; /* Increased gap */
+    padding-top: 40px;
   }
   .code-block {
     background: #0F172A;
     color: #F8FAFC;
-    padding: 20px;
+    padding: 28px 32px; /* Increased padding */
     border-radius: 12px;
     font-family: monospace;
-    font-size: 14px;
-    line-height: 1.5;
+    font-size: 17px; /* Larger code font */
+    line-height: 1.6;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: var(--glass-shadow);
+    margin-top: 36px;
   }
   .code-keyword { color: #F472B6; }
   .code-type { color: #38BDF8; }
@@ -38,17 +41,17 @@
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 16px;
-    padding: 16px;
+    padding: 20px;
     box-shadow: var(--glass-shadow);
     width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
   }
   .timing-card img {
     max-width: 100%;
-    height: 180px;
+    height: 200px; /* Taller image */
     object-fit: contain;
     border-radius: 6px;
   }
@@ -56,7 +59,7 @@
   /* Waveform Animation */
   .waveform-container {
     width: 100%;
-    height: 140px;
+    height: 210px; /* Taller waveform card */
     background: rgba(15, 23, 42, 0.05);
     border-radius: 12px;
     border: 1px solid rgba(139, 92, 246, 0.1);
@@ -72,8 +75,8 @@
     position: absolute;
     left: 20px;
   }
-  .label-scl { top: 30px; }
-  .label-sda { top: 85px; }
+  .label-scl { top: 55px; } /* Repositioned SCL label */
+  .label-sda { top: 140px; } /* Repositioned SDA label */
   
   .wave-svg {
     width: 100%;
@@ -148,7 +151,7 @@
       <div class="scan-line"></div>
       <div class="wave-label label-scl">SCL (CLK)</div>
       <div class="wave-label label-sda">SDA (DATA)</div>
-      <svg class="wave-svg">
+      <svg class="wave-svg" viewBox="0 0 600 120" preserveAspectRatio="none">
         <!-- SCL clock line -->
         <path class="wave-path scl-path" d="M 80,35 L 120,35 L 120,15 L 150,15 L 150,35 L 190,35 L 190,15 L 220,15 L 220,35 L 260,35 L 260,15 L 290,15 L 290,35 L 330,35 L 330,15 L 360,15 L 360,35 L 400,35 L 400,15 L 430,15 L 430,35 L 470,35 L 470,15 L 500,15 L 500,35 L 540,35 M 540,35 L 580,35" />
         <!-- SDA data line (Write Command 0xAC: 10101100) -->

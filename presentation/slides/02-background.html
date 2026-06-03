@@ -9,26 +9,28 @@
     flex: 1.1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 0.9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    gap: 24px;
+    justify-content: flex-start;
+    padding-top: 40px;
+    gap: 32px; /* Increased gap */
   }
   .pain-list {
-    margin-top: 32px;
+    margin-top: 60px; /* Increased spacing */
     list-style: none;
   }
   .pain-list li {
-    font-size: 22px;
+    font-size: 24px; /* Larger font size */
     line-height: 1.8;
     color: var(--text-secondary);
-    margin-bottom: 24px;
+    margin-bottom: 32px; /* Spaced out */
     position: relative;
-    padding-left: 36px;
+    padding-left: 40px;
   }
   .pain-list li::before {
     content: "✦";
@@ -40,33 +42,36 @@
   .pain-card {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 24px;
+    padding: 36px 40px; /* Expanded padding to occupy more space */
+    min-height: 140px;
   }
   .pain-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
+    width: 68px;
+    height: 68px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: bold;
     color: #fff;
+    flex-shrink: 0;
   }
   .pain-1 { background: linear-gradient(135deg, #FF6B6B, #FF8E53); }
   .pain-2 { background: linear-gradient(135deg, #4DADF7, #339AF0); }
   .pain-3 { background: linear-gradient(135deg, #FCC419, #FF922B); }
   
   .pain-card-text h3 {
-    font-size: 20px;
+    font-size: 22px; /* Grander title */
     font-weight: 800;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     color: var(--text-primary);
   }
   .pain-card-text p {
-    font-size: 15px;
+    font-size: 16px; /* Larger description */
     color: var(--text-secondary);
-    line-height: 1.4;
+    line-height: 1.5;
   }
 </style>
 </head>
@@ -88,7 +93,7 @@
     <p class="slide-subtitle">Traditional Temperature Alarm Limitations</p>
     
     <ul class="pain-list">
-      <li><strong>固定阈值不灵敏</strong>：室外冬季 10°C 与夏季 35°C 基准相差巨大，固定警报阈值在温度渐变时难以动态监测，急需智能自适应环境。</li>
+      <li><strong>固定阈值不灵敏</strong>：室外冬季 <span class="formula">10°C</span> 与夏季 <span class="formula">35°C</span> 基准相差巨大，固定警报阈值在温度渐变时难以动态监测，急需智能自适应环境。</li>
       <li><strong>传感器易单点故障</strong>：工业或特殊监测场景下，单个总线传感器极易因连线松动、潮湿等物理故障掉线导致系统整体瘫痪。</li>
       <li><strong>显示刷新闪烁大</strong>：慢速串行 SPI 硬件总线画屏耗时高，LCD 在频繁刷新数据时会产生严重的视觉闪烁，影响交互体验。</li>
     </ul>
@@ -99,7 +104,7 @@
       <div class="pain-icon pain-1">01</div>
       <div class="pain-card-text">
         <h3>环境基准漂移 (Baseline Drift)</h3>
-        <p>传统温度监测系统依靠写死固定上限（如38°C）报警，无法适应多变的气候和不同安装场所的环境基底。</p>
+        <p>传统温度监测系统依靠写死固定上限（如 <span class="formula">38°C</span>）报警，无法适应多变的气候和不同安装场所的环境基底。</p>
       </div>
     </div>
 

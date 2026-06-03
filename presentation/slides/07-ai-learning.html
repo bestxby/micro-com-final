@@ -9,40 +9,41 @@
     flex: 0.9;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .right-col {
     flex: 1.1;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
+    padding-top: 40px;
   }
   
   .formula-card {
     background: rgba(139, 92, 246, 0.05);
     border: 1px dashed rgba(139, 92, 246, 0.4);
     border-radius: 12px;
-    padding: 20px;
-    margin: 20px 0;
-    font-family: 'Times New Roman', Times, serif;
-    font-size: 24px;
+    padding: 24px; /* Increased padding */
+    margin: 32px 0; /* More spacing */
     text-align: center;
     color: var(--brand-primary);
-    font-weight: bold;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
   }
   
   .learning-panel {
     width: 100%;
-    max-width: 500px;
+    max-width: 600px; /* Expanded width */
+    height: 600px; /* Grander height */
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 40px;
+    padding: 48px;
     box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    justify-content: space-between; /* Spaced out content */
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -117,10 +118,10 @@
     <p class="slide-subtitle">Unsupervised AI Baseline Learning Phase</p>
     
     <div style="font-size: 16px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>免校准自适应机制</strong>：系统不需要人工写死特定温度阈值。在上电初期设置自学习模式（前 100 次采样，约 150 秒），自动捕获现场环境的基准温度。</p>
+      <p>• <strong>免校准自适应机制</strong>：系统不需要人工写死特定温度阈值。在上电初期设置自学习模式（前 <span class="formula">100</span> 次采样，约 <span class="formula">150</span> 秒），自动捕获现场环境的基准温度 <span class="formula">&mu;<sub>base</sub></span>。</p>
       
       <div class="formula-card">
-        &mu;<sub>base</sub>[n] = (1 - 1/n) &middot; &mu;<sub>base</sub>[n-1] + (1/n) &middot; T<sub>f</sub>[n]
+        <span class="formula" style="font-size: 28px;">&mu;<sub>base</sub>[n] = (1 - 1/n) &middot; &mu;<sub>base</sub>[n-1] + (1/n) &middot; T<sub>f</sub>[n]</span>
       </div>
       
       <p>• <strong>递推均值拟合</strong>：算法通过动态增量式均值公式，逐步收敛并计算当前室内/温室环境的准确基底基准值。</p>
@@ -133,7 +134,7 @@
       <div class="state-badge" id="learningState">LEARNING IN PROGRESS...</div>
       
       <div>
-        <div class="large-value"><span id="tempValue">22.0</span>°C</div>
+        <div class="large-value formula"><span id="tempValue">22.0</span>°C</div>
         <div style="font-size: 14px; color: var(--text-muted); font-weight: bold; margin-top: 4px;">当前拟合环境基准值 (Baseline Mean)</div>
       </div>
       
