@@ -248,3 +248,171 @@ p.slide-subtitle {
   text-align: center;
   padding: 20px;
 }
+
+/* Active node continuous pulse animations (Slide 9) */
+@keyframes activeNodePulse {
+  0% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+  50% {
+    transform: scale(1.14);
+    box-shadow: 0 0 35px rgba(139, 92, 246, 0.7);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.4);
+  }
+}
+@keyframes activeAnomalyNodePulse {
+  0% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  }
+  50% {
+    transform: scale(1.14);
+    box-shadow: 0 0 35px rgba(239, 68, 68, 0.8);
+  }
+  100% {
+    transform: scale(1.1);
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+  }
+}
+.node-active {
+  border-color: var(--brand-primary) !important;
+  animation: activeNodePulse 2s infinite ease-in-out !important;
+}
+.node-active-anomaly {
+  border-color: var(--alert-red) !important;
+  animation: activeAnomalyNodePulse 1.5s infinite ease-in-out !important;
+}
+
+/* Swirling particles flow animations (Slide 3) */
+@keyframes flowUp1 {
+  0% {
+    bottom: 0px;
+    opacity: 0;
+    transform: translateX(0px) scale(0.7);
+    background: var(--brand-secondary);
+    box-shadow: 0 0 8px var(--brand-secondary);
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(8px) scale(1.1);
+    background: var(--brand-primary);
+    box-shadow: 0 0 12px var(--brand-primary);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 540px;
+    opacity: 0;
+    transform: translateX(-4px) scale(0.7);
+    background: var(--brand-primary);
+    box-shadow: 0 0 8px var(--brand-primary);
+  }
+}
+@keyframes flowUp2 {
+  0% {
+    bottom: 0px;
+    opacity: 0;
+    transform: translateX(4px) scale(0.8);
+    background: var(--brand-secondary);
+    box-shadow: 0 0 8px var(--brand-secondary);
+  }
+  10% {
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-8px) scale(1.0);
+    background: var(--brand-primary);
+    box-shadow: 0 0 12px var(--brand-primary);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    bottom: 540px;
+    opacity: 0;
+    transform: translateX(2px) scale(0.8);
+    background: var(--brand-primary);
+    box-shadow: 0 0 8px var(--brand-primary);
+  }
+}
+
+.particle-1 { animation: flowUp1 2.5s infinite linear !important; animation-delay: 0s !important; left: 10px !important; width: 10px !important; height: 10px !important; }
+.particle-2 { animation: flowUp2 2.5s infinite linear !important; animation-delay: 0.6s !important; left: 18px !important; width: 12px !important; height: 12px !important; }
+.particle-3 { animation: flowUp1 2.5s infinite linear !important; animation-delay: 1.25s !important; left: 8px !important; width: 8px !important; height: 8px !important; }
+.particle-4 { animation: flowUp2 2.5s infinite linear !important; animation-delay: 1.85s !important; left: 20px !important; width: 14px !important; height: 14px !important; }
+
+/* SVG Oscilloscope Tracing (Slide 5) */
+@keyframes drawWave {
+  0% { width: 80px; }
+  100% { width: 580px; }
+}
+#clipRect {
+  animation: drawWave 4s infinite linear;
+}
+@keyframes svgScan {
+  0% { x1: 80; x2: 80; }
+  100% { x1: 580; x2: 580; }
+}
+#svgScanLine {
+  filter: url(#scanGlow);
+  animation: svgScan 4s infinite linear;
+}
+
+/* SVG Chart ClipPath Reveal (Slide 6 & 11) */
+@keyframes revealChart {
+  from { width: 0; }
+  to { width: 740; }
+}
+#chartClipRect {
+  animation: revealChart 2s ease-in-out forwards;
+}
+
+@keyframes revealVerifyChart {
+  from { width: 0; }
+  to { width: 400; }
+}
+#verifyClipRect {
+  animation: revealVerifyChart 2.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+/* Slide 11 Warning popover */
+.verify-alert-trigger {
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: 300px 15px;
+  animation: popTrigger 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.9s forwards;
+}
+@keyframes popTrigger {
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Staggered text fadeIn lists (Slide 2 & 12) */
+@keyframes slideListFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.pain-list li, .summary-list li {
+  opacity: 0;
+  animation: slideListFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.pain-list li:nth-child(1) { animation-delay: 0.2s; }
+.pain-list li:nth-child(2) { animation-delay: 0.4s; }
+.pain-list li:nth-child(3) { animation-delay: 0.6s; }
+
+.summary-list li:nth-child(1) { animation-delay: 0.1s; }
+.summary-list li:nth-child(2) { animation-delay: 0.3s; }
+.summary-list li:nth-child(3) { animation-delay: 0.5s; }
+.summary-list li:nth-child(4) { animation-delay: 0.7s; }

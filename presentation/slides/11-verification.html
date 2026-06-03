@@ -122,7 +122,7 @@
 
   <div class="right-col">
     <!-- Video container for user's alert/buzzer test video -->
-    <div class="video-card delay-2">
+    <div class="video-card animate-fade-in-up delay-2">
       <div class="video-placeholder-container">
         <video controls autoplay muted loop>
           <source src="../shared/videos/alert_test.mp4" type="video/mp4">
@@ -134,7 +134,7 @@
       </div>
     </div>
     
-    <div class="mini-chart delay-3">
+    <div class="mini-chart animate-fade-in-up delay-3">
       <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">瞬态温升突破统计决策边界曲线 <span class="formula">&Delta;T &gt; 5°C</span></div>
       <svg class="chart-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
         <defs>
@@ -146,10 +146,19 @@
             <stop offset="0%" stop-color="#EF4444" stop-opacity="0.22" />
             <stop offset="100%" stop-color="#EF4444" stop-opacity="0.0" />
           </linearGradient>
+          <clipPath id="verifyClip">
+            <rect id="verifyClipRect" x="0" y="0" width="0" height="80" />
+          </clipPath>
         </defs>
         
-        <!-- Red Alert Area Gradient Fill -->
-        <path d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8 L 400,80 L 0,80 Z" fill="url(#alertAreaGrad)" />
+        <g clip-path="url(#verifyClip)">
+          <!-- Red Alert Area Gradient Fill -->
+          <path d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8 L 400,80 L 0,80 Z" fill="url(#alertAreaGrad)" />
+          
+          <!-- Temp curve shooting up -->
+          <path class="temp-path" stroke="url(#cyanPurpleGrad)" 
+                d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8" />
+        </g>
 
         <!-- Lines -->
         <line x1="0" y1="60" x2="400" y2="60" class="baseline-line" /> <!-- Baseline 25C -->
@@ -158,11 +167,11 @@
         <text x="5" y="52" fill="#64748B" font-size="7" font-weight="bold" class="formula">基准均值 25.0°C</text>
         <text x="5" y="12" fill="#EF4444" font-size="7" font-weight="bold" class="formula">报警边界 30.0°C</text>
         
-        <!-- Temp curve shooting up -->
-        <path class="temp-path circuit-line" stroke="url(#cyanPurpleGrad)" 
-              d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8" />
-        <circle cx="300" cy="15" r="3" fill="#EF4444" class="glowing-node" />
-        <text x="310" y="25" fill="#EF4444" font-size="7" font-weight="bold">越界报警触发!</text>
+        <!-- Glowing alert dot and text synced with curve reveal -->
+        <g class="verify-alert-trigger">
+          <circle cx="300" cy="15" r="3" fill="#EF4444" class="glowing-node" />
+          <text x="310" y="25" fill="#EF4444" font-size="7" font-weight="bold">越界报警触发!</text>
+        </g>
       </svg>
     </div>
   </div>

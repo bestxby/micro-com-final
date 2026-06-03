@@ -130,7 +130,7 @@
       <p style="margin-top: 10px;">• <strong>总线级多传感器并联</strong>：于 <span class="formula">PB6 (SCL)</span> 与 <span class="formula">PB7 (SDA)</span> 构建的模拟总线上挂载 AHT20 与 BMP280 感知芯片。通过独特的 <span class="formula">7-bit</span> 物理从机地址进行轮询时分复用寻址，在极简的物理拓扑结构下实现双参数高稳定度并发采集。</p>
     </div>
     
-    <div class="code-block delay-2">
+    <div class="code-block animate-fade-in-up delay-2">
 <span class="code-type">uint8_t</span> <span class="code-func">AHT20_ReadData</span>(<span class="code-type">float</span> *temp, <span class="code-type">float</span> *humidity) {
     <span class="code-func">I2C_Start</span>();
     <span class="code-func">I2C_WriteByte</span>(AHT20_ADDR_WRITE);
@@ -142,20 +142,37 @@
   </div>
 
   <div class="right-col">
-    <div class="timing-card delay-3">
+    <div class="timing-card animate-fade-in-up delay-3">
       <div style="font-size: 14px; font-weight: bold; color: var(--text-primary);">I²C 总线模拟物理层通信波形分析</div>
       <img src="../shared/images/i2c_timing.png" alt="I2C Waveform Schematic">
     </div>
     
-    <div class="waveform-container delay-4">
-      <div class="scan-line"></div>
+    <div class="waveform-container animate-fade-in-up delay-4">
       <div class="wave-label label-scl">SCL (Clock)</div>
-      <div class="wave-label label-sda">SDA (Data)</div></div>
+      <div class="wave-label label-sda">SDA (Data)</div>
       <svg class="wave-svg" viewBox="0 0 600 120" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#06b6d4" />
+            <stop offset="100%" stop-color="#8b5cf6" />
+          </linearGradient>
+          <filter id="scanGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <clipPath id="waveClip">
+            <rect id="clipRect" x="0" y="0" width="80" height="120" />
+          </clipPath>
+        </defs>
         <!-- SCL clock line -->
-        <path class="wave-path scl-path" d="M 80,35 L 120,35 L 120,15 L 150,15 L 150,35 L 190,35 L 190,15 L 220,15 L 220,35 L 260,35 L 260,15 L 290,15 L 290,35 L 330,35 L 330,15 L 360,15 L 360,35 L 400,35 L 400,15 L 430,15 L 430,35 L 470,35 L 470,15 L 500,15 L 500,35 L 540,35 M 540,35 L 580,35" />
+        <path clip-path="url(#waveClip)" class="wave-path scl-path" d="M 80,35 L 120,35 L 120,15 L 150,15 L 150,35 L 190,35 L 190,15 L 220,15 L 220,35 L 260,35 L 260,15 L 290,15 L 290,35 L 330,35 L 330,15 L 360,15 L 360,35 L 400,35 L 400,15 L 430,15 L 430,35 L 470,35 L 470,15 L 500,15 L 500,35 L 540,35 M 540,35 L 580,35" />
         <!-- SDA data line (Write Command 0xAC: 10101100) -->
-        <path class="wave-path sda-path" d="M 80,90 L 110,90 L 110,65 L 150,65 L 150,90 L 230,90 L 230,65 L 300,65 L 300,90 L 370,90 L 370,65 L 440,65 L 440,90 L 510,90 L 510,90 L 580,90" />
+        <path clip-path="url(#waveClip)" class="wave-path sda-path" d="M 80,90 L 110,90 L 110,65 L 150,65 L 150,90 L 230,90 L 230,65 L 300,65 L 300,90 L 370,90 L 370,65 L 440,65 L 440,90 L 510,90 L 510,90 L 580,90" />
+        <!-- Oscilloscope Scan Line -->
+        <line id="svgScanLine" x1="80" y1="0" x2="80" y2="120" stroke="url(#scanGrad)" stroke-width="3" />
       </svg>
     </div>
   </div>

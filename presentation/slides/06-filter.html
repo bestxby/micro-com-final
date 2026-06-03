@@ -132,7 +132,7 @@
   </div>
 
   <div class="right-col">
-    <div class="chart-card delay-2">
+    <div class="chart-card animate-fade-in-up delay-2">
       <div class="chart-header">
         <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">10Hz 采样率下温度波形原始数据与滤波数据时域对比</div>
         <div class="chart-legend">
@@ -162,22 +162,27 @@
               <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.18" />
               <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0" />
             </linearGradient>
+            <clipPath id="chartClip">
+              <rect id="chartClipRect" x="0" y="0" width="0" height="320" />
+            </clipPath>
           </defs>
           
           <!-- Grid helper lines -->
           <line x1="0" y1="100" x2="740" y2="100" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
           <line x1="0" y1="200" x2="740" y2="200" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
           
-          <!-- Filtered Area Gradient Fill -->
-          <path d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95 L 720,320 L 0,320 Z" fill="url(#areaGradient)" />
+          <g clip-path="url(#chartClip)">
+            <!-- Filtered Area Gradient Fill -->
+            <path d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95 L 720,320 L 0,320 Z" fill="url(#areaGradient)" />
 
-          <!-- Raw Noisy Temperature Wave (grey, jagged) -->
-          <path class="wave-path circuit-line" stroke="#94A3B8" stroke-width="2" opacity="0.6"
-                d="M 0,250 L 40,240 L 80,260 L 120,225 L 160,255 L 200,210 L 240,245 L 280,180 L 320,205 L 360,150 L 400,165 L 440,110 L 480,140 L 520,115 L 560,90 L 600,120 L 640,85 L 680,105 L 720,80" />
-                
-          <!-- Filtered Temperature Wave (glowing cyan/purple gradient, smooth) -->
-          <path class="wave-path circuit-line" stroke="url(#gradientLine)" stroke-width="4"
-                d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95" />
+            <!-- Raw Noisy Temperature Wave (grey, jagged) -->
+            <path class="wave-path" stroke="#94A3B8" stroke-width="2" opacity="0.6"
+                  d="M 0,250 L 40,240 L 80,260 L 120,225 L 160,255 L 200,210 L 240,245 L 280,180 L 320,205 L 360,150 L 400,165 L 440,110 L 480,140 L 520,115 L 560,90 L 600,120 L 640,85 L 680,105 L 720,80" />
+                  
+            <!-- Filtered Temperature Wave (glowing cyan/purple gradient, smooth) -->
+            <path class="wave-path" stroke="url(#gradientLine)" stroke-width="4"
+                  d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95" />
+          </g>
         </svg>
       </div>
     </div>
