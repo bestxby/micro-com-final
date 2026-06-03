@@ -95,8 +95,8 @@ void Game_Update(uint8_t key_pressed)
             if (old_x < 460) {
                 int erase_w = 460 - old_x;
                 if (erase_w > pipe_w) erase_w = pipe_w;
-                LCD_FillRect(old_x, 57, erase_w, top_y2 - 57, BLACK);
-                LCD_FillRect(old_x, bot_y1, erase_w, 285 - bot_y1, BLACK);
+                LCD_FillRect(old_x, 57, erase_w, top_y2 - 57, theme_bg);
+                LCD_FillRect(old_x, bot_y1, erase_w, 285 - bot_y1, theme_bg);
             }
 
             pipe_x = 440.0f;
@@ -151,29 +151,29 @@ void Game_Draw(uint8_t force_refresh)
     
     if (force_refresh) {
         /* 绘制游戏大底座卡片框 (X: 20..460, Y: 56..286) */
-        LCD_FillRect(20, 56, 441, 231, BLACK);
-        LCD_DrawRect(20, 56, 441, 231, GRAY);
-        LCD_DrawRect(19, 55, 443, 233, GRAY); /* 双线高级边框 */
+        LCD_FillRect(20, 56, 441, 231, theme_bg);
+        LCD_DrawRect(20, 56, 441, 231, theme_border);
+        LCD_DrawRect(19, 55, 443, 233, theme_border); /* 双线高级边框 */
         
         // 绘制外框的科技感青色折角
         // 左上
-        LCD_DrawLine(19, 55, 29, 55, CYAN);
-        LCD_DrawLine(19, 55, 19, 65, CYAN);
+        LCD_DrawLine(19, 55, 29, 55, theme_accent);
+        LCD_DrawLine(19, 55, 19, 65, theme_accent);
         // 右上
-        LCD_DrawLine(452, 55, 462, 55, CYAN);
-        LCD_DrawLine(462, 55, 462, 65, CYAN);
+        LCD_DrawLine(452, 55, 462, 55, theme_accent);
+        LCD_DrawLine(462, 55, 462, 65, theme_accent);
         // 左下
-        LCD_DrawLine(19, 278, 19, 288, CYAN);
-        LCD_DrawLine(19, 288, 29, 288, CYAN);
+        LCD_DrawLine(19, 278, 19, 288, theme_accent);
+        LCD_DrawLine(19, 288, 29, 288, theme_accent);
         // 右下
-        LCD_DrawLine(452, 288, 462, 288, CYAN);
-        LCD_DrawLine(462, 278, 462, 288, CYAN);
+        LCD_DrawLine(452, 288, 462, 288, theme_accent);
+        LCD_DrawLine(462, 278, 462, 288, theme_accent);
         
         if (game_state == STATE_START) {
-            LCD_FillRect(376, 26, 100, 19, BLACK);
-            LCD_ShowString(188, 120, "FLAPPY BIRD", YELLOW, BLACK);
-            LCD_ShowString(152, 165, "Press KEY2 to FLAP", WHITE, BLACK);
-            LCD_ShowString(152, 195, "Press KEY1 to EXIT", GRAY, BLACK);
+            LCD_FillRect(376, 26, 100, 19, theme_bg);
+            LCD_ShowString(188, 120, "FLAPPY BIRD", theme_yellow, theme_bg);
+            LCD_ShowString(152, 165, "Press KEY2 to FLAP", theme_text, theme_bg);
+            LCD_ShowString(152, 195, "Press KEY1 to EXIT", theme_text_muted, theme_bg);
         }
         last_drawn_score = -1;
     }
@@ -182,7 +182,7 @@ void Game_Draw(uint8_t force_refresh)
         /* 1. 增量渲染副标题的得分看板 (仅当得分改变时才重绘以防闪烁) */
         if (score != last_drawn_score) {
             sprintf(text_buf, "SCORE: %2d", score);
-            LCD_ShowString(376, 28, text_buf, CYAN, BLACK);
+            LCD_ShowString(376, 28, text_buf, theme_accent, theme_bg);
             last_drawn_score = score;
         }
 
@@ -192,11 +192,11 @@ void Game_Draw(uint8_t force_refresh)
         
         if (old_by != new_by || force_refresh) {
             if (!force_refresh) {
-                /* 黑色抹除旧小鸟位置 */
-                LCD_FillRect(bird_x, old_by, 12, 12, BLACK);
+                /* 背景色抹除旧小鸟位置 */
+                LCD_FillRect(bird_x, old_by, 12, 12, theme_bg);
             }
-            /* 绘制新小鸟 (琥珀金/黄色) */
-            LCD_FillRect(bird_x, new_by, 12, 12, YELLOW);
+            /* 绘制新小鸟 (主题黄色) */
+            LCD_FillRect(bird_x, new_by, 12, 12, theme_yellow);
         }
 
         /* 3. 增量渲染管道 (仅绘制管道运动的 4px 左右前/后边缘) */
@@ -213,13 +213,13 @@ void Game_Draw(uint8_t force_refresh)
                 if (px1 < 21) px1 = 21;
                 if (px2 > 459) px2 = 459;
                 if (px1 <= px2) {
-                    LCD_FillRect(px1, 57, px2 - px1 + 1, top_limit - 57, GREEN);
-                    LCD_FillRect(px1, bot_limit, px2 - px1 + 1, 285 - bot_limit, GREEN);
+                    LCD_FillRect(px1, 57, px2 - px1 + 1, top_limit - 57, theme_green);
+                    LCD_FillRect(px1, bot_limit, px2 - px1 + 1, 285 - bot_limit, theme_green);
                 }
             } else {
                 int dx = old_px - new_px; /* 正常每帧向左偏移 4 像素 */
                 if (dx > 0) {
-                    /* (A) 用黑色抹除管道向左移动后露出的旧右侧边缘 */
+                    /* (A) 用背景色抹除管道向左移动后露出的旧右侧边缘 */
                     int erase_x = new_px + pipe_w;
                     int erase_w = dx;
                     if (erase_x < 21) {
@@ -230,11 +230,11 @@ void Game_Draw(uint8_t force_refresh)
                         erase_w = 460 - erase_x;
                     }
                     if (erase_w > 0) {
-                        LCD_FillRect(erase_x, 57, erase_w, top_limit - 57, BLACK);
-                        LCD_FillRect(erase_x, bot_limit, erase_w, 285 - bot_limit, BLACK);
+                        LCD_FillRect(erase_x, 57, erase_w, top_limit - 57, theme_bg);
+                        LCD_FillRect(erase_x, bot_limit, erase_w, 285 - bot_limit, theme_bg);
                     }
 
-                    /* (B) 绘制管道向左移出的新左侧边缘 (填充霓虹绿) */
+                    /* (B) 绘制管道向左移出的新左侧边缘 (填充主题绿) */
                     int draw_x = new_px;
                     int draw_w = dx;
                     if (draw_x < 21) {
@@ -245,8 +245,8 @@ void Game_Draw(uint8_t force_refresh)
                         draw_w = 460 - draw_x;
                     }
                     if (draw_w > 0) {
-                        LCD_FillRect(draw_x, 57, draw_w, top_limit - 57, GREEN);
-                        LCD_FillRect(draw_x, bot_limit, draw_w, 285 - bot_limit, GREEN);
+                        LCD_FillRect(draw_x, 57, draw_w, top_limit - 57, theme_green);
+                        LCD_FillRect(draw_x, bot_limit, draw_w, 285 - bot_limit, theme_green);
                     }
                 }
             }
@@ -254,9 +254,9 @@ void Game_Draw(uint8_t force_refresh)
     } 
     else if (game_state == STATE_GAMEOVER) {
         /* 游戏结束界面 */
-        LCD_ShowString(188, 120, "GAME OVER", RED, BLACK);
+        LCD_ShowString(188, 120, "GAME OVER", theme_red, theme_bg);
         sprintf(text_buf, "Final Score: %2d", score);
-        LCD_ShowString(164, 155, text_buf, YELLOW, BLACK);
-        LCD_ShowString(132, 190, "Press KEY2 to Restart", WHITE, BLACK);
+        LCD_ShowString(164, 155, text_buf, theme_yellow, theme_bg);
+        LCD_ShowString(132, 190, "Press KEY2 to Restart", theme_text, theme_bg);
     }
 }

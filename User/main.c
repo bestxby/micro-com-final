@@ -75,8 +75,8 @@ static void Draw_TempIcon(uint16_t x, uint16_t y, uint16_t color) {
     LCD_DrawLine(x + 2, y, x + 2, y + 8, color);
     LCD_DrawLine(x + 4, y, x + 4, y + 8, color);
     LCD_DrawCircle(x + 3, y + 11, 3, color);
-    LCD_FillCircle(x + 3, y + 11, 2, RED);
-    LCD_DrawLine(x + 3, y + 3, x + 3, y + 9, RED);
+    LCD_FillCircle(x + 3, y + 11, 2, theme_red);
+    LCD_DrawLine(x + 3, y + 3, x + 3, y + 9, theme_red);
 }
 
 /* 绘制像素水滴图标 */
@@ -84,23 +84,23 @@ static void Draw_DropIcon(uint16_t x, uint16_t y, uint16_t color) {
     LCD_DrawLine(x + 3, y, x, y + 6, color);
     LCD_DrawLine(x + 3, y, x + 6, y + 6, color);
     LCD_DrawCircle(x + 3, y + 7, 3, color);
-    LCD_FillCircle(x + 3, y + 7, 1, BLUE);
+    LCD_FillCircle(x + 3, y + 7, 1, theme_blue);
 }
 
 /* 绘制气压表图标 */
 static void Draw_GaugeIcon(uint16_t x, uint16_t y, uint16_t color) {
     LCD_DrawCircle(x + 6, y + 6, 6, color);
-    LCD_DrawLine(x + 6, y + 6, x + 9, y + 3, CYAN);
+    LCD_DrawLine(x + 6, y + 6, x + 9, y + 3, theme_accent);
     LCD_DrawPoint(x + 6, y + 6, color);
 }
 
 /* 绘制大脑 (AI) 节点图标 */
 static void Draw_BrainIcon(uint16_t x, uint16_t y, uint16_t color) {
-    LCD_DrawLine(x + 3, y + 1, x + 1, y + 6, GRAY);
-    LCD_DrawLine(x + 3, y + 1, x + 7, y + 4, GRAY);
-    LCD_DrawLine(x + 1, y + 6, x + 5, y + 10, GRAY);
-    LCD_DrawLine(x + 7, y + 4, x + 5, y + 10, GRAY);
-    LCD_DrawLine(x + 1, y + 6, x + 7, y + 4, GRAY);
+    LCD_DrawLine(x + 3, y + 1, x + 1, y + 6, theme_border);
+    LCD_DrawLine(x + 3, y + 1, x + 7, y + 4, theme_border);
+    LCD_DrawLine(x + 1, y + 6, x + 5, y + 10, theme_border);
+    LCD_DrawLine(x + 7, y + 4, x + 5, y + 10, theme_border);
+    LCD_DrawLine(x + 1, y + 6, x + 7, y + 4, theme_border);
     LCD_FillCircle(x + 3, y + 1, 1, color);
     LCD_FillCircle(x + 1, y + 6, 1, color);
     LCD_FillCircle(x + 7, y + 4, 1, color);
@@ -133,10 +133,10 @@ static void Draw_SegmentedBar(uint16_t x, uint16_t y, uint16_t active_segs, uint
 
 /* ---- 获取当前状态主色调 ---- */
 static uint16_t TopBarBg(void) {
-    if (!aht20_healthy) return RED;
-    if (current_ai_state == AI_STATE_ANOMALY) return RED;
-    if (current_ai_state == AI_STATE_LEARNING) return BLUE;
-    return DARK_GRAY;
+    if (!aht20_healthy) return theme_red;
+    if (current_ai_state == AI_STATE_ANOMALY) return theme_red;
+    if (current_ai_state == AI_STATE_LEARNING) return theme_blue;
+    return theme_card_bg;
 }
 
 /* ---- 绘制顶部状态栏（科技徽章风格） ---- */
@@ -144,26 +144,26 @@ static void Draw_TopBar(void) {
     uint16_t bg = TopBarBg();
     
     // 清空背景
-    LCD_FillRect(0, 0, LCD_WIDTH, TOP_BAR_H, BLACK);
+    LCD_FillRect(0, 0, LCD_WIDTH, TOP_BAR_H, theme_bg);
     
     // 霓虹底部双色线
-    uint16_t line_color = (bg == RED) ? RED : ((bg == BLUE) ? BLUE : CYAN);
+    uint16_t line_color = (bg == theme_red) ? theme_red : ((bg == theme_blue) ? theme_blue : theme_accent);
     LCD_DrawLine(0, TOP_BAR_H - 1, LCD_WIDTH - 1, TOP_BAR_H - 1, line_color);
     
     char buf[40];
     uint16_t text_color;
     if (!aht20_healthy) {
         strcpy(buf, " SENSOR ERROR ");
-        text_color = RED;
+        text_color = theme_red;
     } else if (current_ai_state == AI_STATE_ANOMALY) {
         strcpy(buf, " ANOMALY ALARM ");
-        text_color = RED;
+        text_color = theme_red;
     } else if (current_ai_state == AI_STATE_LEARNING) {
         strcpy(buf, " AI LEARNING ");
-        text_color = BLUE;
+        text_color = theme_blue;
     } else {
         strcpy(buf, " SYSTEM SAFE ");
-        text_color = GREEN;
+        text_color = theme_green;
     }
 
     uint16_t text_len = (uint16_t)strlen(buf);
@@ -174,24 +174,34 @@ static void Draw_TopBar(void) {
     
     LCD_DrawRect(pill_x, pill_y, pill_w, pill_h, text_color);
     Draw_CornerBrackets(pill_x, pill_y, pill_w, pill_h, 3, text_color);
-    LCD_ShowString(pill_x + 6, pill_y + 1, buf, text_color, BLACK);
+    LCD_ShowString(pill_x + 6, pill_y + 1, buf, text_color, theme_bg);
+
+    // 绘制主题切换空按钮 (X: 420, Y: 4, W: 24, H: 16)
+    LCD_DrawRect(420, 4, 24, 16, theme_border);
+    if (current_theme == 0) {
+        // 暗色模式：填充主题高亮色
+        LCD_FillRect(426, 8, 12, 8, theme_accent);
+    } else {
+        // 亮色模式：保留空心框
+        LCD_DrawRect(426, 8, 12, 8, theme_accent);
+    }
 }
 
 /* ---- 绘制副标题（带有科技几何装饰线） ---- */
 static void Draw_Header(const char *title) {
-    LCD_DrawLine(0, SEP_Y1, LCD_WIDTH - 1, SEP_Y1, GRAY);
-    LCD_FillRect(0, SEP_Y1 + 1, LCD_WIDTH, SEP_Y2 - SEP_Y1 - 1, BLACK);
+    LCD_DrawLine(0, SEP_Y1, LCD_WIDTH - 1, SEP_Y1, theme_border);
+    LCD_FillRect(0, SEP_Y1 + 1, LCD_WIDTH, SEP_Y2 - SEP_Y1 - 1, theme_bg);
     
-    // Left vertical cyan accent bar for premium look
-    LCD_FillRect(8, TITLE_Y, 3, 16, CYAN);
+    // Left vertical accent bar for premium look
+    LCD_FillRect(8, TITLE_Y, 3, 16, theme_accent);
     
-    LCD_ShowString(16, TITLE_Y, title, CYAN, BLACK);
+    LCD_ShowString(16, TITLE_Y, title, theme_accent, theme_bg);
     
     // 右侧科技感短斜线装饰
-    LCD_DrawLine(LCD_WIDTH - 60, TITLE_Y + 4, LCD_WIDTH - 24, TITLE_Y + 4, GRAY);
-    LCD_DrawLine(LCD_WIDTH - 24, TITLE_Y + 4, LCD_WIDTH - 20, TITLE_Y, GRAY);
+    LCD_DrawLine(LCD_WIDTH - 60, TITLE_Y + 4, LCD_WIDTH - 24, TITLE_Y + 4, theme_border);
+    LCD_DrawLine(LCD_WIDTH - 24, TITLE_Y + 4, LCD_WIDTH - 20, TITLE_Y, theme_border);
     
-    LCD_DrawLine(0, SEP_Y2, LCD_WIDTH - 1, SEP_Y2, GRAY);
+    LCD_DrawLine(0, SEP_Y2, LCD_WIDTH - 1, SEP_Y2, theme_border);
 }
 
 /* ---- 绘制底部翻页指示点（呼吸棱形） ---- */
@@ -199,11 +209,11 @@ static void Draw_PageDots(void) {
     uint16_t dots[4] = {210, 230, 250, 270};
     for (uint8_t i = 0; i < 4; i++) {
         if (i == current_page) {
-            LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, CYAN);
-            LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, CYAN);
+            LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, theme_accent);
+            LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, theme_accent);
         } else {
-            LCD_FillCircle(dots[i], PAGE_DOT_Y, 2, BLACK);
-            LCD_DrawCircle(dots[i], PAGE_DOT_Y, 3, GRAY);
+            LCD_FillCircle(dots[i], PAGE_DOT_Y, 2, theme_bg);
+            LCD_DrawCircle(dots[i], PAGE_DOT_Y, 3, theme_border);
         }
     }
 }
@@ -212,13 +222,13 @@ static void Draw_PageDots(void) {
 static void Draw_BottomInfo(void) {
     char buf[24];
     sprintf(buf, "SYS-UP: %5ds", system_uptime_s);
-    LCD_FillRect(0, BOTTOM_Y, 150, 16, BLACK);
-    LCD_ShowString(16, BOTTOM_Y, buf, GRAY, BLACK);
+    LCD_FillRect(0, BOTTOM_Y, 150, 16, theme_bg);
+    LCD_ShowString(16, BOTTOM_Y, buf, theme_text_muted, theme_bg);
 
     sprintf(buf, "G-05 HUD");
     uint16_t x = LCD_WIDTH - (uint16_t)strlen(buf) * 8 - 16;
-    LCD_FillRect(x, BOTTOM_Y, 80, 16, BLACK);
-    LCD_ShowString(x, BOTTOM_Y, buf, GRAY, BLACK);
+    LCD_FillRect(x, BOTTOM_Y, 80, 16, theme_bg);
+    LCD_ShowString(x, BOTTOM_Y, buf, theme_text_muted, theme_bg);
 }
 
 /* ---- Page 1: 偏差网格折线图（示波器风格） ---- */
@@ -226,17 +236,23 @@ static void Draw_DevChart(void) {
     uint16_t cx = 216, cy = 56, cw = 248, ch = 220;
     uint16_t zero_y = cy + ch / 2;
     
+    // 清空图表内部区域，防止历史折线残留堆叠
+    LCD_FillRect(cx + 1, cy + 8, cw - 2, ch - 10, theme_card_bg);
+    
+    // 重新绘制图表标题
+    LCD_ShowString(cx + 12, cy + 6, "Deviation Trend (+/-5 C)", theme_accent, theme_card_bg);
+    
     // 绘制示波器点虚线网格
-    Draw_DottedLine(cx + 6, zero_y - 45, cx + cw - 7, zero_y - 45, DARK_GRAY);  /* +3.0C */
-    Draw_DottedLine(cx + 6, zero_y + 45, cx + cw - 7, zero_y + 45, DARK_GRAY);  /* -3.0C */
+    Draw_DottedLine(cx + 6, zero_y - 45, cx + cw - 7, zero_y - 45, theme_border);  /* +3.0C */
+    Draw_DottedLine(cx + 6, zero_y + 45, cx + cw - 7, zero_y + 45, theme_border);  /* -3.0C */
     
     for (uint16_t gx = cx + 30; gx < cx + cw - 10; gx += 38) {
-        Draw_DottedLine(gx, cy + 10, gx, cy + ch - 10, DARK_GRAY);
+        Draw_DottedLine(gx, cy + 10, gx, cy + ch - 10, theme_border);
     }
     
-    Draw_DottedLine(cx + 6, zero_y, cx + cw - 7, zero_y, GRAY);       /* 零偏差线 */
-    LCD_DrawLine(cx + 6, cy + 10, cx + 6, cy + ch - 10, GRAY);         /* 左轴 */
-    LCD_DrawLine(cx + cw - 6, cy + 10, cx + cw - 6, cy + ch - 10, GRAY); /* 右轴 */
+    Draw_DottedLine(cx + 6, zero_y, cx + cw - 7, zero_y, theme_text_muted);       /* 零偏差线 */
+    LCD_DrawLine(cx + 6, cy + 10, cx + 6, cy + ch - 10, theme_border);         /* 左轴 */
+    LCD_DrawLine(cx + cw - 6, cy + 10, cx + cw - 6, cy + ch - 10, theme_border); /* 右轴 */
 
     /* 数据折线绘制 */
     float scale = 15.0f;
@@ -251,8 +267,8 @@ static void Draw_DevChart(void) {
         if (y2_val < cy + 10) y2_val = cy + 10;
         if (y2_val > cy + ch - 10) y2_val = cy + ch - 10;
 
-        LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, CYAN);
-        LCD_FillCircle(x2, (uint16_t)y2_val, 1, CYAN); // 绘制数据接点
+        LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, theme_accent);
+        LCD_FillCircle(x2, (uint16_t)y2_val, 1, theme_accent); // 绘制数据接点
     }
 }
 
@@ -262,9 +278,9 @@ static void Draw_DevChart(void) {
 void Display_Refresh(uint8_t force_refresh) {
     char buf[40];
 
-    /* 切页 → 全屏清黑 */
+    /* 切页 → 全屏清屏 */
     if (current_page != last_page || force_refresh) {
-        LCD_Clear(BLACK);
+        LCD_Clear(theme_bg);
         last_page = current_page;
         force_refresh = 1;
     }
@@ -293,90 +309,90 @@ void Display_Refresh(uint8_t force_refresh) {
         
         // Card 1: Temperature Raw (Y: 56..156, height 100)
         if (force_refresh) {
-            LCD_FillRect(16, 56, 216, 100, DARK_GRAY);
-            LCD_DrawRect(16, 56, 216, 100, GRAY);
-            Draw_CornerBrackets(16, 56, 216, 100, 6, CYAN);
-            Draw_TempIcon(28, 66, CYAN);
-            LCD_ShowString(42, 66, "TEMP RAW:", CYAN, DARK_GRAY);
+            LCD_FillRect(16, 56, 216, 100, theme_card_bg);
+            LCD_DrawRect(16, 56, 216, 100, theme_border);
+            Draw_CornerBrackets(16, 56, 216, 100, 6, theme_accent);
+            Draw_TempIcon(28, 66, theme_accent);
+            LCD_ShowString(42, 66, "TEMP RAW:", theme_accent, theme_card_bg);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_aht20_temp);
-            LCD_ShowString(28, 90, buf, WHITE, DARK_GRAY);
+            LCD_ShowString(28, 90, buf, theme_text, theme_card_bg);
             
             float t = test_aht20_temp;
             if (t < 10.0f) t = 10.0f;
             if (t > 40.0f) t = 40.0f;
             uint16_t active_segs = (uint16_t)((t - 10.0f) * 12.0f / 30.0f);
-            uint16_t bar_color = (t > 30.0f || t < 15.0f) ? RED : CYAN;
-            Draw_SegmentedBar(36, 122, active_segs, 12, bar_color, BLACK);
+            uint16_t bar_color = (t > 30.0f || t < 15.0f) ? theme_red : theme_accent;
+            Draw_SegmentedBar(36, 122, active_segs, 12, bar_color, theme_bg);
         } else {
-            LCD_ShowString(28, 90, "[ERROR]", RED, DARK_GRAY);
-            Draw_SegmentedBar(36, 122, 0, 12, RED, BLACK);
+            LCD_ShowString(28, 90, "[ERROR]", theme_red, theme_card_bg);
+            Draw_SegmentedBar(36, 122, 0, 12, theme_red, theme_bg);
         }
 
         // Card 2: Humidity (Y: 176..276, height 100)
         if (force_refresh) {
-            LCD_FillRect(16, 176, 216, 100, DARK_GRAY);
-            LCD_DrawRect(16, 176, 216, 100, GRAY);
-            Draw_CornerBrackets(16, 176, 216, 100, 6, CYAN);
-            Draw_DropIcon(28, 186, CYAN);
-            LCD_ShowString(40, 186, "HUMIDITY:", CYAN, DARK_GRAY);
+            LCD_FillRect(16, 176, 216, 100, theme_card_bg);
+            LCD_DrawRect(16, 176, 216, 100, theme_border);
+            Draw_CornerBrackets(16, 176, 216, 100, 6, theme_accent);
+            Draw_DropIcon(28, 186, theme_accent);
+            LCD_ShowString(40, 186, "HUMIDITY:", theme_accent, theme_card_bg);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f %%", test_aht20_humi);
-            LCD_ShowString(28, 210, buf, WHITE, DARK_GRAY);
+            LCD_ShowString(28, 210, buf, theme_text, theme_card_bg);
             
             float h = test_aht20_humi;
             if (h < 0.0f) h = 0.0f;
             if (h > 100.0f) h = 100.0f;
             uint16_t active_segs = (uint16_t)(h * 12.0f / 100.0f);
-            Draw_SegmentedBar(36, 242, active_segs, 12, CYAN, BLACK);
+            Draw_SegmentedBar(36, 242, active_segs, 12, theme_accent, theme_bg);
         } else {
-            LCD_ShowString(28, 210, "[ERROR]", RED, DARK_GRAY);
-            Draw_SegmentedBar(36, 242, 0, 12, RED, BLACK);
+            LCD_ShowString(28, 210, "[ERROR]", theme_red, theme_card_bg);
+            Draw_SegmentedBar(36, 242, 0, 12, theme_red, theme_bg);
         }
 
         // ------------------ 右侧栏 ------------------
         
         // Card 3: AI Filtered Temp (Y: 56..156, height 100)
         if (force_refresh) {
-            LCD_FillRect(248, 56, 216, 100, DARK_GRAY);
-            LCD_DrawRect(248, 56, 216, 100, GRAY);
-            Draw_CornerBrackets(248, 56, 216, 100, 6, CYAN);
-            Draw_BrainIcon(260, 66, CYAN);
-            LCD_ShowString(274, 66, "AI FILTERED:", CYAN, DARK_GRAY);
+            LCD_FillRect(248, 56, 216, 100, theme_card_bg);
+            LCD_DrawRect(248, 56, 216, 100, theme_border);
+            Draw_CornerBrackets(248, 56, 216, 100, 6, theme_accent);
+            Draw_BrainIcon(260, 66, theme_accent);
+            LCD_ShowString(274, 66, "AI FILTERED:", theme_accent, theme_card_bg);
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_filtered_temp);
-            LCD_ShowString(260, 90, buf, WHITE, DARK_GRAY);
-            LCD_ShowString(260, 122, "(EMA alpha=0.2)", GRAY, DARK_GRAY);
+            LCD_ShowString(260, 90, buf, theme_text, theme_card_bg);
+            LCD_ShowString(260, 122, "(EMA alpha=0.2)", theme_text_muted, theme_card_bg);
         } else {
-            LCD_ShowString(260, 90, "[ERROR]", RED, DARK_GRAY);
+            LCD_ShowString(260, 90, "[ERROR]", theme_red, theme_card_bg);
         }
 
         // Card 4: System Health Info (Y: 176..276, height 100)
         if (force_refresh) {
-            LCD_FillRect(248, 176, 216, 100, DARK_GRAY);
-            LCD_DrawRect(248, 176, 216, 100, GRAY);
-            Draw_CornerBrackets(248, 176, 216, 100, 6, CYAN);
-            LCD_ShowString(260, 186, "SYSTEM HEALTH:", CYAN, DARK_GRAY);
-            LCD_ShowString(260, 208, "AHT20  :", GRAY, DARK_GRAY);
-            LCD_ShowString(260, 230, "AI STATE:", CYAN, DARK_GRAY);
+            LCD_FillRect(248, 176, 216, 100, theme_card_bg);
+            LCD_DrawRect(248, 176, 216, 100, theme_border);
+            Draw_CornerBrackets(248, 176, 216, 100, 6, theme_accent);
+            LCD_ShowString(260, 186, "SYSTEM HEALTH:", theme_accent, theme_card_bg);
+            LCD_ShowString(260, 208, "AHT20  :", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 230, "AI STATE:", theme_accent, theme_card_bg);
         }
         
-        LCD_ShowString(332, 208, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? GREEN : RED, DARK_GRAY);
-        LCD_FillCircle(322, 214, 3, aht20_healthy ? GREEN : RED);
+        LCD_ShowString(332, 208, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(322, 214, 3, aht20_healthy ? theme_green : theme_red);
         
         if (!aht20_healthy) {
-            LCD_ShowString(260, 248, "FAULT/SENSOR ERR", RED, DARK_GRAY);
+            LCD_ShowString(260, 248, "FAULT/SENSOR ERR", theme_red, theme_card_bg);
         } else if (current_ai_state == AI_STATE_LEARNING) {
             uint8_t pct = (my_detector.learning_samples * 100) / 100;
             sprintf(buf, "LEARNING (%3d%%)", pct);
-            LCD_ShowString(260, 248, buf, BLUE, DARK_GRAY);
+            LCD_ShowString(260, 248, buf, theme_blue, theme_card_bg);
         } else if (current_ai_state == AI_STATE_NORMAL) {
-            LCD_ShowString(260, 248, "MONITOR NORMAL  ", GREEN, DARK_GRAY);
+            LCD_ShowString(260, 248, "MONITOR NORMAL  ", theme_green, theme_card_bg);
         } else {
-            LCD_ShowString(260, 248, "ANOMALY ALARM!! ", RED, DARK_GRAY);
+            LCD_ShowString(260, 248, "ANOMALY ALARM!! ", theme_red, theme_card_bg);
         }
     }
 
@@ -387,38 +403,38 @@ void Display_Refresh(uint8_t force_refresh) {
         
         // ------------------ 左侧诊断卡片 ------------------
         if (force_refresh) {
-            LCD_FillRect(16, 56, 184, 220, DARK_GRAY);
-            LCD_DrawRect(16, 56, 184, 220, GRAY);
-            Draw_CornerBrackets(16, 56, 184, 220, 6, CYAN);
+            LCD_FillRect(16, 56, 184, 220, theme_card_bg);
+            LCD_DrawRect(16, 56, 184, 220, theme_border);
+            Draw_CornerBrackets(16, 56, 184, 220, 6, theme_accent);
             
-            Draw_TempIcon(24, 62, GREEN);
-            LCD_ShowString(38, 62, "Baseline Temp:", CYAN, DARK_GRAY);
+            Draw_TempIcon(24, 62, theme_green);
+            LCD_ShowString(38, 62, "Baseline Temp:", theme_accent, theme_card_bg);
             
-            Draw_BrainIcon(24, 96, YELLOW);
-            LCD_ShowString(38, 96, "Filtered Temp:", CYAN, DARK_GRAY);
+            Draw_BrainIcon(24, 96, theme_yellow);
+            LCD_ShowString(38, 96, "Filtered Temp:", theme_accent, theme_card_bg);
             
-            LCD_ShowString(24, 130, "Deviation:", CYAN, DARK_GRAY);
-            LCD_ShowString(24, 204, "AI Progress:", CYAN, DARK_GRAY);
+            LCD_ShowString(24, 130, "Deviation:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 204, "AI Progress:", theme_accent, theme_card_bg);
         }
         
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", my_detector.baseline_temp);
-            LCD_ShowString(24, 78, buf, GREEN, DARK_GRAY);
+            LCD_ShowString(24, 78, buf, theme_green, theme_card_bg);
             
             sprintf(buf, "%5.2f C", test_filtered_temp);
-            LCD_ShowString(24, 112, buf, YELLOW, DARK_GRAY);
+            LCD_ShowString(24, 112, buf, theme_yellow, theme_card_bg);
             
             float dev = test_filtered_temp - my_detector.baseline_temp;
             sprintf(buf, "%+5.2f C", dev);
-            uint16_t dc = GREEN;
-            if (dev > 3.0f || dev < -3.0f) dc = RED;
-            else if (dev > 1.5f || dev < -1.5f) dc = YELLOW;
-            LCD_ShowString(24, 146, buf, dc, DARK_GRAY);
+            uint16_t dc = theme_green;
+            if (dev > 3.0f || dev < -3.0f) dc = theme_red;
+            else if (dev > 1.5f || dev < -1.5f) dc = theme_yellow;
+            LCD_ShowString(24, 146, buf, dc, theme_card_bg);
             
             // 偏差指示小彩条 (X:24..176, width 152)
-            LCD_FillRect(24, 168, 152, 6, BLACK);
-            LCD_DrawRect(24, 168, 152, 6, GRAY);
-            LCD_DrawLine(100, 166, 100, 171, GRAY); // 中心零刻度
+            LCD_FillRect(24, 168, 152, 6, theme_bg);
+            LCD_DrawRect(24, 168, 152, 6, theme_border);
+            LCD_DrawLine(100, 166, 100, 171, theme_border); // 中心零刻度
             
             float dev_lim = dev;
             if (dev_lim > 5.0f) dev_lim = 5.0f;
@@ -430,30 +446,30 @@ void Display_Refresh(uint8_t force_refresh) {
                 LCD_FillRect(100 + w, 169, -w, 4, dc);
             }
         } else {
-            LCD_ShowString(24, 78, "[ERROR]", RED, DARK_GRAY);
-            LCD_ShowString(24, 112, "[ERROR]", RED, DARK_GRAY);
-            LCD_ShowString(24, 146, "[ERROR]", RED, DARK_GRAY);
+            LCD_ShowString(24, 78, "[ERROR]", theme_red, theme_card_bg);
+            LCD_ShowString(24, 112, "[ERROR]", theme_red, theme_card_bg);
+            LCD_ShowString(24, 146, "[ERROR]", theme_red, theme_card_bg);
         }
         
         // 学习样本进度条
         sprintf(buf, "%3d / %d", my_detector.learning_samples, my_detector.max_learning_samples);
-        LCD_ShowString(24, 222, buf, WHITE, DARK_GRAY);
+        LCD_ShowString(24, 222, buf, theme_text, theme_card_bg);
         
         {
             uint32_t cur = my_detector.learning_samples;
             uint32_t max = my_detector.max_learning_samples;
             if (cur > max) cur = max;
             uint16_t active_segs = (uint16_t)(cur * 10 / max);
-            uint16_t pc = my_detector.is_learning_done ? GREEN : BLUE;
-            Draw_SegmentedBar(24, 244, active_segs, 10, pc, BLACK);
+            uint16_t pc = my_detector.is_learning_done ? theme_green : theme_blue;
+            Draw_SegmentedBar(24, 244, active_segs, 10, pc, theme_bg);
         }
 
         // ------------------ 右侧趋势图卡片 ------------------
         if (force_refresh) {
-            LCD_FillRect(216, 56, 248, 220, DARK_GRAY);
-            LCD_DrawRect(216, 56, 248, 220, GRAY);
-            Draw_CornerBrackets(216, 56, 248, 220, 6, GRAY);
-            LCD_ShowString(228, 62, "Deviation Trend (+/-5 C)", CYAN, DARK_GRAY);
+            LCD_FillRect(216, 56, 248, 220, theme_card_bg);
+            LCD_DrawRect(216, 56, 248, 220, theme_border);
+            Draw_CornerBrackets(216, 56, 248, 220, 6, theme_border);
+            LCD_ShowString(228, 62, "Deviation Trend (+/-5 C)", theme_accent, theme_card_bg);
         }
         Draw_DevChart();
     }
@@ -464,12 +480,12 @@ void Display_Refresh(uint8_t force_refresh) {
     else if (current_page == 2) {
         if (my_log_buffer.count == 0) {
             if (force_refresh) {
-                LCD_ShowString(120, 150, "NO ANOMALY LOGS RECORDED", GRAY, BLACK);
+                LCD_ShowString(120, 150, "NO ANOMALY LOGS RECORDED", theme_text_muted, theme_bg);
             }
         } else {
             /* 1. 先绘制点虚线时间轴垂直线 */
             if (force_refresh) {
-                Draw_DottedLine(24, 56, 24, 276, GRAY);
+                Draw_DottedLine(24, 56, 24, 276, theme_border);
             }
             
             /* 2. 遍历环形缓冲区绘制历史异常记录 */
@@ -483,21 +499,21 @@ void Display_Refresh(uint8_t force_refresh) {
 
                 if (force_refresh) {
                     /* 双圈闪烁时间轴节点 */
-                    LCD_DrawLine(24, row_y + 24, 42, row_y + 24, GRAY);
-                    LCD_FillCircle(24, row_y + 24, 2, RED);
-                    LCD_DrawCircle(24, row_y + 24, 5, RED);
+                    LCD_DrawLine(24, row_y + 24, 42, row_y + 24, theme_border);
+                    LCD_FillCircle(24, row_y + 24, 2, theme_red);
+                    LCD_DrawCircle(24, row_y + 24, 5, theme_red);
 
                     /* 右侧日志卡片背景与细灰色边框，配合红角标 */
-                    LCD_FillRect(42, row_y, 422, 48, DARK_GRAY);
-                    LCD_DrawRect(42, row_y, 422, 48, GRAY);
-                    Draw_CornerBrackets(42, row_y, 422, 48, 4, RED);
+                    LCD_FillRect(42, row_y, 422, 48, theme_card_bg);
+                    LCD_DrawRect(42, row_y, 422, 48, theme_border);
+                    Draw_CornerBrackets(42, row_y, 422, 48, 4, theme_red);
 
                     /* 卡片内部信息 */
                     sprintf(buf, "#%d [TIME: %d s]", i + 1, ev->timestamp_s);
-                    LCD_ShowString(52, row_y + 6, buf, YELLOW, DARK_GRAY);
+                    LCD_ShowString(52, row_y + 6, buf, theme_yellow, theme_card_bg);
 
                     sprintf(buf, "Base: %5.2f C -> Curr: %5.2f C", ev->baseline_temp, ev->current_temp);
-                    LCD_ShowString(52, row_y + 26, buf, RED, DARK_GRAY);
+                    LCD_ShowString(52, row_y + 26, buf, theme_red, theme_card_bg);
 
 
                 }
@@ -528,8 +544,8 @@ static void Draw_Beacon(void) {
         tick = 0;
         char s[2] = {sym[idx], '\0'};
         uint16_t bg = TopBarBg();
-        uint16_t fg = (bg == RED) ? RED : ((bg == BLUE) ? BLUE : GREEN);
-        LCD_ShowString(LCD_WIDTH - 16, 4, s, fg, BLACK);
+        uint16_t fg = (bg == theme_red) ? theme_red : ((bg == theme_blue) ? theme_blue : theme_green);
+        LCD_ShowString(LCD_WIDTH - 16, 4, s, fg, theme_bg);
         idx = (idx + 1) & 3;
     }
 }
@@ -547,7 +563,8 @@ int main(void) {
     LED_Init();
     KEY_Init();
     LCD_Init();
-    LCD_Clear(BLACK);
+    Theme_Init();
+    LCD_Clear(theme_bg);
     TP_Init();
 
     /* 传感器初始化 */
@@ -596,7 +613,15 @@ int main(void) {
                     touch_start_y = tp_dev.y;
                     swipe_triggered = 0;
                     tap_triggered = 0;
-                } else if (!swipe_triggered) {
+                    
+                    // 检测是否点击在主题切换按钮区域 (X: 410..460, Y: 0..30)
+                    if (tp_dev.x >= 410 && tp_dev.x <= 460 && tp_dev.y <= 30) {
+                        current_theme = !current_theme;
+                        Theme_Apply();
+                        Display_Refresh(1); // 强制全局重绘
+                        tap_triggered = 1;
+                    }
+                } else if (!swipe_triggered && !tap_triggered) {
                     int dx = (int)tp_dev.x - (int)touch_start_x;
                     int dy = (int)tp_dev.y - (int)touch_start_y;
                     

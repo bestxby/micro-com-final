@@ -307,3 +307,53 @@ void LCD_ShowString(uint16_t x, uint16_t y, const char *str, uint16_t fc, uint16
         cx += 8; str++;
     }
 }
+
+/* ============================================================
+ * 动态主题配置实现
+ * ============================================================ */
+uint8_t current_theme = 0; // 0 = Dark (Neon), 1 = Light (Claude Warm Paper)
+uint16_t theme_bg = BLACK;
+uint16_t theme_card_bg = DARK_GRAY;
+uint16_t theme_text = WHITE;
+uint16_t theme_text_muted = GRAY;
+uint16_t theme_border = GRAY;
+uint16_t theme_accent = CYAN;
+uint16_t theme_green = GREEN;
+uint16_t theme_blue = BLUE;
+uint16_t theme_red = RED;
+uint16_t theme_yellow = YELLOW;
+
+void Theme_Apply(void)
+{
+    if (current_theme == 0) {
+        // Dark Theme (Neon style)
+        theme_bg = BLACK;
+        theme_card_bg = DARK_GRAY;
+        theme_text = WHITE;
+        theme_text_muted = GRAY;
+        theme_border = GRAY;
+        theme_accent = CYAN;
+        theme_green = GREEN;
+        theme_blue = BLUE;
+        theme_red = RED;
+        theme_yellow = YELLOW;
+    } else {
+        // Light Theme (Claude warm paper style)
+        theme_bg = 0xF7BD;        // Warm cream page bg (#F7F4EB)
+        theme_card_bg = 0xFFFF;   // Clean white card bg (#FFFFFF)
+        theme_text = 0x18C3;      // Charcoal brown text (#1E1B18)
+        theme_text_muted = 0x7BEF;// Muted gray-brown text (#7E7B78)
+        theme_border = 0xD6BA;    // Soft warm gray border (#D6D3C9)
+        theme_accent = 0xDB48;    // Warm terracotta/orange accent (#D96B43)
+        theme_green = 0x24C8;     // Soft green (#209840)
+        theme_blue = 0x1B35;      // Deep soft blue (#1F619F)
+        theme_red = 0xC104;       // Crimson red (#C02020)
+        theme_yellow = 0xB440;    // Ochre/amber yellow (#B48800)
+    }
+}
+
+void Theme_Init(void)
+{
+    Theme_Apply();
+}
+

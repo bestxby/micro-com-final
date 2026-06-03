@@ -67,6 +67,24 @@
 #define ORANGE              0xFC00  // 橙色
 
 /* ============================================================
+ * 动态主题配置 (支持 Neon 暗色与 Claude 亮色主题)
+ * ============================================================ */
+extern uint8_t current_theme;
+extern uint16_t theme_bg;
+extern uint16_t theme_card_bg;
+extern uint16_t theme_text;
+extern uint16_t theme_text_muted;
+extern uint16_t theme_border;
+extern uint16_t theme_accent;
+extern uint16_t theme_green;
+extern uint16_t theme_blue;
+extern uint16_t theme_red;
+extern uint16_t theme_yellow;
+
+void Theme_Init(void);
+void Theme_Apply(void);
+
+/* ============================================================
  * 公开 API
  * ============================================================ */
 void LCD_Init(void);
