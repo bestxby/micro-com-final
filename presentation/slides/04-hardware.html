@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>04 物理接口定义与I/O引脚分配规划 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  .right-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding-top: 40px;
+  }
+  .mcu-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 36px; /* Increased margin */
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+  .mcu-table th, .mcu-table td {
+    padding: 18px 24px; /* Increased padding */
+    text-align: left;
+    font-size: 19px; /* Grander font size */
+  }
+  .mcu-table th {
+    background: rgba(139, 92, 246, 0.1);
+    color: var(--brand-primary);
+    font-weight: 800;
+  }
+  .mcu-table tr {
+    border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  }
+  .mcu-table tr:last-child {
+    border-bottom: none;
+  }
+  .mcu-table tr:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+  .pin-badge {
+    background: #E2E8F0;
+    color: #475569;
+    padding: 4px 10px; /* Larger badge */
+    border-radius: 4px;
+    font-weight: bold;
+    font-family: monospace;
+  }
+  .img-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--glass-shadow);
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .img-card img {
+    max-width: 100%;
+    max-height: 520px; /* Grander image display */
+    border-radius: 8px;
+    object-fit: contain;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">STM32 物理接口引脚接线映射</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">物理接口定义与<span class="highlight-gradient">I/O引脚分配规划</span></h1>
+    <p class="slide-subtitle">Physical Interface Definitions & I/O Pin Allocations</p>
+    
+    <table class="mcu-table">
+      <thead>
+        <tr>
+          <th>外设子系统</th>
+          <th>接口信号定义</th>
+          <th>MCU 引脚分配</th>
+          <th>配置模式与电气特性描述</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>I²C 传感器总线</strong></td>
+          <td>SCL / SDA</td>
+          <td><span class="pin-badge">PB6</span> / <span class="pin-badge">PB7</span></td>
+          <td>GPIO 软件模拟 I²C，通用开漏输出配置，挂载 AHT20 与 BMP280 并行总线</td>
+        </tr>
+        <tr>
+          <td><strong>TFT-LCD 显示模块</strong></td>
+          <td>CLK / MOSI / CS / RS</td>
+          <td><span class="pin-badge">PA5</span> / <span class="pin-badge">PA7</span> / <span class="pin-badge">PA4</span> / <span class="pin-badge">PA8</span></td>
+          <td>软件模拟单向 SPI 传输协议（配以 PA3-RST 硬件复位与 PB1-BL 背光占空比控制）</td>
+        </tr>
+        <tr>
+          <td><strong>XPT2046 触摸控制器</strong></td>
+          <td>TCS / DIN / DO / CLK / IRQ</td>
+          <td><span class="pin-badge">PB4</span> / <span class="pin-badge">PB3</span> / <span class="pin-badge">PA1</span> / <span class="pin-badge">PA8</span> / <span class="pin-badge">PA0</span></td>
+          <td>GPIO 位带操作加速软件 SPI（需重映射解除 PB3/PB4 的 JTAG/SW-DP 调试端口复用占用）</td>
+        </tr>
+        <tr>
+          <td><strong>多色状态指示与声光告警</strong></td>
+          <td>PC13 / PA0 / PA1 / PA2</td>
+          <td><span class="pin-badge">PC13</span> / <span class="pin-badge">PA0</span> / <span class="pin-badge">PA1</span> / <span class="pin-badge">PA2</span></td>
+          <td>TIM2_CH1 通道硬件 PWM 驱动 LED 呼吸灯（PA0）| GPIO 推挽输出驱动学习状态指示灯（PA1）与超限监测灯（PA2）</td>
+        </tr>
+        <tr>
+          <td><strong>外部用户交互按键</strong></td>
+          <td>KEY1 (翻页) / KEY2 (重置)</td>
+          <td><span class="pin-badge">PB0</span> / <span class="pin-badge">PB8</span></td>
+          <td>GPIO 弱上拉输入模式，映射外部中断线 EXTI 触发中断服务程序（ISR）</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="right-col">
+    <div class="img-card animate-fade-in-up delay-2">
+      <!-- Embed the extracted AHT20/BMP280 sensor wiring image -->
+      <img src="../shared/images/sensor_wiring.png" alt="AHT20/BMP280 Sensor Wiring Schematic">
+    </div>
+    <div style="font-size: 14px; color: var(--text-muted); font-weight: 600; font-style: italic;">
+      图 4.1：微控制器与感知阵列的物理接线与拓扑示意图
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">03. 物理接口定义与I/O引脚分配规划</div>
+  <div class="slide-number">Page 4 / 12</div>
+</div>
+
+</body>
+</html>

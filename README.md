@@ -1,4 +1,4 @@
-# STM32F103C8T6 异常检测与娱乐自适应系统 (README.md)
+# STM32-Adaptive-Sentinel: Real-time Environmental Anomaly Monitoring & Adaptive Flappy Bird Game Engine
 
 基于 **STM32F103C8T6** (Blue Pill) 的环境自适应异常监测与像素飞鸟小游戏系统。系统采用高内聚、低耦合的模块化设计，完美适配了 **480×320 横屏 LCD** 以及 **XPT2046 触摸屏控制器**，并支持基于电容/电阻式触屏的多点手势识别与交互。
 

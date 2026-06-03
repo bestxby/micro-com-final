@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>06 一阶IIR指数移动平均低通滤波器设计 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  .right-col {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    padding-top: 40px;
+  }
+  
+  .formula-card {
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px dashed rgba(139, 92, 246, 0.4);
+    border-radius: 12px;
+    padding: 24px; /* Increased padding */
+    margin: 32px 0; /* More spacing */
+    text-align: center;
+    color: var(--brand-primary);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+  }
+  
+  .chart-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: var(--glass-shadow);
+    width: 100%;
+    height: 600px; /* Taller chart card */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+  .chart-legend {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .legend-color {
+    width: 24px;
+    height: 4px;
+    border-radius: 2px;
+  }
+  .color-raw { background: #94A3B8; }
+  .color-filtered { background: linear-gradient(90deg, #06B6D4, #8B5CF6); }
+  
+  .chart-area {
+    flex-grow: 1;
+    position: relative;
+    border-left: 2px solid #CBD5E1;
+    border-bottom: 2px solid #CBD5E1;
+  }
+  
+  .chart-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+  .y-axis-label {
+    position: absolute;
+    left: -40px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-muted);
+  }
+  .y-high { top: 10px; }
+  .y-low { bottom: 10px; }
+  .x-axis-label {
+    position: absolute;
+    bottom: -24px;
+    right: 10px;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-muted);
+  }
+
+  /* Localized animations for Slide 6 continuous oscilloscope sweep */
+  @keyframes sweepReveal {
+    0% { width: 0; }
+    95% { width: 740px; opacity: 1; }
+    98% { opacity: 0; }
+    99% { width: 0; opacity: 0; }
+    100% { width: 0; opacity: 1; }
+  }
+  @keyframes sweepScan {
+    0% { x1: 0; x2: 0; opacity: 1; }
+    95% { x1: 740; x2: 740; opacity: 1; }
+    98% { opacity: 0; }
+    99% { x1: 0; x2: 0; opacity: 0; }
+    100% { x1: 0; x2: 0; opacity: 1; }
+  }
+  #chartClipRect {
+    animation: sweepReveal 4s infinite linear !important;
+  }
+  #svgScanLineChart {
+    animation: sweepScan 4s infinite linear;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">数字滤波算法设计与幅频特性分析</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">数据预处理：<span class="highlight-gradient">一阶IIR指数移动平均低通滤波器</span></h1>
+    <p class="slide-subtitle">First-Order IIR Exponential Moving Average Low-Pass Filter</p>
+    
+    <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
+      <p>• <strong>低通去噪机理</strong>：温湿度传感器输出的原始采样数据中混杂有高频瞬态环境热噪声。为防止时域波动引起决策边界的异常误判，设计并部署了一阶无限冲激响应（IIR）指数移动平均平滑滤波算法。</p>
+      
+      <div class="formula-card">
+        <span class="formula" style="font-size: 28px;">T<sub>f</sub>[n] = &alpha; &middot; T<sub>raw</sub>[n] + (1 - &alpha;) &middot; T<sub>f</sub>[n-1]</span>
+      </div>
+      
+      <p>• <strong>滤波器参数约束</strong>：设定平滑衰减因子 <span class="formula" style="color: var(--brand-primary); font-weight: bold;">&alpha; = 0.2</span>。当传感器时分采样率设定为 <span class="formula">f<sub>s</sub> = 10Hz</span> 时，系统物理截止频率理论推导为 <span class="formula">f<sub>c</sub> &asymp; 0.356Hz</span>。此配置可在阻带内提供优异的高频随机噪声抑制性能，并确保通带响应延时不超过 <span class="formula">300ms</span>，实现滤波平滑度与瞬态响应灵敏度的最优折衷。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="chart-card animate-fade-in-up delay-2">
+      <div class="chart-header">
+        <div style="font-size: 16px; font-weight: 800; color: var(--text-primary);">10Hz 采样率下温度波形原始数据与滤波数据时域对比</div>
+        <div class="chart-legend">
+          <div class="legend-item">
+            <span class="legend-color color-raw"></span>
+            <span>原始物理温度 <span class="formula">T<sub>raw</sub></span></span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color color-filtered"></span>
+            <span>去噪估计温度 <span class="formula">T<sub>f</sub></span></span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="chart-area">
+        <span class="y-axis-label y-high formula">35°C</span>
+        <span class="y-axis-label y-low formula">20°C</span>
+        <span class="x-axis-label">时域采样周期 (s)</span>
+        
+        <svg class="chart-svg" viewBox="0 0 740 320" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="gradientLine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#06B6D4" />
+              <stop offset="100%" stop-color="#8B5CF6" />
+            </linearGradient>
+            <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.18" />
+              <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0" />
+            </linearGradient>
+            <linearGradient id="scanGradChart" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#8b5cf6" />
+            </linearGradient>
+            <filter id="scanGlowChart" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            <clipPath id="chartClip">
+              <rect id="chartClipRect" x="0" y="0" width="0" height="320" />
+            </clipPath>
+          </defs>
+          
+          <!-- Grid helper lines -->
+          <line x1="0" y1="100" x2="740" y2="100" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
+          <line x1="0" y1="200" x2="740" y2="200" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4" />
+          
+          <g clip-path="url(#chartClip)">
+            <!-- Filtered Area Gradient Fill -->
+            <path d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95 L 720,320 L 0,320 Z" fill="url(#areaGradient)" />
+
+            <!-- Raw Noisy Temperature Wave (grey, jagged) -->
+            <path class="wave-path" stroke="#94A3B8" stroke-width="2" opacity="0.6"
+                  d="M 0,250 L 40,240 L 80,260 L 120,225 L 160,255 L 200,210 L 240,245 L 280,180 L 320,205 L 360,150 L 400,165 L 440,110 L 480,140 L 520,115 L 560,90 L 600,120 L 640,85 L 680,105 L 720,80" />
+                  
+            <!-- Filtered Temperature Wave (glowing cyan/purple gradient, smooth) -->
+            <path class="wave-path" stroke="url(#gradientLine)" stroke-width="4"
+                  d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95" />
+          </g>
+
+          <!-- Oscilloscope Scan Line -->
+          <line id="svgScanLineChart" x1="0" y1="0" x2="0" y2="320" stroke="url(#scanGradChart)" stroke-width="4" filter="url(#scanGlowChart)" />
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">05. 一阶IIR指数移动平均低通滤波器设计</div>
+  <div class="slide-number">Page 6 / 12</div>
+</div>
+
+</body>
+</html>

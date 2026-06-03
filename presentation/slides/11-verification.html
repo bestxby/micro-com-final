@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>11 瞬态温控响应实验与声光告警联合验证 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 0.95;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  .right-col {
+    flex: 1.05;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 20px;
+    padding-top: 40px;
+  }
+  
+  .alarm-card {
+    background: rgba(239, 68, 68, 0.05);
+    border: 1px dashed rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 20px 24px; /* Increased padding */
+    margin-top: 24px;
+  }
+  .alarm-card h4 {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--alert-red);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .alarm-card p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  
+  .video-card {
+    width: 100%;
+    height: 450px; /* Expanded height */
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 12px;
+    box-shadow: var(--glass-shadow);
+  }
+  
+  .mini-chart {
+    width: 100%;
+    height: 180px; /* Expanded height */
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .chart-svg {
+    position: absolute;
+    top: 40px; left: 20px;
+    width: calc(100% - 40px);
+    height: calc(100% - 55px);
+    overflow: visible;
+  }
+  .threshold-line {
+    stroke: var(--alert-red);
+    stroke-width: 1.5px;
+    stroke-dasharray: 4;
+  }
+  .baseline-line {
+    stroke: var(--text-muted);
+    stroke-width: 1.5px;
+    stroke-dasharray: 4;
+  }
+  .temp-path {
+    fill: none;
+    stroke: linear-gradient(90deg, var(--brand-secondary), var(--alert-red));
+    stroke-width: 3px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">系统瞬态热工特性与物理联动校验</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">瞬态温控响应实验与<span class="highlight-gradient">声光告警联合验证</span></h1>
+    <p class="slide-subtitle">Transient Thermal Testing & Alarm Co-Verification</p>
+    
+    <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
+      <p>• <strong>瞬态温升物理激励</strong>：系统完成自适应锁温基准（以 <span class="formula">25°C</span> 为底数锁存）后，通过对传感器模组施加局部热传导激励（如温控热源或手部接触）。当感知温度瞬态攀升至 <span class="formula">30.1°C</span> 时，计算所得的绝对偏差 <span class="formula">&Delta;T</span> 达到 <span class="formula">5.1°C</span>，成功突破统计学决策边界门限。</p>
+      
+      <div class="alarm-card">
+        <h4>🚨 <span class="formula">5Hz</span> 声光电多维并发告警机制</h4>
+        <p>系统调度内核切断 TIM2_CH1 通道，关断 LED2 呼吸指示；驱动 PC13 引脚电平高速翻转，以固定的 <span class="formula">5Hz</span> 频率驱使告警 LED 爆闪；同时驱动 GPIO 引脚控制 LED3 与 LED4 模拟警灯交互闪烁，配合有源电磁式蜂鸣器发出高分贝断续声鸣。</p>
+      </div>
+      
+      <p style="margin-top: 20px;">• <strong>异常数据帧快照归档</strong>：在越界决策触发的瞬间，系统硬件中断程序立即捕获当前的温湿度、大气压、拟合均值及硬件定时器时间戳，以增量形式写入 <span class="formula">AnomalyLog</span> 环形数据缓冲区（Ring Buffer）。此快照在物理层与 LCD 菜单的日志页（Page 2）进行非易失/半易失的实时持久化呈现。</p>
+    </div>
+  </div>
+
+  <div class="right-col">
+    <!-- Video container for user's alert/buzzer test video -->
+    <div class="video-card animate-fade-in-up delay-2">
+      <div class="video-placeholder-container">
+        <video controls autoplay muted loop>
+          <source src="../shared/videos/alert_test.mp4" type="video/mp4">
+          <div class="video-fallback-msg">
+            🎥 [请在此处替换为您的测试视频：alert_test.mp4]<br>
+            展示捂热传感器后 LED 爆闪和蜂鸣器报警的实物效果
+          </div>
+        </video>
+      </div>
+    </div>
+    
+    <div class="mini-chart animate-fade-in-up delay-3">
+      <div style="font-size: 13px; font-weight: bold; color: var(--text-primary);">瞬态温升突破统计决策边界曲线 <span class="formula">&Delta;T &gt; 5°C</span></div>
+      <svg class="chart-svg" viewBox="0 0 400 80" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cyanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#06B6D4" />
+            <stop offset="100%" stop-color="#8B5CF6" />
+          </linearGradient>
+          <linearGradient id="alertAreaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" stop-color="#EF4444" stop-opacity="0.22" />
+            <stop offset="100%" stop-color="#EF4444" stop-opacity="0.0" />
+          </linearGradient>
+          <clipPath id="verifyClip">
+            <rect id="verifyClipRect" x="0" y="0" width="0" height="80" />
+          </clipPath>
+        </defs>
+        
+        <g clip-path="url(#verifyClip)">
+          <!-- Red Alert Area Gradient Fill -->
+          <path d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8 L 400,80 L 0,80 Z" fill="url(#alertAreaGrad)" />
+          
+          <!-- Temp curve shooting up -->
+          <path class="temp-path" stroke="url(#cyanPurpleGrad)" 
+                d="M 0,60 L 60,60 L 120,62 L 180,60 L 220,58 L 260,45 L 300,15 L 340,10 L 400,8" />
+        </g>
+
+        <!-- Lines -->
+        <line x1="0" y1="60" x2="400" y2="60" class="baseline-line" /> <!-- Baseline 25C -->
+        <line x1="0" y1="20" x2="400" y2="20" class="threshold-line" /> <!-- Threshold 30C -->
+        
+        <text x="5" y="52" fill="#64748B" font-size="7" font-weight="bold" class="formula">基准均值 25.0°C</text>
+        <text x="5" y="12" fill="#EF4444" font-size="7" font-weight="bold" class="formula">报警边界 30.0°C</text>
+        
+        <!-- Glowing alert dot and text synced with curve reveal -->
+        <g class="verify-alert-trigger">
+          <circle cx="300" cy="15" r="3" fill="#EF4444" class="glowing-node" />
+          <text x="310" y="25" fill="#EF4444" font-size="7" font-weight="bold">越界报警触发!</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">10. 瞬态温控响应实验与声光告警联合验证</div>
+  <div class="slide-number">Page 11 / 12</div>
+</div>
+
+</body>
+</html>

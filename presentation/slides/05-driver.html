@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>05 I²C协议栈设计与多传感器总线驱动 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 40px;
+  }
+  .right-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 30px; /* Increased gap */
+    padding-top: 40px;
+  }
+  .code-block {
+    background: #0F172A;
+    color: #F8FAFC;
+    padding: 28px 32px; /* Increased padding */
+    border-radius: 12px;
+    font-family: monospace;
+    font-size: 19px; /* Larger code font */
+    line-height: 1.6;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: var(--glass-shadow);
+    margin-top: 36px;
+  }
+  .code-keyword { color: #F472B6; }
+  .code-type { color: #38BDF8; }
+  .code-func { color: #FB7185; }
+  
+  .timing-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: var(--glass-shadow);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .timing-card img {
+    max-width: 100%;
+    height: 200px; /* Taller image */
+    object-fit: contain;
+    border-radius: 6px;
+  }
+  
+  /* Waveform Animation */
+  .waveform-container {
+    width: 100%;
+    height: 210px; /* Taller waveform card */
+    background: rgba(15, 23, 42, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(139, 92, 246, 0.1);
+    position: relative;
+    overflow: hidden;
+    padding: 10px 20px;
+  }
+  .wave-label {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-muted);
+    font-family: monospace;
+    position: absolute;
+    left: 20px;
+  }
+  .label-scl { top: 55px; } /* Repositioned SCL label */
+  .label-sda { top: 140px; } /* Repositioned SDA label */
+  
+  .wave-svg {
+    width: 100%;
+    height: 100%;
+  }
+  .wave-path {
+    fill: none;
+    stroke-width: 3px;
+    stroke-linecap: round;
+  }
+  .scl-path {
+    stroke: var(--brand-secondary);
+  }
+  .sda-path {
+    stroke: var(--brand-primary);
+  }
+  .scan-line {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(to bottom, #06b6d4, #8b5cf6);
+    box-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+    animation: scan 4s infinite linear;
+  }
+  @keyframes scan {
+    0% { left: 80px; }
+    100% { left: 95%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">模拟 I²C 串行通信时序与驱动</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">I²C协议栈设计与<span class="highlight-gradient">多传感器总线驱动</span></h1>
+    <p class="slide-subtitle">I²C Protocol Stack & Multi-Sensor Bus Driver</p>
+    
+    <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 20px;">
+      <p>• <strong>GPIO 模拟开漏时序</strong>：避开 STM32F103 硬件 I²C 控制器在多主/复杂状态下极易发生的 <span class="formula">BUSY</span> 标志死锁硬件缺陷。基于软件模拟开漏输出，在发生从机拉死 <span class="formula">SDA</span> 的异常挂死状况时，主机可自主输出 <span class="formula">9</span> 个 <span class="formula">SCL</span> 时钟脉冲强行复位从机状态机，实现总线硬件级自愈。</p>
+      <p style="margin-top: 10px;">• <strong>总线级多传感器并联</strong>：于 <span class="formula">PB6 (SCL)</span> 与 <span class="formula">PB7 (SDA)</span> 构建的模拟总线上挂载 AHT20 与 BMP280 感知芯片。通过独特的 <span class="formula">7-bit</span> 物理从机地址进行轮询时分复用寻址，在极简的物理拓扑结构下实现双参数高稳定度并发采集。</p>
+    </div>
+    
+    <div class="code-block animate-fade-in-up delay-2">
+<span class="code-type">uint8_t</span> <span class="code-func">AHT20_ReadData</span>(<span class="code-type">float</span> *temp, <span class="code-type">float</span> *humidity) {
+    <span class="code-func">I2C_Start</span>();
+    <span class="code-func">I2C_WriteByte</span>(AHT20_ADDR_WRITE);
+    <span class="code-keyword">if</span> (!<span class="code-func">I2C_WaitAck</span>()) { <span class="code-func">I2C_Stop</span>(); <span class="code-keyword">return</span> <span class="code-type">0</span>; }
+    <span class="code-func">I2C_WriteByte</span>(<span class="code-type">0xAC</span>); <span class="code-comment">// 发送触发测量命令</span>
+    ...
+}
+    </div>
+  </div>
+
+  <div class="right-col">
+    <div class="timing-card animate-fade-in-up delay-3">
+      <div style="font-size: 14px; font-weight: bold; color: var(--text-primary);">I²C 总线模拟物理层通信波形分析</div>
+      <img src="../shared/images/i2c_timing.png" alt="I2C Waveform Schematic">
+    </div>
+    
+    <div class="waveform-container animate-fade-in-up delay-4">
+      <div class="wave-label label-scl">SCL (Clock)</div>
+      <div class="wave-label label-sda">SDA (Data)</div>
+      <svg class="wave-svg" viewBox="0 0 600 120" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="scanGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#06b6d4" />
+            <stop offset="100%" stop-color="#8b5cf6" />
+          </linearGradient>
+          <filter id="scanGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+            <feMerge>
+              <feMergeNode in="blur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <clipPath id="waveClip">
+            <rect id="clipRect" x="0" y="0" width="80" height="120" />
+          </clipPath>
+        </defs>
+        <!-- SCL clock line -->
+        <path clip-path="url(#waveClip)" class="wave-path scl-path" d="M 80,35 L 120,35 L 120,15 L 150,15 L 150,35 L 190,35 L 190,15 L 220,15 L 220,35 L 260,35 L 260,15 L 290,15 L 290,35 L 330,35 L 330,15 L 360,15 L 360,35 L 400,35 L 400,15 L 430,15 L 430,35 L 470,35 L 470,15 L 500,15 L 500,35 L 540,35 M 540,35 L 580,35" />
+        <!-- SDA data line (Write Command 0xAC: 10101100) -->
+        <path clip-path="url(#waveClip)" class="wave-path sda-path" d="M 80,90 L 110,90 L 110,65 L 150,65 L 150,90 L 230,90 L 230,65 L 300,65 L 300,90 L 370,90 L 370,65 L 440,65 L 440,90 L 510,90 L 510,90 L 580,90" />
+        <!-- Oscilloscope Scan Line -->
+        <line id="svgScanLine" x1="80" y1="0" x2="80" y2="120" stroke="url(#scanGrad)" stroke-width="3" />
+      </svg>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">04. I²C协议栈设计与多传感器总线驱动</div>
+  <div class="slide-number">Page 5 / 12</div>
+</div>
+
+</body>
+</html>
