@@ -178,18 +178,16 @@
   .gauge-container {
     position: relative;
     width: 100%;
-    height: 110px;
-    margin-top: 10px;
+    height: 85px;
+    margin-top: 15px;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 35px;
+    align-items: flex-end;
   }
   .gauge-bar {
     width: 100%;
-    height: 30px;
+    height: 32px;
     background: #E2E8F0;
-    border-radius: 15px;
+    border-radius: 16px;
     position: relative;
     overflow: hidden;
     border: 1px solid rgba(148, 163, 184, 0.3);
@@ -228,53 +226,54 @@
   
   .gauge-pointer {
     position: absolute;
-    width: 60px;
-    height: 70px;
-    top: 0px;
+    bottom: 38px;
+    left: 50%;
     transform: translateX(-50%);
     z-index: 15;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    transition: left 3.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: left 0.1s linear; /* Smooth linear tracking */
   }
-  .pointer-pin {
-    width: 14px;
-    height: 14px;
-    border-radius: 99px;
-    background: #0F172A;
-    border: 3px solid #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    margin-bottom: 6px;
-    transition: background-color 0.5s ease;
-  }
-  .gauge-pointer span {
-    font-size: 15px;
+  .pointer-bubble {
+    font-size: 16px;
     font-weight: 800;
     background: #0F172A;
     color: #fff;
-    padding: 4px 10px;
-    border-radius: 6px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    padding: 6px 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     white-space: nowrap;
+    position: relative;
     transition: background-color 0.5s ease;
   }
-  
-  .pointer-anomaly .pointer-pin {
-    background: #EF4444 !important;
-    box-shadow: 0 0 10px #EF4444;
+  .pointer-bubble::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px 6px 0;
+    border-style: solid;
+    border-color: #0F172A transparent;
+    display: block;
+    width: 0;
+    transition: border-top-color 0.5s ease;
   }
-  .pointer-anomaly span {
+  
+  .pointer-anomaly .pointer-bubble {
     background: #EF4444 !important;
+  }
+  .pointer-anomaly .pointer-bubble::after {
+    border-color: #EF4444 transparent !important;
   }
 
   .gauge-labels-row {
     position: relative;
     width: 100%;
-    height: 45px;
+    height: 48px;
     margin-top: 8px;
-    font-size: 13px;
+    font-size: 15px;
     font-weight: bold;
     color: var(--text-muted);
   }
@@ -285,24 +284,32 @@
   }
   .label-left {
     left: 0;
-    color: #EF4444;
+    color: #EF4444 !important;
+    font-weight: 900;
   }
   .label-mid-left {
     left: 18.75%;
     transform: translateX(-50%);
+    color: #10B981 !important;
+    font-weight: 900;
   }
   .label-center {
     left: 50%;
     transform: translateX(-50%);
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
+    font-size: 16px !important;
+    font-weight: 900;
   }
   .label-mid-right {
     left: 81.25%;
     transform: translateX(-50%);
+    color: #10B981 !important;
+    font-weight: 900;
   }
   .label-right {
     right: 0;
-    color: #EF4444;
+    color: #EF4444 !important;
+    font-weight: 900;
   }
 </style>
 </head>
@@ -388,10 +395,9 @@
           <!-- Center line mark -->
           <div class="center-tick"></div>
         </div>
-        <!-- Pointer with indicator pin -->
+        <!-- Pointer with indicator bubble -->
         <div class="gauge-pointer" id="gaugePointer" style="left: 50%;">
-          <div class="pointer-pin"></div>
-          <span class="formula">T<sub>f</sub></span>
+          <div class="pointer-bubble formula">T<sub>f</sub>: <span id="pointerTemp">25.0</span>°C</div>
         </div>
       </div>
       
@@ -418,40 +424,92 @@
     const banner = document.getElementById('statusBanner');
     const tfVal = document.getElementById('tfVal');
     const devVal = document.getElementById('devVal');
+    const pointerTemp = document.getElementById('pointerTemp');
     
-    // Simulate pointer sliding to Anomaly after 1.5s
-    setTimeout(() => {
-      // 1. Slide pointer to the right anomaly zone (95%)
-      pointer.style.left = '95%';
+    const baseTemp = 25.0;
+    
+    // Animation state machine parameters for continuous simulation
+    let state = 'NORMAL_TO_ANOMALY'; 
+    let currentDev = 0.0;
+    let targetDev = 0.0;
+    let startDev = 0.0;
+    let duration = 3000; 
+    let elapsed = 0;
+    const intervalTime = 30; 
+    
+    function updateUI(dev) {
+      const absDev = Math.abs(dev);
+      devVal.innerText = absDev.toFixed(1);
       
-      // 2. Animate devVal, tfVal and status change
-      let currentDev = 0.0;
-      const targetDev = 7.2;
-      const baseTemp = 25.0;
-      const steps = 50;
-      let step = 0;
+      const currentTemp = baseTemp + dev;
+      tfVal.innerText = currentTemp.toFixed(1);
+      pointerTemp.innerText = currentTemp.toFixed(1);
       
-      const interval = setInterval(() => {
-        step++;
-        currentDev = (targetDev * (step / steps));
-        devVal.innerText = currentDev.toFixed(1);
-        tfVal.innerText = (baseTemp + currentDev).toFixed(1);
+      // Map deviation (-8 to +8) to percentage (0% to 100%)
+      const percent = 50 + (dev / 8) * 50;
+      pointer.style.left = `${percent}%`;
+      
+      if (absDev > 5.0) {
+        banner.innerText = '决策推断: 异常 (瞬态突变)';
+        banner.className = 'alert-banner banner-anomaly';
+        pointer.classList.add('pointer-anomaly');
+      } else {
+        banner.innerText = '决策推断: 正常 (稳态)';
+        banner.className = 'alert-banner banner-normal';
+        pointer.classList.remove('pointer-anomaly');
+      }
+    }
+    
+    function runSimulation() {
+      const timer = setInterval(() => {
+        elapsed += intervalTime;
+        let t = Math.min(elapsed / duration, 1.0);
         
-        if (currentDev > 5.0) {
-          // Switch to Anomaly styling
-          banner.innerText = '决策推断: 异常 (瞬态突变)';
-          banner.className = 'alert-banner banner-anomaly';
-          pointer.classList.add('pointer-anomaly');
-        }
+        // Easing function: easeInOutQuad
+        let ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
         
-        if (step >= steps) {
-          clearInterval(interval);
+        currentDev = startDev + (targetDev - startDev) * ease;
+        updateUI(currentDev);
+        
+        if (t >= 1.0) {
+          clearInterval(timer);
+          
+          // Move to next state after a delay
+          setTimeout(() => {
+            if (state === 'NORMAL_TO_ANOMALY') {
+              state = 'HOLD_ANOMALY';
+              startDev = 7.4;
+              targetDev = 7.4;
+              duration = 2000; // Hold at high anomaly for 2 seconds
+            } else if (state === 'HOLD_ANOMALY') {
+              state = 'ANOMALY_TO_NORMAL';
+              startDev = 7.4;
+              targetDev = -0.6; // Drop below baseline to simulate cooling
+              duration = 3500; 
+            } else if (state === 'ANOMALY_TO_NORMAL') {
+              state = 'HOLD_NORMAL';
+              startDev = -0.6;
+              targetDev = -0.6;
+              duration = 2000; // Hold at normal baseline for 2 seconds
+            } else if (state === 'HOLD_NORMAL') {
+              state = 'NORMAL_TO_ANOMALY';
+              startDev = -0.6;
+              targetDev = 7.4;
+              duration = 3000; 
+            }
+            elapsed = 0;
+            runSimulation();
+          }, 400);
         }
-      }, 45);
-      
-    }, 1500);
+      }, intervalTime);
+    }
+    
+    // Initialize loop
+    startDev = 0.0;
+    targetDev = 7.4;
+    duration = 3000;
+    runSimulation();
   });
 </script>
-
 </body>
 </html>
