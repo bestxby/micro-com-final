@@ -6,131 +6,303 @@
 <link rel="stylesheet" href="../shared/tokens.css">
 <style>
   .left-col {
-    flex: 1;
+    flex: 1.1;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 40px;
+    padding-top: 20px;
   }
   .right-col {
-    flex: 1;
+    flex: 0.9;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
-    padding-top: 40px;
+    padding-top: 20px;
+  }
+
+  .desc-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-top: 24px;
+  }
+  .desc-card-item {
+    display: flex;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.4);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+    border-radius: 16px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+    transition: all 0.3s ease;
+  }
+  .desc-card-item:hover {
+    background: rgba(255, 255, 255, 0.75);
+    border-color: var(--brand-secondary);
+    transform: translateX(6px);
+  }
+  .desc-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .desc-text {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .desc-text strong {
+    color: var(--text-primary);
+  }
+  .formula-display {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--brand-primary);
+    margin: 8px 0 4px 0;
+    text-align: center;
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 8px;
+    border: 1px dashed rgba(139, 92, 246, 0.2);
+    display: inline-block;
+    padding: 6px 30px;
+  }
+  .decision-rules {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .rule-item {
+    font-size: 19px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  .rule-normal {
+    background: rgba(16, 185, 129, 0.08);
+    color: #059669;
+    border-left: 4px solid #10B981;
+  }
+  .rule-anomaly {
+    background: rgba(239, 68, 68, 0.08);
+    color: #DC2626;
+    border-left: 4px solid #EF4444;
   }
   
   .detect-card {
     width: 100%;
-    max-width: 600px; /* Expanded width */
-    height: 600px; /* Grander height */
+    max-width: 660px;
+    height: 610px;
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     border-radius: 24px;
-    padding: 48px;
+    padding: 36px;
     box-shadow: var(--glass-shadow);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Spaced out layout */
+    justify-content: space-between;
     position: relative;
+  }
+  
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  .dashboard-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .dashboard-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
   }
   
   .alert-banner {
     width: 100%;
-    padding: 12px;
+    padding: 14px 20px;
     border-radius: 12px;
-    font-size: 18px;
-    font-weight: 800;
+    font-size: 22px;
+    font-weight: 900;
     text-align: center;
     text-transform: uppercase;
-    transition: all 0.5s ease;
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .banner-normal {
-    background: #D1FAE5;
-    color: #059669;
-    border: 1px solid #A7F3D0;
+    background: rgba(16, 185, 129, 0.12);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.35);
   }
   .banner-anomaly {
-    background: #FEE2E2;
-    color: #DC2626;
-    border: 1px solid #FCA5A5;
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+    border: 1px solid rgba(239, 68, 68, 0.35);
     animation: flashAlert 0.8s infinite alternate;
   }
   @keyframes flashAlert {
-    from { opacity: 0.8; box-shadow: 0 0 10px rgba(220, 38, 38, 0.2); }
-    to { opacity: 1; box-shadow: 0 0 25px rgba(220, 38, 38, 0.6); }
+    from { opacity: 0.85; box-shadow: 0 0 10px rgba(239, 68, 68, 0.15); }
+    to { opacity: 1; box-shadow: 0 0 25px rgba(239, 68, 68, 0.45); }
   }
   
-  /* Threshold Visual Gauge */
+  .readout-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin: 10px 0;
+  }
+  .readout-item {
+    background: rgba(255, 255, 255, 0.45);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .readout-label {
+    font-size: 15px;
+    color: var(--text-muted);
+    font-weight: bold;
+    display: block;
+    margin-bottom: 6px;
+  }
+  .readout-value {
+    font-size: 42px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  
   .gauge-container {
     position: relative;
     width: 100%;
-    height: 100px;
-    margin: 20px 0;
+    height: 110px;
+    margin-top: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 35px;
   }
   .gauge-bar {
     width: 100%;
-    height: 24px;
+    height: 30px;
     background: #E2E8F0;
-    border-radius: 12px;
+    border-radius: 15px;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.3);
   }
   .normal-zone {
     position: absolute;
-    left: 25%;
-    width: 50%;
+    left: 18.75%;
+    width: 62.5%;
     height: 100%;
-    background: linear-gradient(90deg, rgba(52, 211, 153, 0.4), rgba(52, 211, 153, 0.8), rgba(52, 211, 153, 0.4));
-    border-left: 2px dashed #059669;
-    border-right: 2px dashed #059669;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.35), rgba(16, 185, 129, 0.15));
+    border-left: 2px dashed rgba(16, 185, 129, 0.6);
+    border-right: 2px dashed rgba(16, 185, 129, 0.6);
   }
   .anomaly-zone-left {
     position: absolute;
     left: 0;
-    width: 25%;
+    width: 18.75%;
     height: 100%;
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.15);
   }
   .anomaly-zone-right {
     position: absolute;
     right: 0;
-    width: 25%;
+    width: 18.75%;
     height: 100%;
-    background: rgba(239, 68, 68, 0.3);
+    background: rgba(239, 68, 68, 0.15);
+  }
+  .center-tick {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.15);
   }
   
   .gauge-pointer {
     position: absolute;
-    width: 20px;
-    height: 40px;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--text-primary);
-    border-radius: 4px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 10;
+    width: 60px;
+    height: 70px;
+    top: 0px;
+    transform: translateX(-50%);
+    z-index: 15;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 10px;
-    font-weight: bold;
+    justify-content: space-between;
     transition: left 3.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
+  .pointer-pin {
+    width: 14px;
+    height: 14px;
+    border-radius: 99px;
+    background: #0F172A;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    margin-bottom: 6px;
+    transition: background-color 0.5s ease;
+  }
+  .gauge-pointer span {
+    font-size: 15px;
+    font-weight: 800;
+    background: #0F172A;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    white-space: nowrap;
+    transition: background-color 0.5s ease;
+  }
   
-  .gauge-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
+  .pointer-anomaly .pointer-pin {
+    background: #EF4444 !important;
+    box-shadow: 0 0 10px #EF4444;
+  }
+  .pointer-anomaly span {
+    background: #EF4444 !important;
+  }
+
+  .gauge-labels-row {
+    position: relative;
+    width: 100%;
+    height: 45px;
+    margin-top: 8px;
+    font-size: 13px;
     font-weight: bold;
     color: var(--text-muted);
-    margin-top: 10px;
-    font-family: monospace;
+  }
+  .gauge-labels-row span {
+    position: absolute;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .label-left {
+    left: 0;
+    color: #EF4444;
+  }
+  .label-mid-left {
+    left: 18.75%;
+    transform: translateX(-50%);
+  }
+  .label-center {
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-primary);
+  }
+  .label-mid-right {
+    left: 81.25%;
+    transform: translateX(-50%);
+  }
+  .label-right {
+    right: 0;
+    color: #EF4444;
   }
 </style>
 </head>
@@ -151,41 +323,85 @@
     <h1 class="slide-title">统计决策边界与<span class="highlight-gradient">自适应异常判定</span></h1>
     <p class="slide-subtitle">Statistical Decision Boundary & Adaptive Anomaly Detection</p>
     
-    <div style="font-size: 19px; line-height: 1.6; color: var(--text-secondary);">
-      <p>• <strong>绝对偏差评估模型</strong>：系统锁定均值基准量 <span class="formula">&mu;<sub>base</sub></span> 后，无缝转入实时监测模态。连续读取当前低通滤波温度 <span class="formula">T<sub>f</sub></span> 并解算其实时绝对温差偏离度：</p>
-      <p style="margin: 12px 0 12px 30px; font-weight: bold; color: var(--brand-primary); font-size: 26px;"><span class="formula">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</span></p>
-      
-      <p>• <strong>置信度决策准则</strong>：</p>
-      <p style="margin-left: 20px; line-height: 2.0; font-size: 19px;">
-        - 若 <strong style="color: #059669;" class="formula">&Delta;T &le; 5°C</strong>：判定系统处于 <strong style="color: #059669;">正常温控稳态 (NORMAL)</strong>。<br>
-        - 若 <strong style="color: #DC2626;" class="formula">&Delta;T &gt; 5°C</strong>：判定系统触发 <strong style="color: #DC2626;">环境温度瞬态异常突变 (ANOMALY)</strong>。
-      </p>
-      <p style="margin-top: 16px;">• <strong>阈值参数的数理学术来源</strong>：突变偏差门限值设定为 <span class="formula">5°C</span> 并非经验值，而是基于系统在基准学习期间实时解算出的温度总体标准差估计量 <span class="formula">&sigma;</span>。根据统计学中的 <span class="formula">3&sigma;</span>（三倍标准差）概率边界准则（即 <span class="formula">3&sigma; &asymp; 5°C</span>），当温度波动由高频随机白噪声主导时，该边界能够提供高达 <span class="formula">99.73%</span> 的防误判置信水平，从而确保系统决策的统计严密性。</p>
+    <div class="desc-container">
+      <div class="desc-card-item">
+        <div class="desc-icon">📊</div>
+        <div class="desc-text">
+          <strong>绝对偏差评估模型</strong>：系统锁定均值基准量 <span class="formula">&mu;<sub>base</sub></span> 后，无缝转入实时监测模态。连续读取当前低通滤波温度 <span class="formula">T<sub>f</sub></span> 并解算其绝对偏离度：
+          <div style="display: block; text-align: center;"><div class="formula-display"><span class="formula">&Delta;T = | T<sub>f</sub> - &mu;<sub>base</sub> |</span></div></div>
+        </div>
+      </div>
+
+      <div class="desc-card-item">
+        <div class="desc-icon">⚖️</div>
+        <div class="desc-text">
+          <strong>置信度决策准则</strong>：
+          <div class="decision-rules">
+            <div class="rule-item rule-normal">
+              若 <span class="formula">&Delta;T &le; 5°C</span> &rarr; 判定为 <strong class="formula">正常温控稳态 (NORMAL)</strong>
+            </div>
+            <div class="rule-item rule-anomaly">
+              若 <span class="formula">&Delta;T &gt; 5°C</span> &rarr; 判定为 <strong class="formula">环境温度异常突变 (ANOMALY)</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="desc-card-item">
+        <div class="desc-icon">🔬</div>
+        <div class="desc-text">
+          <strong>阈值参数数理上限</strong>：设定 <span class="formula">5°C</span> 阈值是基于自适应拟合解算出的环境温度标准差 <span class="formula">&sigma;</span>，采用统计学三倍标准差法则（<span class="formula">3&sigma; &asymp; 5°C</span>）约束。在仅有高频热噪声时，该范围可提供高达 <span class="formula">99.73%</span> 的防误判置信水平。
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="right-col">
     <div class="detect-card animate-fade-in-up delay-2">
-      <div class="alert-banner banner-normal" id="statusBanner">DETECTION STATUS: NORMAL</div>
+      <!-- Dashboard Header -->
+      <div class="dashboard-header">
+        <h3 class="dashboard-title">自适应温度异常检测决策终端</h3>
+        <span class="dashboard-subtitle">Adaptive Decision Terminal</span>
+      </div>
+
+      <!-- Alert Status Banner -->
+      <div class="alert-banner banner-normal" id="statusBanner">决策推断: 正常 (稳态)</div>
       
+      <!-- Real-Time Large Digital Readouts -->
+      <div class="readout-grid">
+        <div class="readout-item">
+          <span class="readout-label">当前滤波温度 <span class="formula">T<sub>f</sub></span></span>
+          <div class="readout-value formula" style="color: var(--brand-secondary);"><span id="tfVal">25.0</span>°C</div>
+        </div>
+        <div class="readout-item">
+          <span class="readout-label">实时绝对偏差 <span class="formula">&Delta;T</span></span>
+          <div class="readout-value formula" style="color: var(--brand-primary);"><span id="devVal">0.0</span>°C</div>
+        </div>
+      </div>
+      
+      <!-- Visual Analog Gauge -->
       <div class="gauge-container">
         <div class="gauge-bar">
           <div class="anomaly-zone-left"></div>
           <div class="normal-zone"></div>
           <div class="anomaly-zone-right"></div>
+          <!-- Center line mark -->
+          <div class="center-tick"></div>
         </div>
-        <div class="gauge-pointer formula" id="gaugePointer" style="left: 50%;">T<sub>f</sub></div>
+        <!-- Pointer with indicator pin -->
+        <div class="gauge-pointer" id="gaugePointer" style="left: 50%;">
+          <div class="pointer-pin"></div>
+          <span class="formula">T<sub>f</sub></span>
+        </div>
       </div>
       
-      <div class="gauge-labels formula" style="font-size: 13px;">
-        <span>&Delta;T &gt; 5°C</span>
-        <span>&mu;<sub>base</sub></span>
-        <span>&Delta;T &gt; 5°C</span>
-      </div>
-      
-      <div style="display: flex; justify-content: space-between; font-size: 16px; color: var(--text-muted); font-weight: bold;">
-        <span>实时绝对偏差 <span class="formula">&Delta;T</span>: <strong id="devVal" style="color: var(--text-primary);" class="formula">0.0</strong> °C</span>
-        <span>决策推断: <strong id="decisionText" style="color: #059669;">正常 (稳态)</strong></span>
+      <!-- Gauge Labels with exact alignment -->
+      <div class="gauge-labels-row formula">
+        <span class="label-left">&Delta;T &gt; 5°C<br>异常区</span>
+        <span class="label-mid-left">-5°C 边界</span>
+        <span class="label-center">基准 &mu;<sub>base</sub><br>(0°C 偏差)</span>
+        <span class="label-mid-right">+5°C 边界</span>
+        <span class="label-right">&Delta;T &gt; 5°C<br>异常区</span>
       </div>
     </div>
   </div>
@@ -200,17 +416,18 @@
   window.addEventListener('load', () => {
     const pointer = document.getElementById('gaugePointer');
     const banner = document.getElementById('statusBanner');
+    const tfVal = document.getElementById('tfVal');
     const devVal = document.getElementById('devVal');
-    const decisionText = document.getElementById('decisionText');
     
     // Simulate pointer sliding to Anomaly after 1.5s
     setTimeout(() => {
-      // 1. Slide pointer to the right anomaly zone (e.g. 85%)
-      pointer.style.left = '85%';
+      // 1. Slide pointer to the right anomaly zone (95%)
+      pointer.style.left = '95%';
       
-      // 2. Animate devVal and decision text change
+      // 2. Animate devVal, tfVal and status change
       let currentDev = 0.0;
       const targetDev = 7.2;
+      const baseTemp = 25.0;
       const steps = 50;
       let step = 0;
       
@@ -218,18 +435,19 @@
         step++;
         currentDev = (targetDev * (step / steps));
         devVal.innerText = currentDev.toFixed(1);
+        tfVal.innerText = (baseTemp + currentDev).toFixed(1);
         
         if (currentDev > 5.0) {
           // Switch to Anomaly styling
-          banner.innerText = 'DETECTION STATUS: ANOMALY TRIGGERED';
-          decisionText.innerText = '异常 (瞬态突变)';
-          decisionText.style.color = '#DC2626';
+          banner.innerText = '决策推断: 异常 (瞬态突变)';
+          banner.className = 'alert-banner banner-anomaly';
+          pointer.classList.add('pointer-anomaly');
         }
         
         if (step >= steps) {
           clearInterval(interval);
         }
-      }, 40);
+      }, 45);
       
     }, 1500);
   });
