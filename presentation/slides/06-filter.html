@@ -101,6 +101,28 @@
     font-weight: bold;
     color: var(--text-muted);
   }
+
+  /* Localized animations for Slide 6 continuous oscilloscope sweep */
+  @keyframes sweepReveal {
+    0% { width: 0; }
+    95% { width: 740px; opacity: 1; }
+    98% { opacity: 0; }
+    99% { width: 0; opacity: 0; }
+    100% { width: 0; opacity: 1; }
+  }
+  @keyframes sweepScan {
+    0% { x1: 0; x2: 0; opacity: 1; }
+    95% { x1: 740; x2: 740; opacity: 1; }
+    98% { opacity: 0; }
+    99% { x1: 0; x2: 0; opacity: 0; }
+    100% { x1: 0; x2: 0; opacity: 1; }
+  }
+  #chartClipRect {
+    animation: sweepReveal 4s infinite linear !important;
+  }
+  #svgScanLineChart {
+    animation: sweepScan 4s infinite linear;
+  }
 </style>
 </head>
 <body>
@@ -162,6 +184,17 @@
               <stop offset="0%" stop-color="#06B6D4" stop-opacity="0.18" />
               <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.0" />
             </linearGradient>
+            <linearGradient id="scanGradChart" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#06b6d4" />
+              <stop offset="100%" stop-color="#8b5cf6" />
+            </linearGradient>
+            <filter id="scanGlowChart" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
             <clipPath id="chartClip">
               <rect id="chartClipRect" x="0" y="0" width="0" height="320" />
             </clipPath>
@@ -183,6 +216,9 @@
             <path class="wave-path" stroke="url(#gradientLine)" stroke-width="4"
                   d="M 0,250 Q 40,248 80,250 Q 120,238 160,243 Q 200,228 240,233 Q 280,210 320,208 Q 360,180 400,175 Q 440,145 480,143 Q 520,132 560,120 Q 600,120 640,105 Q 680,105 720,95" />
           </g>
+
+          <!-- Oscilloscope Scan Line -->
+          <line id="svgScanLineChart" x1="0" y1="0" x2="0" y2="320" stroke="url(#scanGradChart)" stroke-width="4" filter="url(#scanGlowChart)" />
         </svg>
       </div>
     </div>
