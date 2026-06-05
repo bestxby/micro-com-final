@@ -1,0 +1,884 @@
+#-----------------------------------------------------------
+# Vivado v2019.1 (64-bit)
+# SW Build 2552052 on Fri May 24 14:49:42 MDT 2019
+# IP Build 2548770 on Fri May 24 18:01:18 MDT 2019
+# Start of session at: Mon Aug  5 09:43:59 2024
+# Process ID: 12880
+# Current directory: E:/EES-351-V1.1/project/lab1_io/lab1_io.runs/S86_0_synth_1
+# Command line: vivado.exe -log S86_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source S86_0.tcl
+# Log file: E:/EES-351-V1.1/project/lab1_io/lab1_io.runs/S86_0_synth_1/S86_0.vds
+# Journal file: E:/EES-351-V1.1/project/lab1_io/lab1_io.runs/S86_0_synth_1\vivado.jou
+#-----------------------------------------------------------
+source S86_0.tcl -notrace
+WARNING: [Board 49-69] Validation failed for board file F:/vivado2019.1/Vivado/2019.1/data/boards/board_files/PYNQ-Z2/A.0/board.xml:
+ Frequency Parameter not provided for audio_clock
+
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/new/S86_ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'F:/vivado2019.1/Vivado/2019.1/data/ip'.
+Command: synth_design -top S86_0 -part xc7z020clg484-1 -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 31412 
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 574.078 ; gain = 180.617
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'S86_0' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/synth/S86_0.v:58]
+INFO: [Synth 8-6157] synthesizing module 'zet' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet.v:24]
+INFO: [Synth 8-6157] synthesizing module 'zet_core' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_core.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_fetch' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_fetch.v:24]
+	Parameter opcod_st bound to: 3'b000 
+	Parameter modrm_st bound to: 3'b001 
+	Parameter offse_st bound to: 3'b010 
+	Parameter immed_st bound to: 3'b011 
+	Parameter execu_st bound to: 3'b100 
+INFO: [Synth 8-6157] synthesizing module 'zet_next_or_not' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_next_or_not.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_next_or_not' (1#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_next_or_not.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_nstate' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_nstate.v:20]
+	Parameter opcod_st bound to: 3'b000 
+	Parameter modrm_st bound to: 3'b001 
+	Parameter offse_st bound to: 3'b010 
+	Parameter immed_st bound to: 3'b011 
+	Parameter execu_st bound to: 3'b100 
+INFO: [Synth 8-6155] done synthesizing module 'zet_nstate' (2#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_nstate.v:20]
+INFO: [Synth 8-155] case statement is not full and has no default [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_fetch.v:175]
+INFO: [Synth 8-6155] done synthesizing module 'zet_fetch' (3#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_fetch.v:24]
+INFO: [Synth 8-6157] synthesizing module 'zet_decode' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_decode.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_opcode_deco' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_opcode_deco.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_memory_regs' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_memory_regs.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_memory_regs' (4#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_memory_regs.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_opcode_deco' (5#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_opcode_deco.v:22]
+INFO: [Synth 8-6155] done synthesizing module 'zet_decode' (6#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_decode.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_micro_data' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_micro_data.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_micro_rom' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_micro_rom.v:26]
+INFO: [Synth 8-3876] $readmem data file 'micro_rom.dat' is read successfully [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_micro_rom.v:38]
+INFO: [Synth 8-6155] done synthesizing module 'zet_micro_rom' (7#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_micro_rom.v:26]
+INFO: [Synth 8-6155] done synthesizing module 'zet_micro_data' (8#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_micro_data.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_exec' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_exec.v:24]
+INFO: [Synth 8-6157] synthesizing module 'zet_alu' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_alu.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_addsub' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_addsub.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_fulladd16' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_fulladd16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_fulladd16' (9#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_fulladd16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_addsub' (10#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_addsub.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_conv' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_conv.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_mux8_16' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_mux8_16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_mux8_16' (11#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_mux8_16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_conv' (12#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_conv.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_muldiv' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_muldiv.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_signmul17' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/others/zet_signmul17.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_signmul17' (13#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/others/zet_signmul17.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_div_su' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_su.v:60]
+	Parameter z_width bound to: 34 - type: integer 
+	Parameter d_width bound to: 17 - type: integer 
+INFO: [Synth 8-6157] synthesizing module 'zet_div_uu' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:63]
+	Parameter z_width bound to: 34 - type: integer 
+	Parameter d_width bound to: 17 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'zet_div_uu' (14#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:63]
+INFO: [Synth 8-6155] done synthesizing module 'zet_div_su' (15#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_su.v:60]
+INFO: [Synth 8-6155] done synthesizing module 'zet_muldiv' (16#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_muldiv.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_bitlog' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_bitlog.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_bitlog' (17#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_bitlog.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_arlog' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_arlog.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_arlog' (18#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_arlog.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_shrot' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_shrot.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_rxr8' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_rxr8.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_rxr8' (19#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_rxr8.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_rxr16' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_rxr16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_rxr16' (20#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_rxr16.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_shrot' (21#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_shrot.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_othop' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_othop.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_othop' (22#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_othop.v:20]
+INFO: [Synth 8-6157] synthesizing module 'zet_mux8_1' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_mux8_1.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_mux8_1' (23#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_mux8_1.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet_alu' (24#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_alu.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_regfile' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_regfile.v:23]
+INFO: [Synth 8-6155] done synthesizing module 'zet_regfile' (25#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_regfile.v:23]
+INFO: [Synth 8-6157] synthesizing module 'zet_jmp_cond' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_jmp_cond.v:21]
+INFO: [Synth 8-6155] done synthesizing module 'zet_jmp_cond' (26#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_jmp_cond.v:21]
+INFO: [Synth 8-6155] done synthesizing module 'zet_exec' (27#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_exec.v:24]
+INFO: [Synth 8-6155] done synthesizing module 'zet_core' (28#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_core.v:22]
+INFO: [Synth 8-6157] synthesizing module 'zet_wb_master' [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_wb_master.v:20]
+	Parameter IDLE bound to: 2'b00 
+	Parameter stb1_hi bound to: 2'b01 
+	Parameter stb2_hi bound to: 2'b10 
+	Parameter bloc_lo bound to: 2'b11 
+INFO: [Synth 8-6155] done synthesizing module 'zet_wb_master' (29#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_wb_master.v:20]
+INFO: [Synth 8-6155] done synthesizing module 'zet' (30#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet.v:24]
+INFO: [Synth 8-6155] done synthesizing module 'S86_0' (31#1) [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/synth/S86_0.v:58]
+WARNING: [Synth 8-3331] design zet_exec has unconnected port ir[31]
+WARNING: [Synth 8-3331] design zet_decode has unconnected port ld_base
+---------------------------------------------------------------------------------
+Finished Synthesize : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 641.113 ; gain = 247.652
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 641.113 ; gain = 247.652
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7z020clg484-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 641.113 ; gain = 247.652
+---------------------------------------------------------------------------------
+INFO: [Device 21-403] Loading part xc7z020clg484-1
+INFO: [Synth 8-5546] ROM "rom" won't be mapped to RAM because it is too sparse
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+INFO: [Synth 8-5818] HDL ADVISOR - The operator resource <adder> is shared. To prevent sharing consider applying a KEEP on the output of the operator [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:95]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[16]' and it is trimmed from '17' to '16' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[15]' and it is trimmed from '17' to '15' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[14]' and it is trimmed from '17' to '14' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[13]' and it is trimmed from '17' to '13' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[12]' and it is trimmed from '17' to '12' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[11]' and it is trimmed from '17' to '11' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[10]' and it is trimmed from '17' to '10' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[9]' and it is trimmed from '17' to '9' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[8]' and it is trimmed from '17' to '8' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[7]' and it is trimmed from '17' to '7' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[6]' and it is trimmed from '17' to '6' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[5]' and it is trimmed from '17' to '5' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[4]' and it is trimmed from '17' to '4' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[3]' and it is trimmed from '17' to '3' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[2]' and it is trimmed from '17' to '2' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'q_pipe_reg[1]' and it is trimmed from '17' to '1' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:170]
+WARNING: [Synth 8-3936] Found unconnected internal register 'd_pipe_reg[17]' and it is trimmed from '35' to '34' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:152]
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:06 ; elapsed = 00:00:06 . Memory (MB): peak = 790.410 ; gain = 396.949
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     35 Bit       Adders := 17    
+	   2 Input     34 Bit       Adders := 2     
+	   2 Input     32 Bit       Adders := 2     
+	   2 Input     20 Bit       Adders := 3     
+	   2 Input     19 Bit       Adders := 1     
+	   2 Input     18 Bit       Adders := 2     
+	   3 Input     17 Bit       Adders := 2     
+	   2 Input     17 Bit       Adders := 1     
+	   2 Input     16 Bit       Adders := 5     
+	   3 Input     16 Bit       Adders := 1     
+	   2 Input      9 Bit       Adders := 2     
+	   3 Input      8 Bit       Adders := 2     
+	   2 Input      5 Bit       Adders := 3     
+	   2 Input      4 Bit       Adders := 3     
+	   2 Input      3 Bit       Adders := 1     
++---XORs : 
+	   2 Input     16 Bit         XORs := 1     
+	   3 Input      1 Bit         XORs := 4     
+	   2 Input      1 Bit         XORs := 8     
++---XORs : 
+	                8 Bit    Wide XORs := 1     
+	                2 Bit    Wide XORs := 1     
++---Registers : 
+	               35 Bit    Registers := 33    
+	               34 Bit    Registers := 2     
+	               19 Bit    Registers := 4     
+	               18 Bit    Registers := 2     
+	               17 Bit    Registers := 5     
+	               16 Bit    Registers := 21    
+	               15 Bit    Registers := 1     
+	               14 Bit    Registers := 1     
+	               13 Bit    Registers := 1     
+	               12 Bit    Registers := 1     
+	               11 Bit    Registers := 1     
+	               10 Bit    Registers := 1     
+	                9 Bit    Registers := 3     
+	                8 Bit    Registers := 3     
+	                7 Bit    Registers := 1     
+	                6 Bit    Registers := 1     
+	                5 Bit    Registers := 2     
+	                4 Bit    Registers := 1     
+	                3 Bit    Registers := 3     
+	                2 Bit    Registers := 4     
+	                1 Bit    Registers := 20    
++---Muxes : 
+	 513 Input     50 Bit        Muxes := 1     
+	   2 Input     36 Bit        Muxes := 1     
+	   2 Input     35 Bit        Muxes := 17    
+	   2 Input     34 Bit        Muxes := 6     
+	   2 Input     32 Bit        Muxes := 3     
+	   2 Input     20 Bit        Muxes := 1     
+	   2 Input     19 Bit        Muxes := 1     
+	   2 Input     18 Bit        Muxes := 2     
+	   2 Input     17 Bit        Muxes := 23    
+	   5 Input     16 Bit        Muxes := 1     
+	   2 Input     16 Bit        Muxes := 118   
+	   7 Input     16 Bit        Muxes := 1     
+	   3 Input     16 Bit        Muxes := 1     
+	   4 Input      9 Bit        Muxes := 5     
+	   2 Input      9 Bit        Muxes := 17    
+	  86 Input      9 Bit        Muxes := 1     
+	   3 Input      9 Bit        Muxes := 1     
+	   5 Input      8 Bit        Muxes := 2     
+	   2 Input      8 Bit        Muxes := 33    
+	   3 Input      8 Bit        Muxes := 5     
+	   4 Input      8 Bit        Muxes := 6     
+	   8 Input      8 Bit        Muxes := 1     
+	   4 Input      7 Bit        Muxes := 2     
+	   2 Input      7 Bit        Muxes := 5     
+	   2 Input      6 Bit        Muxes := 5     
+	   2 Input      5 Bit        Muxes := 6     
+	   9 Input      4 Bit        Muxes := 1     
+	   8 Input      4 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 14    
+	   4 Input      4 Bit        Muxes := 2     
+	  86 Input      4 Bit        Muxes := 2     
+	   4 Input      3 Bit        Muxes := 1     
+	   2 Input      3 Bit        Muxes := 17    
+	   5 Input      3 Bit        Muxes := 1     
+	   3 Input      3 Bit        Muxes := 1     
+	   2 Input      2 Bit        Muxes := 9     
+	  10 Input      2 Bit        Muxes := 1     
+	   6 Input      2 Bit        Muxes := 5     
+	   2 Input      1 Bit        Muxes := 98    
+	   9 Input      1 Bit        Muxes := 4     
+	   5 Input      1 Bit        Muxes := 3     
+	  86 Input      1 Bit        Muxes := 4     
+	   4 Input      1 Bit        Muxes := 1     
+	   3 Input      1 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+Hierarchical RTL Component report 
+Module zet_next_or_not 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      1 Bit        Muxes := 1     
+Module zet_nstate 
+Detailed RTL Component Info : 
++---Muxes : 
+	   4 Input      3 Bit        Muxes := 1     
+	   2 Input      3 Bit        Muxes := 8     
+	   2 Input      1 Bit        Muxes := 1     
+Module zet_fetch 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     20 Bit       Adders := 1     
++---Registers : 
+	               16 Bit    Registers := 2     
+	                8 Bit    Registers := 2     
+	                3 Bit    Registers := 2     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 1     
++---Muxes : 
+	   5 Input     16 Bit        Muxes := 1     
+	   5 Input      8 Bit        Muxes := 2     
+	   2 Input      8 Bit        Muxes := 2     
+	   5 Input      3 Bit        Muxes := 1     
+	   2 Input      3 Bit        Muxes := 2     
+	   2 Input      2 Bit        Muxes := 3     
+	   2 Input      1 Bit        Muxes := 14    
+	   9 Input      1 Bit        Muxes := 4     
+	   5 Input      1 Bit        Muxes := 3     
+Module zet_memory_regs 
+Detailed RTL Component Info : 
++---Muxes : 
+	   9 Input      4 Bit        Muxes := 1     
+	   8 Input      4 Bit        Muxes := 1     
+	  10 Input      2 Bit        Muxes := 1     
+Module zet_opcode_deco 
+Detailed RTL Component Info : 
++---XORs : 
+	                2 Bit    Wide XORs := 1     
++---Muxes : 
+	   4 Input      9 Bit        Muxes := 5     
+	   2 Input      9 Bit        Muxes := 4     
+	  86 Input      9 Bit        Muxes := 1     
+	   3 Input      8 Bit        Muxes := 5     
+	   2 Input      8 Bit        Muxes := 8     
+	   4 Input      8 Bit        Muxes := 6     
+	   8 Input      8 Bit        Muxes := 1     
+	   4 Input      7 Bit        Muxes := 2     
+	   2 Input      7 Bit        Muxes := 5     
+	   2 Input      6 Bit        Muxes := 5     
+	   2 Input      5 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 2     
+	   4 Input      4 Bit        Muxes := 1     
+	  86 Input      4 Bit        Muxes := 2     
+	   2 Input      3 Bit        Muxes := 4     
+	   3 Input      3 Bit        Muxes := 1     
+	   2 Input      2 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 3     
+	  86 Input      1 Bit        Muxes := 4     
+Module zet_decode 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input      9 Bit       Adders := 2     
+	   2 Input      5 Bit       Adders := 1     
++---Registers : 
+	                9 Bit    Registers := 1     
+	                5 Bit    Registers := 1     
+	                1 Bit    Registers := 9     
++---Muxes : 
+	   2 Input      9 Bit        Muxes := 2     
+	   3 Input      9 Bit        Muxes := 1     
+	   2 Input      5 Bit        Muxes := 1     
+	   2 Input      3 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 4     
+Module zet_micro_rom 
+Detailed RTL Component Info : 
++---Muxes : 
+	 513 Input     50 Bit        Muxes := 1     
+Module zet_micro_data 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 1     
+	   7 Input     16 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 6     
+	   4 Input      4 Bit        Muxes := 1     
+	   2 Input      3 Bit        Muxes := 1     
+	   2 Input      2 Bit        Muxes := 2     
+Module zet_fulladd16 
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     17 Bit       Adders := 1     
+Module zet_addsub 
+Detailed RTL Component Info : 
++---XORs : 
+	   3 Input      1 Bit         XORs := 2     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 2     
+	   2 Input      1 Bit        Muxes := 8     
+Module zet_conv 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     16 Bit       Adders := 2     
+	   3 Input      8 Bit       Adders := 2     
++---Muxes : 
+	   2 Input      1 Bit        Muxes := 2     
+Module zet_div_uu 
+Detailed RTL Component Info : 
++---Adders : 
+	   3 Input     35 Bit       Adders := 17    
+	   2 Input     34 Bit       Adders := 1     
++---Registers : 
+	               35 Bit    Registers := 33    
+	               34 Bit    Registers := 1     
+	               17 Bit    Registers := 4     
+	               16 Bit    Registers := 1     
+	               15 Bit    Registers := 1     
+	               14 Bit    Registers := 1     
+	               13 Bit    Registers := 1     
+	               12 Bit    Registers := 1     
+	               11 Bit    Registers := 1     
+	               10 Bit    Registers := 1     
+	                9 Bit    Registers := 1     
+	                8 Bit    Registers := 1     
+	                7 Bit    Registers := 1     
+	                6 Bit    Registers := 1     
+	                5 Bit    Registers := 1     
+	                4 Bit    Registers := 1     
+	                3 Bit    Registers := 1     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 3     
++---Muxes : 
+	   2 Input     35 Bit        Muxes := 17    
+	   2 Input     34 Bit        Muxes := 1     
+Module zet_div_su 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     34 Bit       Adders := 1     
+	   2 Input     18 Bit       Adders := 2     
+	   2 Input     17 Bit       Adders := 1     
++---XORs : 
+	   2 Input      1 Bit         XORs := 1     
++---Registers : 
+	               34 Bit    Registers := 1     
+	               19 Bit    Registers := 2     
+	               18 Bit    Registers := 2     
+	               17 Bit    Registers := 1     
+	                1 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     34 Bit        Muxes := 1     
+	   2 Input     18 Bit        Muxes := 2     
+	   2 Input     17 Bit        Muxes := 1     
+Module zet_muldiv 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     34 Bit        Muxes := 4     
+	   2 Input     32 Bit        Muxes := 3     
+	   2 Input     17 Bit        Muxes := 5     
+	   2 Input      1 Bit        Muxes := 9     
+Module zet_arlog 
+Detailed RTL Component Info : 
++---XORs : 
+	   2 Input     16 Bit         XORs := 1     
+	   3 Input      1 Bit         XORs := 2     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 4     
+	   2 Input      1 Bit        Muxes := 5     
+Module zet_rxr8 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      9 Bit        Muxes := 7     
+Module zet_rxr16 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     17 Bit        Muxes := 15    
+Module zet_shrot 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     32 Bit       Adders := 2     
+	   2 Input      5 Bit       Adders := 2     
+	   2 Input      4 Bit       Adders := 3     
+	   2 Input      3 Bit       Adders := 1     
++---XORs : 
+	   2 Input      1 Bit         XORs := 4     
++---Muxes : 
+	   2 Input     17 Bit        Muxes := 2     
+	   2 Input     16 Bit        Muxes := 7     
+	   2 Input      9 Bit        Muxes := 2     
+	   2 Input      5 Bit        Muxes := 4     
+	   2 Input      4 Bit        Muxes := 5     
+	   2 Input      3 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 21    
+Module zet_othop 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     20 Bit       Adders := 2     
+	   2 Input     16 Bit       Adders := 3     
+	   3 Input     16 Bit       Adders := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 7     
+	   2 Input      9 Bit        Muxes := 1     
+	   2 Input      4 Bit        Muxes := 1     
+Module zet_alu 
+Detailed RTL Component Info : 
++---XORs : 
+	                8 Bit    Wide XORs := 1     
++---Muxes : 
+	   2 Input      9 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 5     
+Module zet_regfile 
+Detailed RTL Component Info : 
++---XORs : 
+	   2 Input      1 Bit         XORs := 1     
++---Registers : 
+	               16 Bit    Registers := 16    
+	                9 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 88    
+	   2 Input      8 Bit        Muxes := 23    
+	   2 Input      1 Bit        Muxes := 17    
+Module zet_jmp_cond 
+Detailed RTL Component Info : 
++---XORs : 
+	   2 Input      1 Bit         XORs := 2     
++---Muxes : 
+	   4 Input      1 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 2     
+Module zet_exec 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 2     
+	   2 Input      1 Bit        Muxes := 1     
+Module zet_core 
+Detailed RTL Component Info : 
++---Registers : 
+	                1 Bit    Registers := 5     
++---Muxes : 
+	   2 Input     36 Bit        Muxes := 1     
+	   2 Input     20 Bit        Muxes := 1     
+	   2 Input     16 Bit        Muxes := 1     
+	   2 Input      1 Bit        Muxes := 3     
+Module zet_wb_master 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input     19 Bit       Adders := 1     
++---Registers : 
+	               19 Bit    Registers := 2     
+	               16 Bit    Registers := 2     
+	                2 Bit    Registers := 2     
+	                1 Bit    Registers := 1     
++---Muxes : 
+	   2 Input     19 Bit        Muxes := 1     
+	   2 Input     16 Bit        Muxes := 5     
+	   3 Input     16 Bit        Muxes := 1     
+	   6 Input      2 Bit        Muxes := 5     
+	   2 Input      2 Bit        Muxes := 3     
+	   2 Input      1 Bit        Muxes := 2     
+	   3 Input      1 Bit        Muxes := 1     
+Module zet 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 220 (col length:60)
+BRAMs: 280 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+Warning: Parallel synthesis criteria is not met 
+WARNING: [Synth 8-3936] Found unconnected internal register 'div_su/s_reg' and it is trimmed from '18' to '16' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_su.v:154]
+WARNING: [Synth 8-3936] Found unconnected internal register 'div_su/divider/s_reg' and it is trimmed from '17' to '16' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/rtl/zet_div_uu.v:203]
+WARNING: [Synth 8-3936] Found unconnected internal register 'signmul17/p_reg' and it is trimmed from '34' to '32' bits. [e:/EES-351-V1.1/project/lab1_io/lab1_io.srcs/sources_1/ip/S86_0/others/zet_signmul17.v:29]
+DSP Report: Generating DSP signmul17/p_reg, operation Mode is: (C or 0)+(0 or (A*B)').
+DSP Report: register signmul17/p_reg is absorbed into DSP signmul17/p_reg.
+DSP Report: operator signmul17/p0 is absorbed into DSP signmul17/p_reg.
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/iz_reg[33] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/s_pipe_reg[1][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][5] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][8] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][9] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][10] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][11] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][12] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][13] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[1][16] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/s_pipe_reg[2][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][5] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][8] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][9] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][10] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][11] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][12] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][13] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[2][16] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/s_pipe_reg[3][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][5] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][8] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][9] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][10] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][11] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][12] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][13] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[3][16] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/s_pipe_reg[4][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][5] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][8] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][9] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][10] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][11] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][12] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][13] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[4][16] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][2] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][3] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][5] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/s_pipe_reg[5][4] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][6] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][7] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][8] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][9] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][10] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][11] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][12] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][13] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][14] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][15] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[5][16] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[6][34] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[6][0] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[6][1] )
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\inst/core/exec/alu /\muldiv/div_su/divider/d_pipe_reg[6][2] )
+INFO: [Common 17-14] Message 'Synth 8-3333' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:01:26 ; elapsed = 00:01:32 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+DSP: Preliminary Mapping  Report (see note below)
++--------------+------------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|Module Name   | DSP Mapping            | A Size | B Size | C Size | D Size | P Size | AREG | BREG | CREG | DREG | ADREG | MREG | PREG | 
++--------------+------------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+|zet_signmul17 | (C or 0)+(0 or (A*B)') | 17     | 17     | 32     | -      | 34     | 0    | 0    | 0    | -    | -     | 1    | 0    | 
++--------------+------------------------+--------+--------+--------+--------+--------+------+------+------+------+-------+------+------+
+
+Note: The table above is a preliminary report that shows the DSPs inferred at the current stage of the synthesis flow. Some DSP may be reimplemented as non DSP primitives later in the synthesis flow. Multiple instantiated DSPs are reported only once.
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+No constraint files found.
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:01:29 ; elapsed = 00:01:35 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:01:32 ; elapsed = 00:01:38 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+Static Shift Register Report:
++------------+----------------------------------------------------+--------+-------+--------------+--------------------+-------------------+--------+---------+
+|Module Name | RTL Name                                           | Length | Width | Reset Signal | Pull out first Reg | Pull out last Reg | SRL16E | SRLC32E | 
++------------+----------------------------------------------------+--------+-------+--------------+--------------------+-------------------+--------+---------+
+|S86_0       | inst/core/exec/alu/muldiv/div_su/sdpipe_reg[18]    | 19     | 1     | NO           | NO                 | YES               | 0      | 1       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/szpipe_reg[18]    | 19     | 1     | NO           | NO                 | YES               | 0      | 1       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/ovf_reg           | 19     | 1     | NO           | YES                | YES               | 0      | 1       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[16] | 17     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[15] | 16     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[14] | 15     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[13] | 14     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[12] | 13     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[11] | 12     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[10] | 11     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[9]  | 10     | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[8]  | 9      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[7]  | 8      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[6]  | 7      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[5]  | 6      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[4]  | 5      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[3]  | 4      | 1     | NO           | NO                 | YES               | 1      | 0       | 
+|S86_0       | inst/core/exec/alu/muldiv/div_su/divider/q_reg[2]  | 3      | 1     | NO           | NO                 | YES               | 1      | 0       | 
++------------+----------------------------------------------------+--------+-------+--------------+--------------------+-------------------+--------+---------+
+
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+--------+------+
+|      |Cell    |Count |
++------+--------+------+
+|1     |CARRY4  |   179|
+|2     |DSP48E1 |     1|
+|3     |LUT1    |    66|
+|4     |LUT2    |   222|
+|5     |LUT3    |   566|
+|6     |LUT4    |   253|
+|7     |LUT5    |   400|
+|8     |LUT6    |  1484|
+|9     |MUXF7   |   175|
+|10    |MUXF8   |    26|
+|11    |SRL16E  |    15|
+|12    |SRLC32E |     3|
+|13    |FDRE    |  1257|
+|14    |FDSE    |    19|
++------+--------+------+
+
+Report Instance Areas: 
++------+----------------------+---------------+------+
+|      |Instance              |Module         |Cells |
++------+----------------------+---------------+------+
+|1     |top                   |               |  4666|
+|2     |  inst                |zet            |  4666|
+|3     |    core              |zet_core       |  4564|
+|4     |      decode          |zet_decode     |   277|
+|5     |      exec            |zet_exec       |  2853|
+|6     |        alu           |zet_alu        |  1531|
+|7     |          conv        |zet_conv       |    13|
+|8     |          muldiv      |zet_muldiv     |  1478|
+|9     |            div_su    |zet_div_su     |  1347|
+|10    |              divider |zet_div_uu     |  1169|
+|11    |            signmul17 |zet_signmul17  |    26|
+|12    |          othop       |zet_othop      |    40|
+|13    |        regfile       |zet_regfile    |  1322|
+|14    |      fetch           |zet_fetch      |   945|
+|15    |      micro_data      |zet_micro_data |   483|
+|16    |        micro_rom     |zet_micro_rom  |   483|
+|17    |    wb_master         |zet_wb_master  |   102|
++------+----------------------+---------------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 22 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+Synthesis Optimization Complete : Time (s): cpu = 00:01:33 ; elapsed = 00:01:39 . Memory (MB): peak = 1024.883 ; gain = 631.422
+INFO: [Project 1-571] Translating synthesized netlist
+INFO: [Netlist 29-17] Analyzing 381 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1024.883 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+195 Infos, 23 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:01:37 ; elapsed = 00:01:44 . Memory (MB): peak = 1024.883 ; gain = 638.520
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1024.883 ; gain = 0.000
+WARNING: [Constraints 18-5210] No constraints selected for write.
+Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
+INFO: [Timing 38-35] Done setting XDC timing constraints.
+INFO: [Common 17-1381] The checkpoint 'E:/EES-351-V1.1/project/lab1_io/lab1_io.runs/S86_0_synth_1/S86_0.dcp' has been generated.
+write_checkpoint: Time (s): cpu = 00:00:06 ; elapsed = 00:00:07 . Memory (MB): peak = 1355.305 ; gain = 330.422
+WARNING: [Common 17-576] 'use_project_ipc' is deprecated. This option is deprecated and no longer used.
+INFO: [Coretcl 2-1648] Added synthesis output to IP cache for IP S86_0, cache-ID = 9959001c7289d240
+INFO: [Coretcl 2-1174] Renamed 16 cell refs.
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.001 . Memory (MB): peak = 1357.895 ; gain = 0.000
+WARNING: [Constraints 18-5210] No constraints selected for write.
+Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
+INFO: [Common 17-1381] The checkpoint 'E:/EES-351-V1.1/project/lab1_io/lab1_io.runs/S86_0_synth_1/S86_0.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file S86_0_utilization_synth.rpt -pb S86_0_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Mon Aug  5 09:45:58 2024...

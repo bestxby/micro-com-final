@@ -1,0 +1,164 @@
+Copyright 1986-2019 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2019.1 (win64) Build 2552052 Fri May 24 14:49:42 MDT 2019
+| Date         : Thu May 21 15:29:27 2026
+| Host         : LAPTOP-86LF2T48 running 64-bit major release  (build 9200)
+| Command      : report_control_sets -verbose -file S86_top_control_sets_placed.rpt
+| Design       : S86_top
+| Device       : xc7z020
+------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Histogram
+3. Flip-Flop Distribution
+4. Detailed Control Set Information
+
+1. Summary
+----------
+
++----------------------------------------------------------+-------+
+|                          Status                          | Count |
++----------------------------------------------------------+-------+
+| Total control sets                                       |    86 |
+|    Minimum number of control sets                        |    86 |
+|    Addition due to synthesis replication                 |     0 |
+|    Addition due to physical synthesis replication        |     0 |
+| Unused register locations in slices containing registers |   277 |
++----------------------------------------------------------+-------+
+* Control sets can be merged at opt_design using control_set_merge or merge_equivalent_drivers
+** Run report_qor_suggestions for automated merging and remapping suggestions
+
+
+2. Histogram
+------------
+
++--------------------+-------+
+|       Fanout       | Count |
++--------------------+-------+
+| Total control sets |    86 |
+| >= 0 to < 4        |    33 |
+| >= 4 to < 6        |     2 |
+| >= 6 to < 8        |     2 |
+| >= 8 to < 10       |    42 |
+| >= 10 to < 12      |     0 |
+| >= 12 to < 14      |     0 |
+| >= 14 to < 16      |     0 |
+| >= 16              |     7 |
++--------------------+-------+
+* Control sets can be remapped at either synth_design or opt_design
+
+
+3. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |             923 |          198 |
+| No           | No                    | Yes                    |              76 |           35 |
+| No           | Yes                   | No                     |              32 |           20 |
+| Yes          | No                    | No                     |              36 |           14 |
+| Yes          | No                    | Yes                    |              24 |           15 |
+| Yes          | Yes                   | No                     |             344 |          147 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+4. Detailed Control Set Information
+-----------------------------------
+
++-----------------------------+-----------------------------------------------+----------------------------------------------+------------------+----------------+
+|         Clock Signal        |                 Enable Signal                 |               Set/Reset Signal               | Slice Load Count | Bel Load Count |
++-----------------------------+-----------------------------------------------+----------------------------------------------+------------------+----------------+
+|  D2/OL_reg[2]_LDC_i_1_n_0   |                                               | D2/OL_reg[2]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/OL_reg[1]_LDC_i_1_n_0   |                                               | D2/OL_reg[1]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[0]_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/OL_reg[3]_LDC_i_1_n_0   |                                               | D2/OL_reg[3]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[4]_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[7]_LDC_i_1_n_0                     |                1 |              1 |
+| ~U4/clk_sys                 |                                               | D2/NULL_COUNT_i_2_n_0                        |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[6]_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[5]_LDC_i_1_n_0                     |                1 |              1 |
+| ~U4/clk_sys                 |                                               |                                              |                1 |              1 |
+|  wmode                      |                                               | D2/FWcr1_reg_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/OL_reg[0]_LDC_i_1_n_0   |                                               | D2/OL_reg[0]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/OL_reg[4]_LDC_i_1_n_0   |                                               | D2/OL_reg[4]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/OL_reg[7]_LDC_i_1_n_0   |                                               | D2/OL_reg[7]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/OL_reg[6]_LDC_i_1_n_0   |                                               | D2/OL_reg[6]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/OL_reg[5]_LDC_i_1_n_0   |                                               | D2/OL_reg[5]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/rsta_reg[1]_LDC_i_1_n_0 |                                               | wmode                                        |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[0]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[2]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[1]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[3]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[4]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[7]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[5]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/OL_reg[6]_LDC_i_2_n_0                     |                1 |              1 |
+|  D2/wrback                  |                                               | D2/rsta_reg[1]_LDC_i_1_n_0                   |                1 |              1 |
+|  D2/wrback                  |                                               | D2/rsta[0]_i_1_n_0                           |                1 |              1 |
+|  D2/wrback                  |                                               | wmode                                        |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[2]_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[3]_LDC_i_1_n_0                     |                1 |              1 |
+|  D2/wrback                  | D2/p_2_in                                     | D2/OL_reg[1]_LDC_i_1_n_0                     |                1 |              1 |
+| ~U4/clk_sys                 |                                               | wmode                                        |                3 |              3 |
+| ~U4/clk_sys                 |                                               | D2/FWcr1_reg_LDC_i_1_n_0                     |                2 |              3 |
+|  CLOCK/inst/clk_out2        | M0/ena                                        |                                              |                2 |              4 |
+|  CLOCK/inst/clk_out1        |                                               | S86_proc/inst/core/decode/div_cnt[4]_i_1_n_0 |                1 |              5 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/modrm_l[7]_i_2_n_0   | S86_proc/inst/core/fetch/modrm_l[7]_i_1_n_0  |                1 |              6 |
+|  wmode                      |                                               |                                              |                4 |              6 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_6[0]    | D1/rst                                       |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_7[0]    | D1/rst                                       |                5 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[1][15]_i_2_0[1]    | D1/rst                                       |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_6[1]    | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/state_reg[0]_15[0]   | D1/rst                                       |                5 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/state_reg[0]_15[1]   | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_6[0]      | D1/rst                                       |                1 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/wb_master/cpu_dat_i[15]_i_1_n_0 |                                              |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/wb_master/cpu_dat_i[7]_i_1_n_0  |                                              |                3 |              8 |
+| ~U4/clk_sys                 | D2/CE[7]_i_1_n_0                              | wmode                                        |                5 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/opcode_l_0           | D1/rst                                       |                6 |              8 |
+|  CLOCK/inst/clk_out1        | D1/ctrl_0                                     | D1/rst                                       |                1 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/E[0]                 | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/E[1]                 | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_3[1]    | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_4[1]    | D1/rst                                       |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_0[1]    | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_1[1]    | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_11[0]   | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_1[0]    | D1/rst                                       |                8 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_10[1]   | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_2[0]    | D1/rst                                       |                6 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_0[0]    | D1/rst                                       |                5 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_6[1]      | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_10[0]   | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_3[0]    | D1/rst                                       |                4 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_2[1]    | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_9[1]    | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_11[1]   | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_4[0]    | D1/rst                                       |                1 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_5[1]    | D1/rst                                       |                7 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_7[1]    | D1/rst                                       |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_9[0]    | D1/rst                                       |                6 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_5[0]    | D1/rst                                       |                7 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_8[0]    | D1/rst                                       |                3 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[1][15]_i_2_0[0]    | D1/rst                                       |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/r[15][2]_i_8_8[1]    | D1/rst                                       |                3 |              8 |
+|  D2/wrback                  | D2/SL[7]_i_1_n_0                              | wmode                                        |                2 |              8 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/state_reg[0]_0[3]    | D1/rst                                       |                7 |              9 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/decode/E[0]                | S86_proc/inst/core/fetch/SR[0]               |                2 |              9 |
+|  D2/wcr                     |                                               | wmode                                        |                2 |              9 |
+|  D2/rcounter0               |                                               | D2/rstaflagreset                             |                4 |              9 |
+|  CLOCK/inst/clk_out1        | D1/Ldata_32[31]_i_1_n_0                       | D1/rst                                       |                3 |             16 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/imm_l[15]_i_1_n_0    |                                              |                5 |             16 |
+|  CLOCK/inst/clk_out1        | S86_proc/inst/core/fetch/off_l[15]_i_2_n_0    | S86_proc/inst/core/fetch/off_l[15]_i_1_n_0   |                4 |             16 |
+|  CLOCK/inst/clk_out1        | D1/Ldata_32110_out                            | D1/rst                                       |                3 |             16 |
+|  D1/clk_sys                 |                                               | D1/rst                                       |                5 |             20 |
+|  CLOCK/inst/clk_out1        |                                               | D1/rst                                       |               16 |             37 |
+|  CLOCK/inst/clk_out1        |                                               |                                              |              193 |            934 |
++-----------------------------+-----------------------------------------------+----------------------------------------------+------------------+----------------+
+
+

@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Runs Version="1" Minor="0">
+	<Run Id="bios_ram_synth_1" LaunchDir="C:/Users/lily/Desktop/stu_workspace/lab3_8254/lab3_8254.runs/bios_ram_synth_1" FlowId="Vivado_Synthesis" FromStepId="vivado" ToStepId="vivado"/>
+	<Parameters>
+		<Parameter Name="runs.monitorLSFJobs" Val="true" Type="bool"/>
+	</Parameters>
+</Runs>
+

@@ -1,0 +1,2 @@
+bios_ram.v,verilog,xil_defaultlib,../../../../lab3_8254.srcs/sources_1/ip/bios_ram/sim/bios_ram.v,
+glbl.v,Verilog,xil_defaultlib,glbl.v

@@ -1,0 +1,495 @@
+#-----------------------------------------------------------
+# Vivado v2019.1 (64-bit)
+# SW Build 2552052 on Fri May 24 14:49:42 MDT 2019
+# IP Build 2548770 on Fri May 24 18:01:18 MDT 2019
+# Start of session at: Thu May 21 15:27:29 2026
+# Process ID: 23140
+# Current directory: C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1
+# Command line: vivado.exe -log S86_top.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source S86_top.tcl
+# Log file: C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/S86_top.vds
+# Journal file: C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source S86_top.tcl -notrace
+INFO: [IP_Flow 19-234] Refreshing IP repositories
+INFO: [IP_Flow 19-1700] Loaded user IP repository 'c:/Users/lily/Desktop/stu_workspace/lab1_io/lab1_io.srcs/sources_1/new/S86_ip'.
+INFO: [IP_Flow 19-2313] Loaded Vivado IP repository 'D:/LenovoSoftstore/Vivado2019/Vivado/2019.1/data/ip'.
+Command: synth_design -top S86_top -part xc7z020clg484-1
+Starting synth_design
+WARNING: [Vivado_Tcl 4-393] The 'Synthesis' target of the following IPs are stale, please generate the output products using the generate_target or synth_ip command before running synth_design.
+C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Decoder_0/Decoder_0.xci
+
+WARNING: [Vivado_Tcl 4-393] The 'Implementation' target of the following IPs are stale, please generate the output products using the generate_target or synth_ip command before running synth_design.
+C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Decoder_0/Decoder_0.xci
+
+INFO: [IP_Flow 19-2162] IP 'Decoder_0' is locked:
+* IP definition 'Decoder (1.0)' for IP 'Decoder_0' (customized with software release 2015.4) was not found in the IP Catalog. * Current project part 'xc7z020clg484-1' and the part 'xc7a100tfgg484-1' used to customize the IP 'Decoder_0' do not match.
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7z020'
+INFO: [Device 21-403] Loading part xc7z020clg484-1
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 2876 
+WARNING: [Synth 8-6901] identifier 'NULL_COUNT' is used before its declaration [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:49]
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:03 . Memory (MB): peak = 747.824 ; gain = 184.098
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'S86_top' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S86_top.v:3]
+INFO: [Synth 8-6157] synthesizing module 'pll' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/pll_stub.v:5]
+INFO: [Synth 8-6155] done synthesizing module 'pll' (1#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/pll_stub.v:5]
+INFO: [Synth 8-6157] synthesizing module 'reset' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/reset.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'reset' (2#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/reset.v:3]
+INFO: [Synth 8-6157] synthesizing module 'S86_0' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/S86_0_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'S86_0' (3#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/S86_0_stub.v:6]
+WARNING: [Synth 8-7023] instance 'S86_proc' of module 'S86_0' has 16 connections declared, but only 13 given [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S86_top.v:43]
+INFO: [Synth 8-6157] synthesizing module 'WRgenerator' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/WRgenerator.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'WRgenerator' (4#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/WRgenerator.v:3]
+INFO: [Synth 8-6157] synthesizing module 'Decoder_0' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/Decoder_0_stub.v:7]
+INFO: [Synth 8-6155] done synthesizing module 'Decoder_0' (5#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/Decoder_0_stub.v:7]
+WARNING: [Synth 8-7023] instance 'U1' of module 'Decoder_0' has 14 connections declared, but only 9 given [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S86_top.v:71]
+INFO: [Synth 8-6157] synthesizing module 'Muxdati' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Muxdati.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'Muxdati' (6#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Muxdati.v:3]
+INFO: [Synth 8-6157] synthesizing module 'ACKgenerator' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/ACKgenerator.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'ACKgenerator' (7#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/ACKgenerator.v:3]
+INFO: [Synth 8-6157] synthesizing module 'RAM_BIOS' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/RAM_BIOS.v:3]
+INFO: [Synth 8-6157] synthesizing module 'bios_ram' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/bios_ram_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'bios_ram' (8#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/.Xil/Vivado-23140-LAPTOP-86LF2T48/realtime/bios_ram_stub.v:6]
+INFO: [Synth 8-6155] done synthesizing module 'RAM_BIOS' (9#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/RAM_BIOS.v:3]
+INFO: [Synth 8-6157] synthesizing module 'Switch' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Switch.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'Switch' (10#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Switch.v:3]
+INFO: [Synth 8-6157] synthesizing module 'Digit' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Digit.v:15]
+	Parameter DIV_THRESHOLD bound to: 10000 - type: integer 
+	Parameter DIGIT_DK7 bound to: 3'b000 
+	Parameter DIGIT_DK6 bound to: 3'b001 
+	Parameter DIGIT_DK5 bound to: 3'b010 
+	Parameter DIGIT_DK4 bound to: 3'b011 
+	Parameter DIGIT_DK3 bound to: 3'b100 
+	Parameter DIGIT_DK2 bound to: 3'b101 
+	Parameter DIGIT_DK1 bound to: 3'b110 
+	Parameter DIGIT_DK0 bound to: 3'b111 
+INFO: [Synth 8-226] default block is never used [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Digit.v:116]
+INFO: [Synth 8-6155] done synthesizing module 'Digit' (11#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Digit.v:15]
+INFO: [Synth 8-6157] synthesizing module 'key_latch' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/key_latch.v:2]
+INFO: [Synth 8-6155] done synthesizing module 'key_latch' (12#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/key_latch.v:2]
+INFO: [Synth 8-6157] synthesizing module 'divclk' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/divclk.v:4]
+INFO: [Synth 8-6155] done synthesizing module 'divclk' (13#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/divclk.v:4]
+INFO: [Synth 8-6157] synthesizing module 'S_8254' [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:3]
+INFO: [Synth 8-226] default block is never used [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:326]
+WARNING: [Synth 8-5788] Register zflag_reg in module S_8254 is has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:90]
+WARNING: [Synth 8-5788] Register Rtrace_reg in module S_8254 is has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:91]
+WARNING: [Synth 8-5788] Register OEflag_reg in module S_8254 is has both Set and reset with same priority. This may cause simulation mismatches. Consider rewriting code  [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:187]
+INFO: [Synth 8-6155] done synthesizing module 'S_8254' (14#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S_8254.v:3]
+INFO: [Synth 8-6155] done synthesizing module 'S86_top' (15#1) [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/S86_top.v:3]
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 790.062 ; gain = 226.336
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 790.062 ; gain = 226.336
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:03 ; elapsed = 00:00:04 . Memory (MB): peak = 790.062 ; gain = 226.336
+---------------------------------------------------------------------------------
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/bios_ram/bios_ram/bios_ram_in_context.xdc] for cell 'M0/ram_bios1'
+Finished Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/bios_ram/bios_ram/bios_ram_in_context.xdc] for cell 'M0/ram_bios1'
+Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Decoder_0/Decoder_0/Decoder_0_in_context.xdc] for cell 'U1'
+Finished Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/new/rtl_up/Decoder_0/Decoder_0/Decoder_0_in_context.xdc] for cell 'U1'
+Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/S86_0/S86_0/S86_0_in_context.xdc] for cell 'S86_proc'
+Finished Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/S86_0/S86_0/S86_0_in_context.xdc] for cell 'S86_proc'
+Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/pll/pll/pll_in_context.xdc] for cell 'CLOCK'
+Finished Parsing XDC File [c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/pll/pll/pll_in_context.xdc] for cell 'CLOCK'
+Parsing XDC File [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/constrs_1/new/constraints.xdc]
+WARNING: [Vivado 12-507] No nets matched 'CLOCK/inst/clk_in1_pll'. [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/constrs_1/new/constraints.xdc:74]
+Finished Parsing XDC File [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/constrs_1/new/constraints.xdc]
+WARNING: [Project 1-498] One or more constraints failed evaluation while reading constraint file [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/constrs_1/new/constraints.xdc] and the design contains unresolved black boxes. These constraints will be read post-synthesis (as long as their source constraint file is marked as used_in_implementation) and should be applied correctly then. You should review the constraints listed in the file [.Xil/S86_top_propImpl.xdc] and check the run log file to verify that these constraints were correctly applied.
+INFO: [Project 1-236] Implementation specific constraints were found while reading constraint file [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/constrs_1/new/constraints.xdc]. These constraints will be ignored for synthesis but will be used in implementation. Impacted constraints are listed in the file [.Xil/S86_top_propImpl.xdc].
+Resolution: To avoid this warning, move constraints listed in [.Xil/S86_top_propImpl.xdc] to another XDC file and exclude this new file from synthesis with the used_in_synthesis property (File Properties dialog in GUI) and re-run elaboration/synthesis.
+Parsing XDC File [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/dont_touch.xdc]
+Finished Parsing XDC File [C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/dont_touch.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 941.359 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.010 . Memory (MB): peak = 941.359 ; gain = 0.000
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:08 ; elapsed = 00:00:11 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xc7z020clg484-1
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:08 ; elapsed = 00:00:11 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+Applied set_property IO_BUFFER_TYPE = NONE for clk_100_. (constraint file  c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/pll/pll/pll_in_context.xdc, line 4).
+Applied set_property CLOCK_BUFFER_TYPE = NONE for clk_100_. (constraint file  c:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.srcs/sources_1/ip/pll/pll/pll_in_context.xdc, line 5).
+Applied set_property DONT_TOUCH = true for M0/ram_bios1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for U1. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for S86_proc. (constraint file  auto generated constraint, line ).
+Applied set_property DONT_TOUCH = true for CLOCK. (constraint file  auto generated constraint, line ).
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:08 ; elapsed = 00:00:11 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+INFO: [Synth 8-5544] ROM "SEG_TABLE" won't be mapped to Block RAM because address size (4) smaller than threshold (5)
+INFO: [Synth 8-802] inferred FSM for state register 'state_reg' in module 'Digit'
+---------------------------------------------------------------------------------------------------
+                   State |                     New Encoding |                Previous Encoding 
+---------------------------------------------------------------------------------------------------
+               DIGIT_DK7 |                         00000001 |                              000
+               DIGIT_DK6 |                         00000010 |                              001
+               DIGIT_DK5 |                         00000100 |                              010
+               DIGIT_DK4 |                         00001000 |                              011
+               DIGIT_DK3 |                         00010000 |                              100
+               DIGIT_DK2 |                         00100000 |                              101
+               DIGIT_DK1 |                         01000000 |                              110
+               DIGIT_DK0 |                         10000000 |                              111
+---------------------------------------------------------------------------------------------------
+INFO: [Synth 8-3354] encoded FSM with state register 'state_reg' using encoding 'one-hot' in module 'Digit'
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:08 ; elapsed = 00:00:11 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input      8 Bit       Adders := 2     
+	   2 Input      4 Bit       Adders := 1     
++---Registers : 
+	               32 Bit    Registers := 1     
+	               16 Bit    Registers := 3     
+	                8 Bit    Registers := 4     
+	                6 Bit    Registers := 1     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 13    
++---Muxes : 
+	   3 Input     32 Bit        Muxes := 1     
+	   2 Input     16 Bit        Muxes := 36    
+	   5 Input     16 Bit        Muxes := 2     
+	   6 Input     16 Bit        Muxes := 1     
+	  17 Input      8 Bit        Muxes := 1     
+	   2 Input      8 Bit        Muxes := 9     
+	   4 Input      8 Bit        Muxes := 1     
+	   8 Input      3 Bit        Muxes := 1     
+	   2 Input      2 Bit        Muxes := 1     
+	   3 Input      2 Bit        Muxes := 2     
+	   2 Input      1 Bit        Muxes := 53    
+	   3 Input      1 Bit        Muxes := 2     
+	   4 Input      1 Bit        Muxes := 2     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Hierarchical Component Statistics 
+---------------------------------------------------------------------------------
+Hierarchical RTL Component report 
+Module Muxdati 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 4     
+Module RAM_BIOS 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input      2 Bit        Muxes := 1     
+Module Switch 
+Detailed RTL Component Info : 
++---Muxes : 
+	   2 Input     16 Bit        Muxes := 2     
+Module Digit 
+Detailed RTL Component Info : 
++---Registers : 
+	               32 Bit    Registers := 1     
+	                8 Bit    Registers := 2     
+	                1 Bit    Registers := 1     
++---Muxes : 
+	   3 Input     32 Bit        Muxes := 1     
+	  17 Input      8 Bit        Muxes := 1     
+	   8 Input      3 Bit        Muxes := 1     
+Module key_latch 
+Detailed RTL Component Info : 
++---Registers : 
+	                1 Bit    Registers := 1     
+Module divclk 
+Detailed RTL Component Info : 
++---Registers : 
+	                1 Bit    Registers := 1     
+Module S_8254 
+Detailed RTL Component Info : 
++---Adders : 
+	   2 Input      8 Bit       Adders := 2     
+	   2 Input      4 Bit       Adders := 1     
++---Registers : 
+	               16 Bit    Registers := 3     
+	                8 Bit    Registers := 2     
+	                6 Bit    Registers := 1     
+	                2 Bit    Registers := 1     
+	                1 Bit    Registers := 10    
++---Muxes : 
+	   5 Input     16 Bit        Muxes := 2     
+	   2 Input     16 Bit        Muxes := 30    
+	   6 Input     16 Bit        Muxes := 1     
+	   2 Input      8 Bit        Muxes := 9     
+	   4 Input      8 Bit        Muxes := 1     
+	   3 Input      2 Bit        Muxes := 2     
+	   2 Input      1 Bit        Muxes := 53    
+	   3 Input      1 Bit        Muxes := 2     
+	   4 Input      1 Bit        Muxes := 2     
+---------------------------------------------------------------------------------
+Finished RTL Hierarchical Component Statistics
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 220 (col length:60)
+BRAMs: 280 (col length: RAMB18 60 RAMB36 30)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+Warning: Parallel synthesis criteria is not met 
+WARNING: [Synth 8-3331] design S86_top has unconnected port btn
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[13]' (FDC) to 'D2/CR_reg[15]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[15]' (FDC) to 'D2/CR_reg[14]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[14]' (FDC) to 'D2/CR_reg[12]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[9]' (FDC) to 'D2/CR_reg[12]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[10]' (FDC) to 'D2/CR_reg[12]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[11]' (FDC) to 'D2/CR_reg[12]'
+INFO: [Synth 8-3886] merging instance 'D2/CR_reg[12]' (FDC) to 'D2/CR_reg[8]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (\D2/CR_reg[8] )
+INFO: [Synth 8-3886] merging instance 'i_39/D1/div_counter_reg[16]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/D1/div_counter_reg[15]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[16]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[13]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[15]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[14]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[12]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[11]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[10]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[4]' (FDC) to 'i_39/U4/div_counter_reg[3]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[3]' (FDC) to 'i_39/U4/div_counter_reg[5]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[8]' (FDC) to 'i_39/U4/div_counter_reg[5]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[5]' (FDC) to 'i_39/U4/div_counter_reg[6]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[9]' (FDC) to 'i_39/U4/div_counter_reg[6]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[7]' (FDC) to 'i_39/U4/div_counter_reg[6]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[6]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[31]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[30]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[29]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[28]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[27]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[26]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[25]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[24]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[23]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[22]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[21]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[20]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[19]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3886] merging instance 'i_39/U4/div_counter_reg[18]' (FDC) to 'i_39/U4/div_counter_reg[17]'
+INFO: [Synth 8-3333] propagating constant 0 across sequential element (i_39/\U4/div_counter_reg[17] )
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:10 ; elapsed = 00:00:14 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+INFO: [Synth 8-5578] Moved timing constraint from pin 'CLOCK/clk_out1' to pin 'CLOCK/bbstub_clk_out1/O'
+INFO: [Synth 8-5578] Moved timing constraint from pin 'CLOCK/clk_out2' to pin 'CLOCK/bbstub_clk_out2/O'
+INFO: [Synth 8-5819] Moved 2 constraints on hierarchical pins to their respective driving/loading pins
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:16 ; elapsed = 00:00:23 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:16 ; elapsed = 00:00:23 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+WARNING: [Synth 8-3332] Sequential element (D2/Rtrace_reg_LDC) is unused and will be removed from module S86_top.
+WARNING: [Synth 8-3332] Sequential element (D2/Rtrace_reg_P) is unused and will be removed from module S86_top.
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:16 ; elapsed = 00:00:23 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report Check Netlist: 
++------+------------------+-------+---------+-------+------------------+
+|      |Item              |Errors |Warnings |Status |Description       |
++------+------------------+-------+---------+-------+------------------+
+|1     |multi_driven_nets |      0|        0|Passed |Multi driven nets |
++------+------------------+-------+---------+-------+------------------+
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+
+Report RTL Partitions: 
++-+--------------+------------+----------+
+| |RTL Partition |Replication |Instances |
++-+--------------+------------+----------+
++-+--------------+------------+----------+
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++------+--------------+----------+
+|      |BlackBox name |Instances |
++------+--------------+----------+
+|1     |pll           |         1|
+|2     |S86_0         |         1|
+|3     |Decoder_0     |         1|
+|4     |bios_ram      |         1|
++------+--------------+----------+
+
+Report Cell Usage: 
++------+----------+------+
+|      |Cell      |Count |
++------+----------+------+
+|1     |Decoder_0 |     1|
+|2     |S86_0     |     1|
+|3     |bios_ram  |     1|
+|4     |pll       |     1|
+|5     |BUFG      |     1|
+|6     |CARRY4    |     5|
+|7     |LUT1      |     5|
+|8     |LUT2      |    16|
+|9     |LUT3      |    45|
+|10    |LUT4      |    35|
+|11    |LUT5      |    42|
+|12    |LUT6      |    80|
+|13    |MUXF7     |     4|
+|14    |FDCE      |    86|
+|15    |FDPE      |    14|
+|16    |FDRE      |    39|
+|17    |FDSE      |     8|
+|18    |LDC       |    10|
+|19    |IBUF      |    13|
+|20    |OBUF      |    25|
++------+----------+------+
+
+Report Instance Areas: 
++------+---------+---------+------+
+|      |Instance |Module   |Cells |
++------+---------+---------+------+
+|1     |top      |         |   518|
+|2     |  D1     |Digit    |   134|
+|3     |  D2     |S_8254   |   220|
+|4     |  M0     |RAM_BIOS |    36|
+|5     |  U4     |divclk   |     9|
++------+---------+---------+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:17 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 3 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:13 ; elapsed = 00:00:22 . Memory (MB): peak = 941.359 ; gain = 226.336
+Synthesis Optimization Complete : Time (s): cpu = 00:00:18 ; elapsed = 00:00:25 . Memory (MB): peak = 941.359 ; gain = 377.633
+INFO: [Project 1-571] Translating synthesized netlist
+INFO: [Netlist 29-17] Analyzing 19 Unisim elements for replacement
+INFO: [Netlist 29-28] Unisim Transformation completed in 0 CPU seconds
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 947.582 ; gain = 0.000
+INFO: [Project 1-111] Unisim Transformation Summary:
+  A total of 10 instances were transformed.
+  LDC => LDCE: 10 instances
+
+INFO: [Common 17-83] Releasing license: Synthesis
+93 Infos, 13 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:21 ; elapsed = 00:00:32 . Memory (MB): peak = 947.582 ; gain = 646.547
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 947.582 ; gain = 0.000
+WARNING: [Constraints 18-5210] No constraints selected for write.
+Resolution: This message can indicate that there are no constraints for the design, or it can indicate that the used_in flags are set such that the constraints are ignored. This later case is used when running synth_design to not write synthesis constraints to the resulting checkpoint. Instead, project constraints are read when the synthesized design is opened.
+INFO: [Common 17-1381] The checkpoint 'C:/Users/lily/Desktop/123/lab3_8254/lab3_8254/lab3_8254.runs/synth_1/S86_top.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file S86_top_utilization_synth.rpt -pb S86_top_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu May 21 15:28:07 2026...
