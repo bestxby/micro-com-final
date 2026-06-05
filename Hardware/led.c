@@ -27,17 +27,23 @@ static void rcc_enable(uint32_t enr)
 /* ---- 配置指定 GPIO 引脚为 50 MHz 推挽输出模式 ---- */
 static void gpio_config_output(const LED_Desc *led)
 {
-    uint32_t pin  = led->pin;
-    uint32_t cr   = (uint32_t)&led->port->CRL;
+    uint32_t pin_mask = led->pin;
+    uint32_t pin_index = 0;
+    while (pin_mask > 1) {
+        pin_mask >>= 1;
+        pin_index++;
+    }
+
+    uint32_t cr = (uint32_t)&led->port->CRL;
 
     /* 0..7号引脚对应 CRL 寄存器, 8..15号引脚对应 CRH 寄存器 */
-    if (led->pin > 0x00FF) {
+    if (pin_index >= 8) {
         cr = (uint32_t)&led->port->CRH;
-        pin >>= 8;
+        pin_index -= 8;
     }
 
     /* 准确定位 4 位控制字段并执行位修改 */
-    uint32_t pos   = (pin & 0x7U) * 4U;
+    uint32_t pos   = pin_index * 4U;
     uint32_t field = 0x3U;          /* CNF=00 MODE=11 -> 50 MHz 推挽输出 */
     uint32_t mask  = 0xFU << pos;
 
