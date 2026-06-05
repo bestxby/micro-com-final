@@ -500,14 +500,24 @@
               <FilePath>.\Hardware\stm32f10x_conf.h</FilePath>
             </File>
             <File>
-              <FileName>touch.c</FileName>
+              <FileName>bh1750.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Hardware\touch.c</FilePath>
+              <FilePath>.\Hardware\bh1750.c</FilePath>
             </File>
             <File>
-              <FileName>touch.h</FileName>
+              <FileName>bh1750.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Hardware\touch.h</FilePath>
+              <FilePath>.\Hardware\bh1750.h</FilePath>
+            </File>
+            <File>
+              <FileName>sd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\sd.c</FilePath>
+            </File>
+            <File>
+              <FileName>sd.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\sd.h</FilePath>
             </File>
           </Files>
         </Group>

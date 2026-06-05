@@ -6,7 +6,8 @@
 #include "ai_detect.h"
 #include "anomaly_log.h"
 #include "game.h"
-#include "touch.h"
+#include "bh1750.h"
+#include "sd.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,14 @@ volatile uint8_t test_aht20_init_status  = 1;
 volatile uint8_t aht20_healthy  = 1;
 
 uint8_t aht20_fail_cnt  = 0;
+
+/* BH1750 光电传感器与 SD 存储卡状态变量 */
+volatile float test_bh1750_lux      = 0.0f;
+volatile uint8_t bh1750_healthy     = 1;
+volatile uint8_t sd_healthy         = 1;
+uint32_t log_sector_cursor          = 1000;
+uint8_t log_buffer[512]             = {0};
+uint16_t log_buffer_index           = 0;
 
 AI_Detector     my_detector;
 AnomalyLogBuffer my_log_buffer;
@@ -354,7 +363,7 @@ void Display_Refresh(uint8_t force_refresh) {
 
         // ------------------ 右侧栏 ------------------
         
-        // Card 3: AI Filtered Temp (Y: 56..156, height 100)
+        // Card 3: AI Filtered Temp & State (Y: 56..156, height 100)
         if (force_refresh) {
             LCD_FillRect(248, 56, 216, 100, theme_card_bg);
             LCD_DrawRect(248, 56, 216, 100, theme_border);
@@ -364,35 +373,52 @@ void Display_Refresh(uint8_t force_refresh) {
         }
         if (aht20_healthy) {
             sprintf(buf, "%5.2f C", test_filtered_temp);
-            LCD_ShowString(260, 90, buf, theme_text, theme_card_bg);
-            LCD_ShowString(260, 122, "(EMA alpha=0.2)", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 88, buf, theme_text, theme_card_bg);
+            
+            if (current_ai_state == AI_STATE_LEARNING) {
+                uint8_t pct = (my_detector.learning_samples * 100) / my_detector.max_learning_samples;
+                sprintf(buf, "STATE: LEARN (%d%%)", pct);
+                LCD_ShowString(260, 114, buf, theme_blue, theme_card_bg);
+            } else if (current_ai_state == AI_STATE_NORMAL) {
+                LCD_ShowString(260, 114, "STATE: SAFE", theme_green, theme_card_bg);
+            } else {
+                LCD_ShowString(260, 114, "STATE: ANOMALY!!", theme_red, theme_card_bg);
+            }
+            LCD_ShowString(260, 134, "(EMA alpha=0.2)", theme_text_muted, theme_card_bg);
         } else {
-            LCD_ShowString(260, 90, "[ERROR]", theme_red, theme_card_bg);
+            LCD_ShowString(260, 88, "[ERROR]", theme_red, theme_card_bg);
+            LCD_ShowString(260, 114, "STATE: SENSOR ERR", theme_red, theme_card_bg);
         }
 
-        // Card 4: System Health Info (Y: 176..276, height 100)
+        // Card 4: Hardware Status (Y: 176..276, height 100)
         if (force_refresh) {
             LCD_FillRect(248, 176, 216, 100, theme_card_bg);
             LCD_DrawRect(248, 176, 216, 100, theme_border);
             Draw_CornerBrackets(248, 176, 216, 100, 6, theme_accent);
-            LCD_ShowString(260, 186, "SYSTEM HEALTH:", theme_accent, theme_card_bg);
-            LCD_ShowString(260, 208, "AHT20  :", theme_text_muted, theme_card_bg);
-            LCD_ShowString(260, 230, "AI STATE:", theme_accent, theme_card_bg);
+            LCD_ShowString(260, 184, "HARDWARE STATUS:", theme_accent, theme_card_bg);
+            LCD_ShowString(260, 202, "AHT20 :", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 220, "BH175 :", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 238, "SD LOG:", theme_text_muted, theme_card_bg);
         }
         
-        LCD_ShowString(332, 208, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? theme_green : theme_red, theme_card_bg);
-        LCD_FillCircle(322, 214, 3, aht20_healthy ? theme_green : theme_red);
+        /* AHT20 online status */
+        LCD_ShowString(324, 202, aht20_healthy ? "ONLINE " : "OFFLINE", aht20_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(316, 209, 3, aht20_healthy ? theme_green : theme_red);
         
-        if (!aht20_healthy) {
-            LCD_ShowString(260, 248, "FAULT/SENSOR ERR", theme_red, theme_card_bg);
-        } else if (current_ai_state == AI_STATE_LEARNING) {
-            uint8_t pct = (my_detector.learning_samples * 100) / 100;
-            sprintf(buf, "LEARNING (%3d%%)", pct);
-            LCD_ShowString(260, 248, buf, theme_blue, theme_card_bg);
-        } else if (current_ai_state == AI_STATE_NORMAL) {
-            LCD_ShowString(260, 248, "MONITOR NORMAL  ", theme_green, theme_card_bg);
+        /* BH1750 online status */
+        LCD_ShowString(324, 220, bh1750_healthy ? "ONLINE " : "OFFLINE", bh1750_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(316, 227, 3, bh1750_healthy ? theme_green : theme_red);
+        
+        /* SD Card online status */
+        LCD_ShowString(324, 238, sd_healthy ? "ONLINE " : "OFFLINE", sd_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(316, 245, 3, sd_healthy ? theme_green : theme_red);
+        
+        /* Light Intensity lux raw reading */
+        if (bh1750_healthy) {
+            sprintf(buf, "LIGHT : %5.1f lx", test_bh1750_lux);
+            LCD_ShowString(260, 256, buf, theme_yellow, theme_card_bg);
         } else {
-            LCD_ShowString(260, 248, "ANOMALY ALARM!! ", theme_red, theme_card_bg);
+            LCD_ShowString(260, 256, "LIGHT : [ERROR]  ", theme_red, theme_card_bg);
         }
     }
 
@@ -565,7 +591,27 @@ int main(void) {
     LCD_Init();
     Theme_Init();
     LCD_Clear(theme_bg);
-    TP_Init();
+
+    /* 初始化 BH1750 和 SD 卡 (软件 SPI) */
+    bh1750_healthy = (BH1750_Init() == 0);
+    sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+
+    if (sd_healthy) {
+        /* 自动扫描 SD 卡空闲扇区以恢复数据记录 */
+        uint8_t temp_sector[512];
+        log_sector_cursor = 1000;
+        while (log_sector_cursor < 20000) {
+            if (SD_ReadBlock(temp_sector, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
+                if (temp_sector[0] == 'U' && temp_sector[1] == 'P' && temp_sector[2] == ':') {
+                    log_sector_cursor++;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
 
     /* 传感器初始化 */
     test_aht20_init_status  = AHT20_Init();
@@ -587,6 +633,42 @@ int main(void) {
         if (uptime_cnt >= 100) { 
             uptime_cnt = 0; 
             system_uptime_s++; 
+            
+            /* 每秒数据向 SD 卡缓存写入一次 */
+            if (sd_healthy) {
+                char log_entry[65];
+                int len = sprintf(log_entry, "UP:%5ds T:%5.2fC H:%5.2f%% L:%5.1flx A:%d M:%d",
+                                  system_uptime_s,
+                                  aht20_healthy ? test_aht20_temp : 0.0f,
+                                  aht20_healthy ? test_aht20_humi : 0.0f,
+                                  bh1750_healthy ? test_bh1750_lux : 0.0f,
+                                  current_ai_state,
+                                  system_mode);
+                
+                /* 空格填充至 62 字节，最后加 \r\n 并以 \0 结尾 */
+                for (int i = len; i < 62; i++) {
+                    log_entry[i] = ' ';
+                }
+                log_entry[62] = '\r';
+                log_entry[63] = '\n';
+                log_entry[64] = '\0';
+                
+                memcpy(&log_buffer[log_buffer_index * 64], log_entry, 64);
+                log_buffer_index++;
+                
+                /* 累积满 8 条数据 (512 字节 = 1 扇区) 时进行写入 */
+                if (log_buffer_index >= 8) {
+                    log_buffer_index = 0;
+                    if (SD_WriteBlock(log_buffer, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
+                        log_sector_cursor++;
+                        if (log_sector_cursor >= 25000) {
+                            log_sector_cursor = 1000; /* 循环写保护，防溢出 */
+                        }
+                    } else {
+                        sd_healthy = 0; /* 标记为异常，自动在 1.5s 周期内重连 */
+                    }
+                }
+            }
         }
 
         /* 按键扫描与缓存机制 (以防止 30ms 游戏循环漏按) */
@@ -595,67 +677,6 @@ int main(void) {
         if (key != KEY_NONE) {
             game_key = key;
         }
-
-        /* 触摸屏扫描与手势/点击处理 */
-        tp_dev.scan(0);
-        
-        static uint8_t touch_active = 0;
-        static uint16_t touch_start_x = 0;
-        static uint16_t touch_start_y = 0;
-        static uint8_t swipe_triggered = 0;
-        static uint8_t tap_triggered = 0;
-        
-        if (tp_dev.sta & TP_PRES_DOWN) {
-            if (tp_dev.x < 480 && tp_dev.y < 320) {
-                if (!touch_active) {
-                    touch_active = 1;
-                    touch_start_x = tp_dev.x;
-                    touch_start_y = tp_dev.y;
-                    swipe_triggered = 0;
-                    tap_triggered = 0;
-                    
-                    // 检测是否点击在主题切换按钮区域 (X: 410..460, Y: 0..30)
-                    if (tp_dev.x >= 410 && tp_dev.x <= 460 && tp_dev.y <= 30) {
-                        current_theme = !current_theme;
-                        Theme_Apply();
-                        Display_Refresh(1); // 强制全局重绘
-                        tap_triggered = 1;
-                    }
-                } else if (!swipe_triggered && !tap_triggered) {
-                    int dx = (int)tp_dev.x - (int)touch_start_x;
-                    int dy = (int)tp_dev.y - (int)touch_start_y;
-                    
-                    // 滑动检测阈值: 80 像素
-                    if (dx > 80 && abs(dy) < 60) {
-                        // 向右滑动: 切换到上一个页面
-                        current_page = (current_page + 3) % 4;
-                        if (current_page == 3) Game_Init();
-                        Display_Refresh(1);
-                        swipe_triggered = 1;
-                    } else if (dx < -80 && abs(dy) < 60) {
-                        // 向左滑动: 切换到下一个页面
-                        current_page = (current_page + 1) % 4;
-                        if (current_page == 3) Game_Init();
-                        Display_Refresh(1);
-                        swipe_triggered = 1;
-                    }
-                }
-                
-                // 如果在游戏页面 (Page 3) 且未触发滑动，则检测 Tap 点击
-                if (current_page == 3 && !swipe_triggered && !tap_triggered) {
-                    // 点击游戏画面区域 (X: 20..460, Y: 56..286)
-                    if (tp_dev.x >= 20 && tp_dev.x <= 460 && tp_dev.y >= 56 && tp_dev.y <= 286) {
-                        game_key = 2; // 触发小鸟拍击翅膀 (KEY2)
-                        tap_triggered = 1;
-                    }
-                }
-            }
-        } else {
-            touch_active = 0;
-            swipe_triggered = 0;
-            tap_triggered = 0;
-        }
-
 
         if (key == KEY1_PRESS) {
             /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 0) */
@@ -666,7 +687,10 @@ int main(void) {
             Display_Refresh(1);
         } else if (key == KEY2_PRESS) {
             if (current_page != 3) {
-                /* KEY2 按键 (其他常规页面模式): 硬件自愈重置 */
+                /* KEY2 按键 (其他常规页面模式): 硬件自愈重置 + 切换主题 */
+                current_theme = !current_theme;
+                Theme_Apply();
+                
                 AI_Init(&my_detector, 0.2f, 100);
                 current_ai_state = AI_STATE_LEARNING;
                 system_mode      = 0;
@@ -694,6 +718,40 @@ int main(void) {
                 } else {
                     aht20_fail_cnt++;
                     if (aht20_fail_cnt >= 3) aht20_healthy = 0;
+                }
+            }
+
+            /* BH1750 */
+            if (!bh1750_healthy) {
+                if (BH1750_Init() == 0) { bh1750_healthy = 1; }
+            }
+            if (bh1750_healthy) {
+                float lux;
+                if (BH1750_ReadData(&lux) == 0) {
+                    test_bh1750_lux = lux;
+                } else {
+                    bh1750_healthy = 0;
+                }
+            }
+
+            /* SD Card Auto Re-Init and Sector Re-scan */
+            if (!sd_healthy) {
+                if (SD_Init() == SD_RESPONSE_NO_ERROR) {
+                    sd_healthy = 1;
+                    /* 重新扫描空闲扇区 */
+                    uint8_t temp_sector[512];
+                    log_sector_cursor = 1000;
+                    while (log_sector_cursor < 20000) {
+                        if (SD_ReadBlock(temp_sector, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
+                            if (temp_sector[0] == 'U' && temp_sector[1] == 'P' && temp_sector[2] == ':') {
+                                log_sector_cursor++;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            break;
+                        }
+                    }
                 }
             }
 
