@@ -92,9 +92,9 @@ void LCD_Init(void)
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_IOPBEN;
     (void)RCC->APB2ENR;
 
-    /* ---- 2. PA3..PA7: 50MHz 推挽输出 ---- */
-    GPIOA->CRL &= ~0xFFFFF000;
-    GPIOA->CRL |=  0x33333000;
+    /* ---- 2. PA3, PA4, PA5, PA7: 50MHz 推挽输出 (排除用作 I2C SCL 的 PA6) ---- */
+    GPIOA->CRL &= ~0xF0FFF000;
+    GPIOA->CRL |=  0x30333000;
 
     /* ---- 3. PA8 (LCD_DC): 50MHz 推挽输出 ---- */
     GPIOA->CRH &= ~0x0000000F;

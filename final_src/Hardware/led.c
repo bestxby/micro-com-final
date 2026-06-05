@@ -52,42 +52,48 @@ static void gpio_config_output(const LED_Desc *led)
 }
 
 /* ============================================================
- * LED_Init — 初始化所有配置的 LED 控制端口
+ * LED_Init — 初始化所有配置的 LED 控制端口并配置 TIM2 PWM
  * ============================================================ */
 void LED_Init(void)
 {
-    /* 跟踪已启用的时钟以避免重复写寄存器 */
-    uint32_t enabled = 0;
+    /* 1. 初始化 PC13 (LED1, 核心板载 LED) 为标准 GPIO 输出 */
+    rcc_enable(led_table[0].rcc_enr);
+    gpio_config_output(&led_table[0]);
+    LED_Off(0);
 
-    for (uint8_t i = 0; i < LED_COUNT; i++) {
-        if (!(enabled & led_table[i].rcc_enr)) {
-            rcc_enable(led_table[i].rcc_enr);
-            enabled |= led_table[i].rcc_enr;
-        }
-        
-        gpio_config_output(&led_table[i]);
-        LED_Off(i);  /* 初始化完毕默认关闭 */
-    }
-}
+    /* 2. 开启 TIM2 和 GPIOA 时钟 */
+    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
+    (void)RCC->APB2ENR;
 
-/* ---- 内部函数: 将 GPIO 电平写入引脚的“有效激活”电平 ---- */
-static __inline void led_set_pin(const LED_Desc *led)
-{
-    if (led->active_level) {
-        led->port->BSRR = led->pin;
-    } else {
-        led->port->BRR  = led->pin;
-    }
-}
+    /* 3. 配置 PA0, PA1, PA2 为复用推挽输出 50MHz (CNF=10, MODE=11) */
+    GPIOA->CRL &= ~0x00000FFF;
+    GPIOA->CRL |=  0x00000BBB;
 
-/* ---- 内部函数: 将 GPIO 电平写入引脚的“无效关闭”电平 ---- */
-static __inline void led_reset_pin(const LED_Desc *led)
-{
-    if (led->active_level) {
-        led->port->BRR  = led->pin;
-    } else {
-        led->port->BSRR = led->pin;
-    }
+    /* 4. 配置 TIM2 寄存器参数以产生约 1kHz PWM */
+    TIM2->PSC = 719; // 72MHz / 720 = 100kHz clock
+    TIM2->ARR = 99;  // 100kHz / 100 = 1kHz PWM frequency
+
+    // 配置通道 1, 2, 3 为 PWM 模式 1 (OCxM = 110) 且使能预装载
+    TIM2->CCMR1 &= ~(TIM_CCMR1_OC1M | TIM_CCMR1_OC2M);
+    TIM2->CCMR1 |= (6 << 4) | (6 << 12);
+    TIM2->CCMR1 |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC2PE;
+
+    TIM2->CCMR2 &= ~TIM_CCMR2_OC3M;
+    TIM2->CCMR2 |= (6 << 4);
+    TIM2->CCMR2 |= TIM_CCMR2_OC3PE;
+
+    // 使能通道 1, 2, 3 输出比较
+    TIM2->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E;
+
+    // 启用 TIM2 主计数器
+    TIM2->CR1 |= TIM_CR1_ARPE | TIM_CR1_CEN;
+    TIM2->EGR = TIM_EGR_UG;
+
+    // 默认关闭所有通道 (CCR = 0)
+    TIM2->CCR1 = 0;
+    TIM2->CCR2 = 0;
+    TIM2->CCR3 = 0;
 }
 
 /* ============================================================
@@ -95,8 +101,19 @@ static __inline void led_reset_pin(const LED_Desc *led)
  * ============================================================ */
 void LED_On(uint8_t index)
 {
-    if (index >= LED_COUNT) return;
-    led_set_pin(&led_table[index]);
+    if (index == 1) {
+        TIM2->CCR1 = 99; // PA0
+    } else if (index == 2) {
+        TIM2->CCR2 = 99; // PA1
+    } else if (index == 3) {
+        TIM2->CCR3 = 99; // PA2
+    } else if (index == 0) {
+        if (led_table[0].active_level) {
+            led_table[0].port->BSRR = led_table[0].pin;
+        } else {
+            led_table[0].port->BRR  = led_table[0].pin;
+        }
+    }
 }
 
 /* ============================================================
@@ -104,8 +121,19 @@ void LED_On(uint8_t index)
  * ============================================================ */
 void LED_Off(uint8_t index)
 {
-    if (index >= LED_COUNT) return;
-    led_reset_pin(&led_table[index]);
+    if (index == 1) {
+        TIM2->CCR1 = 0; // PA0
+    } else if (index == 2) {
+        TIM2->CCR2 = 0; // PA1
+    } else if (index == 3) {
+        TIM2->CCR3 = 0; // PA2
+    } else if (index == 0) {
+        if (led_table[0].active_level) {
+            led_table[0].port->BRR  = led_table[0].pin;
+        } else {
+            led_table[0].port->BSRR = led_table[0].pin;
+        }
+    }
 }
 
 /* ============================================================
@@ -113,22 +141,27 @@ void LED_Off(uint8_t index)
  * ============================================================ */
 void LED_Toggle(uint8_t index)
 {
-    if (index >= LED_COUNT) return;
-    const LED_Desc *led = &led_table[index];
-    /* 直接读写 ODR 寄存器物理电平进行逻辑翻转 */
-    if (led->port->ODR & led->pin) {
-        led->port->BRR = led->pin;
-    } else {
-        led->port->BSRR = led->pin;
+    if (index == 1) {
+        TIM2->CCR1 = (TIM2->CCR1 > 0) ? 0 : 99;
+    } else if (index == 2) {
+        TIM2->CCR2 = (TIM2->CCR2 > 0) ? 0 : 99;
+    } else if (index == 3) {
+        TIM2->CCR3 = (TIM2->CCR3 > 0) ? 0 : 99;
+    } else if (index == 0) {
+        const LED_Desc *led = &led_table[0];
+        if (led->port->ODR & led->pin) {
+            led->port->BRR = led->pin;
+        } else {
+            led->port->BSRR = led->pin;
+        }
     }
 }
 
 /* ============================================================
- * LED_Write — 根据输入状态强置高低电平 (0 = 灭, 非零 = 亮)
+ * LED_Write — 根据输入状态强置亮灭 (0 = 灭, 非零 = 亮)
  * ============================================================ */
 void LED_Write(uint8_t index, uint8_t state)
 {
-    if (index >= LED_COUNT) return;
     if (state) {
         LED_On(index);
     } else {
@@ -137,18 +170,18 @@ void LED_Write(uint8_t index, uint8_t state)
 }
 
 /* ============================================================
- * LED_SetBreathingDuty — 直接写入 TIM2 通道 1 寄存器的 PWM 占空比
+ * LED_SetBreathingDuty — 直接写入 TIM2 通道 3 (绿灯) 的 PWM 占空比
  * ============================================================ */
 void LED_SetBreathingDuty(uint16_t duty)
 {
     if (duty > 99) {
         duty = 99;
     }
-    TIM2->CCR1 = duty;
+    TIM2->CCR3 = duty;
 }
 
 /* ============================================================
- * LED_ProcessBreathing — 平滑增减 PWM 占空比的呼吸处理函数
+ * LED_ProcessBreathing — 平滑增减 PWM 占空比的呼吸处理函数 (作用于绿灯)
  * ============================================================ */
 void LED_ProcessBreathing(void)
 {
@@ -164,5 +197,5 @@ void LED_ProcessBreathing(void)
         dir = 1;
     }
     
-    TIM2->CCR1 = duty;
+    TIM2->CCR3 = duty;
 }

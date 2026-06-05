@@ -1222,12 +1222,16 @@ int main(void) {
                     LED_On(2);
                     LED_Off(3);
                 } else {
-                    // 安全监控中：绿色 LED 常亮，其余常灭
+                    // 安全监控中：绿色 LED 呼吸，其余常灭
                     LED_Off(1);
                     LED_Off(2);
-                    LED_On(3);
                 }
             }
+        }
+
+        /* 呼吸灯平滑更新 (每 10ms 周期执行) */
+        if (!security_alert_mode && aht20_healthy && bh1750_healthy && sd_healthy && current_ai_state == AI_STATE_NORMAL) {
+            LED_ProcessBreathing();
         }
 
         Delay(72000);   /* ~10ms 循环节 */
