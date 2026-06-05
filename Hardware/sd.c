@@ -32,10 +32,10 @@ static void SD_SPI_Init(void)
     GPIOB->CRL &= ~0x00FFF000;
     GPIOB->CRL |=  0x00333000;
     
-    /* PA6 -> 上拉输入 (CNF=10, MODE=00 -> 0x8) */
-    GPIOA->CRL &= ~0x0F000000;
-    GPIOA->CRL |=  0x08000000;
-    GPIOA->ODR |=  (1 << 6); /* 使能 PA6 上拉 */
+    /* PA11 -> 上拉输入 (CRH bits 15:12 = 0x8) */
+    GPIOA->CRH &= ~0x0000F000;
+    GPIOA->CRH |=  0x00008000;
+    GPIOA->ODR |=  (1 << 11); /* 使能 PA11 上拉 */
     
     /* 初始化片选高电平 */
     SD_CS_HIGH();

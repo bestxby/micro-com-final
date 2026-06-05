@@ -11,7 +11,7 @@
 #define SD_MOSI_PIN      GPIO_Pin_3
 
 #define SD_MISO_PORT     GPIOA
-#define SD_MISO_PIN      GPIO_Pin_6
+#define SD_MISO_PIN      GPIO_Pin_11      /* PA11 (原 PA6，与 I2C SCL 冲突，将其移至闲置的 PA11) */
 
 #define SD_SCK_PORT      GPIOB
 #define SD_SCK_PIN       GPIO_Pin_5

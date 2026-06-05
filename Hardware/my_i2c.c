@@ -14,18 +14,19 @@ static void I2C_Delay(void)
   */
 void I2C_Init(void)
 {
-    /* 1. 开启 GPIOB 时钟 */
+    /* 1. 开启 GPIOA 和 GPIOB 时钟 */
     RCC->APB2ENR |= I2C_RCC_ENR;
     (void)RCC->APB2ENR; /* 刷新流水线 */
 
-    /* 2. 配置 PB6 (SCL) 为 50MHz 开漏输出 (CRL bits 27:24 = 0x7)
-       配置 PB10 (SDA) 为 50MHz 开漏输出 (CRH bits 11:8 = 0x7) */
-    GPIOB->CRL &= ~0x0F000000;
-    GPIOB->CRL |=  0x07000000;
+    /* 2. 配置 PA6 (SCL) 为 50MHz 开漏输出 (GPIOA->CRL bits 27:24 = 0x7) */
+    GPIOA->CRL &= ~0x0F000000;
+    GPIOA->CRL |=  0x07000000;
+
+    /* 3. 配置 PB10 (SDA) 为 50MHz 开漏输出 (GPIOB->CRH bits 11:8 = 0x7) */
     GPIOB->CRH &= ~0x00000F00;
     GPIOB->CRH |=  0x00000700;
 
-    /* 3. 将信号线默认拉高，置为空闲状态 */
+    /* 4. 将信号线默认拉高，置为空闲状态 */
     I2C_SCL_H();
     I2C_SDA_H();
     I2C_Delay();

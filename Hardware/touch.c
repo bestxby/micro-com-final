@@ -245,15 +245,12 @@ uint8_t TP_Init(void)
 	// 解除PB3、PB4 JTAG复用，使能SWD并将其作为普通IO使用
 	AFIO->MAPR = (AFIO->MAPR & ~AFIO_MAPR_SWJ_CFG) | AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
 
-	// 配置GPIOB的Pin3(T_DIN)和Pin4(T_CS)为推挽输出 (50MHz, CNF=00, MODE=11 -> 0x3)
-	GPIOB->CRL = (GPIOB->CRL & ~0x000FF000) | 0x00033000;
+	// 配置GPIOB的Pin3(T_DIN)、Pin4(T_CS)、Pin5(T_CLK)为推挽输出 (50MHz, CNF=00, MODE=11 -> 0x3)
+	GPIOB->CRL = (GPIOB->CRL & ~0x00FFF000) | 0x00333000;
 
-	// 配置GPIOA的Pin8(T_CLK)为推挽输出 (50MHz, CNF=00, MODE=11 -> 0x3)
-	GPIOA->CRH = (GPIOA->CRH & ~0x0000000F) | 0x00000003;
-
-	// 配置GPIOA的Pin0(T_IRQ)和Pin1(T_DO)为上拉输入 (CNF=10, MODE=00 -> 0x8)
-	GPIOA->CRL = (GPIOA->CRL & ~0x000000FF) | 0x00000088;
-	GPIOA->ODR |= (1 << 0) | (1 << 1); // 开启上拉电阻
+	// 配置GPIOA的Pin11(T_IRQ/PEN)和Pin12(T_DO/DOUT)为上拉输入 (CNF=10, MODE=00 -> 0x8)
+	GPIOA->CRH = (GPIOA->CRH & ~0x000FF000) | 0x00088000;
+	GPIOA->ODR |= (1 << 11) | (1 << 12); // 开启上拉电阻
   
 	TCS = 1;
 	TCLK = 0;

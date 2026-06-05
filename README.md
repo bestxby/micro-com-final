@@ -58,21 +58,22 @@
 | **PA7** | 板载 B4 排针 → TFT SDI | LCD SPI MOSI 数据线 | GPIO 推挽输出 |
 | **PA8** | 板载 B3 排针 → TFT DC | LCD RS 命令/数据选择 | GPIO 推挽输出 |
 | **PB1** | 板载 D6 排针 → TFT LED | LCD 背光控制 | GPIO 推挽输出 |
-| **PB6** | 板载 D5 排针 → I²C SCL | I²C 时钟线 (模拟 AHT20/BMP280) | GPIO 模拟开漏输出 |
-| **PB7** | 板载 D6 排针 → I²C SDA | I²C 数据线 (模拟 AHT20/BMP280) | GPIO 模拟开漏输出 |
-| **PA0** *(复用)* | 板载 A0 排针 → TFT T_IRQ | 触摸中断引脚 (PEN) | GPIO 上拉输入 (共享 PA0) |
-| **PA1** *(复用)* | 板载 A1 排针 → TFT T_DO | 触摸 SPI MISO (DOUT) | GPIO 上拉输入 (共享 PA1) |
-| **PB3** | 板载 D3 排针 → TFT T_DIN | 触摸 SPI MOSI (TDIN) | GPIO 推挽输出 (解除 JTAG 占用) |
-| **PA8** *(复用)* | 板载 B3 排针 → TFT T_CLK | 触摸 SPI SCK (TCLK) | GPIO 推挽输出 (共享 PA8) |
-| **PB4** | 板载 D4 排针 → TFT T_CS | 触摸 SPI 片选 (TCS) | GPIO 推挽输出 (解除 JTAG 占用) |
+| **PA6** | 非 Arduino 排针 $\rightarrow$ I²C SCL | I²C 时钟线 (模拟 AHT20/BMP280/BH1750) | GPIO 模拟开漏输出 |
+| **PB10** | 非 Arduino 排针 $\rightarrow$ I²C SDA | I²C 数据线 (模拟 AHT20/BMP280/BH1750) | GPIO 模拟开漏输出 |
+| **PB4** | 板载 D4 排针 $\rightarrow$ SD CS | SD 卡片选 (SPI CS) | GPIO 推挽输出 (解除 JTAG 占用) |
+| **PB3** | 板载 D3 排针 $\rightarrow$ SD MOSI | SD 卡数据输入 (SPI MOSI) | GPIO 推挽输出 (解除 JTAG 占用) |
+| **PB5** | 板载 D5 排针 $\rightarrow$ SD SCK | SD 卡时钟 (SPI SCK) | GPIO 推挽输出 |
+| **PA11** | 非 Arduino 排针 $\rightarrow$ SD MISO | SD 卡数据输出 (SPI MISO) | GPIO 上拉输入 |
 
 > [!IMPORTANT]
-> **PB3 (JTDO)** 与 **PB4 (JNTRST)** 默认被芯片分配给 JTAG 调试占用。为了使其能作为普通 I/O 控制触摸屏，我们在 `TP_Init` 中执行了 **SWD 接口保留，禁用 JTAG 的重映射**：
-> `AFIO->MAPR = (AFIO->MAPR & ~AFIO_MAPR_SWJ_CFG) | AFIO_MAPR_SWJ_CFG_JTAGDISABLE;`
+> **PB3 (JTDO)** 与 **PB4 (JNTRST)** 默认被芯片分配给 JTAG 调试占用。为了使其能作为普通 I/O 控制 SD 卡，我们在 `SD_SPI_Init` 中执行了 **SWD 接口保留，禁用 JTAG 的重映射**：
+> `AFIO->MAPR = (AFIO->MAPR & ~0x07000000) | 0x02000000;`
 
 ---
 
-## 3. 触摸屏交互设计
+## 3. 触摸屏交互设计（已弃用）
+> [!NOTE]
+> 触摸屏硬件与手势交互功能已在最新版本中彻底抛弃和移除，以避免引脚冲突并精简系统设计。物理交互仅使用独立按键 KEY1 与 KEY2。
 
 ### 3.1 触摸硬件层驱动 (`touch.c` & `touch.h`)
 * **位带操作 (Bit-banding)**: 利用 Cortex-M3 位带区映射实现单指令快速读写 I/O 引脚（如 `TCS = 1`, `TCLK = 0`），使触摸屏软件 SPI 通信更加高速稳定。
@@ -94,7 +95,7 @@
 ## 4. 系统核心功能设计
 
 ### 4.1 传感器热插拔自愈与重连
-系统每隔 1.5 秒读取一次温湿度与气压数据。若连续通信失败 3 次，系统将标记传感器为失联状态并在屏幕上高亮报错。在失联状态下，系统每个周期会自动重新初始化 I2C 和传感器，一旦重新接入传感器，系统可在 1.5 秒内实现自动重连与恢复。
+系统每隔 1.5 秒读取一次温湿度、气压以及光照度数据。若连续通信失败 3 次，系统将标记传感器为失联状态并在屏幕上高亮报错。在失联状态下，系统每个周期会自动重新初始化 I²C 和传感器（AHT20, BMP280, BH1750），一旦重新接入传感器，系统可在 1.5 秒内实现自动重连与数据恢复。
 
 ### 4.2 AI 自适应基准学习与突变检测
 传感器连接成功后，系统会运用 EMA 指数移动平均平滑滤波对原始读数进行平滑，并在前 100 次采样（约 150 秒）内采集数据计算拟合出环境温度的动态基线。学习结束后，若实时滤波温度偏离该基准超过 ±5°C，系统会自动判定为异常突变，并将其记录至历史日志。

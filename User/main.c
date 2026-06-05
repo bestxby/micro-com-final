@@ -592,9 +592,9 @@ int main(void) {
     Theme_Init();
     LCD_Clear(theme_bg);
 
-    /* 初始化 BH1750 和 SD 卡 (软件 SPI) */
+    /* 初始化 BH1750 (软件 I2C) */
     bh1750_healthy = (BH1750_Init() == 0);
-    sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+    sd_healthy = 0; /* 禁用 SD 卡以避免与 I2C SCL (PA6) 冲突 */
 
     if (sd_healthy) {
         /* 自动扫描 SD 卡空闲扇区以恢复数据记录 */
@@ -734,26 +734,7 @@ int main(void) {
                 }
             }
 
-            /* SD Card Auto Re-Init and Sector Re-scan */
-            if (!sd_healthy) {
-                if (SD_Init() == SD_RESPONSE_NO_ERROR) {
-                    sd_healthy = 1;
-                    /* 重新扫描空闲扇区 */
-                    uint8_t temp_sector[512];
-                    log_sector_cursor = 1000;
-                    while (log_sector_cursor < 20000) {
-                        if (SD_ReadBlock(temp_sector, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
-                            if (temp_sector[0] == 'U' && temp_sector[1] == 'P' && temp_sector[2] == ':') {
-                                log_sector_cursor++;
-                            } else {
-                                break;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                }
-            }
+            /* SD Card 自动重连已禁用，避免与 I2C SCL (PA6) 产生引脚冲突 */
 
             /* AI 突变检测 */
             if (aht20_healthy) {
