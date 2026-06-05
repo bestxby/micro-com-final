@@ -12,6 +12,7 @@
 #include "sr04.h"
 #include "usart1.h"
 #include "esp8266.h"
+#include "touch.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,6 +42,8 @@ volatile float test_ultrasonic_dist = 0.0f;
 volatile uint8_t ultrasonic_healthy = 1;
 volatile uint8_t security_alert_mode = 0; /* 0=Disarmed, 1=Armed */
 volatile float distance_history[24] = {0.0f};
+volatile float alarm_threshold_dist = 15.0f;
+volatile float warn_threshold_dist = 50.0f;
 
 AI_Detector     my_detector;
 AnomalyLogBuffer my_log_buffer;
@@ -260,14 +263,14 @@ static void Draw_PageDots(void) {
 /* ---- 底部系统信息 ---- */
 static void Draw_BottomInfo(void) {
     char buf[24];
-    sprintf(buf, "SYS-UP: %5ds", system_uptime_s);
     LCD_FillRect(0, BOTTOM_Y, 150, 16, theme_bg);
-    LCD_ShowString(16, BOTTOM_Y, buf, theme_text_muted, theme_bg);
+    sprintf(buf, "<- PREV");
+    LCD_ShowString(16, BOTTOM_Y, buf, theme_accent, theme_bg);
 
-    sprintf(buf, "G-05 HUD");
-    uint16_t x = LCD_WIDTH - (uint16_t)strlen(buf) * 8 - 16;
+    uint16_t x = LCD_WIDTH - 7 * 8 - 16;
     LCD_FillRect(x, BOTTOM_Y, 80, 16, theme_bg);
-    LCD_ShowString(x, BOTTOM_Y, buf, theme_text_muted, theme_bg);
+    sprintf(buf, "NEXT ->");
+    LCD_ShowString(x, BOTTOM_Y, buf, theme_accent, theme_bg);
 }
 
 /* ---- Page 1: 偏差网格折线图（示波器风格） ---- */
@@ -278,8 +281,12 @@ static void Draw_DevChart(void) {
     // 清空图表内部区域，防止历史折线残留堆叠
     LCD_FillRect(cx + 1, cy + 8, cw - 2, ch - 10, theme_card_bg);
     
-    // 重新绘制图表标题
-    LCD_ShowString(cx + 12, cy + 6, "Deviation Trend (+/-5 C)", theme_accent, theme_card_bg);
+    // 重新绘制图表标题 (缩短标题，为右侧 RST 按钮留出空间)
+    LCD_ShowString(cx + 12, cy + 6, "Dev Trend (+/-5 C) ", theme_accent, theme_card_bg);
+    
+    // 重新绘制 RST 按钮
+    LCD_ShowString(412, 62, "RST", theme_red, theme_card_bg);
+    LCD_DrawRect(408, 59, 32, 19, theme_red);
     
     // 绘制示波器点虚线网格
     Draw_DottedLine(cx + 6, zero_y - 45, cx + cw - 7, zero_y - 45, theme_border);  /* +3.0C */
@@ -491,8 +498,8 @@ void Display_Refresh(uint8_t force_refresh) {
         LCD_FillCircle(316, 227, 3, bh1750_healthy ? theme_green : theme_red);
         
         /* SD Card online status */
-        LCD_ShowString(324, 238, sd_healthy ? "ONLINE " : "OFFLINE", sd_healthy ? theme_green : theme_red, theme_card_bg);
-        LCD_FillCircle(316, 245, 3, sd_healthy ? theme_green : theme_red);
+        LCD_ShowString(324, 238, "DISABLED", theme_text_muted, theme_card_bg);
+        LCD_FillCircle(316, 245, 3, theme_text_muted);
         
         /* Light Intensity lux raw reading */
         if (bh1750_healthy) {
@@ -576,7 +583,11 @@ void Display_Refresh(uint8_t force_refresh) {
             LCD_FillRect(216, 56, 248, 220, theme_card_bg);
             LCD_DrawRect(216, 56, 248, 220, theme_border);
             Draw_CornerBrackets(216, 56, 248, 220, 6, theme_border);
-            LCD_ShowString(228, 62, "Deviation Trend (+/-5 C)", theme_accent, theme_card_bg);
+            LCD_ShowString(228, 62, "Dev Trend (+/-5 C) ", theme_accent, theme_card_bg);
+            
+            // Draw Reset Button
+            LCD_ShowString(412, 62, "RST", theme_red, theme_card_bg);
+            LCD_DrawRect(408, 59, 32, 19, theme_red);
         }
         Draw_DevChart();
     }
@@ -646,45 +657,57 @@ void Display_Refresh(uint8_t force_refresh) {
             Draw_CornerBrackets(16, 56, 184, 220, 6, theme_accent);
             
             LCD_ShowString(24, 62, "Security Mode:", theme_accent, theme_card_bg);
-            LCD_ShowString(24, 130, "Current Dist:", theme_accent, theme_card_bg);
-            LCD_ShowString(24, 204, "Alarm Status:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 114, "Current Dist:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 182, "Status:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 208, "Thresh:", theme_accent, theme_card_bg);
+            
+            // Draw [-] and [+] button borders
+            LCD_DrawRect(24, 240, 60, 24, theme_border);
+            LCD_ShowString(50, 244, "-", theme_red, theme_card_bg);
+            
+            LCD_DrawRect(116, 240, 60, 24, theme_border);
+            LCD_ShowString(142, 244, "+", theme_green, theme_card_bg);
         }
         
-        // Security mode text
+        // Security mode text (Y: 80)
         if (security_alert_mode) {
-            LCD_ShowString(24, 86, "ARMED    ", theme_red, theme_card_bg);
+            LCD_ShowString(24, 80, "ARMED    ", theme_red, theme_card_bg);
         } else {
-            LCD_ShowString(24, 86, "DISARMED ", theme_text_muted, theme_card_bg);
+            LCD_ShowString(24, 80, "DISARMED ", theme_text_muted, theme_card_bg);
         }
         
-        // Current distance text
+        // Current distance text (Y: 134)
         if (ultrasonic_healthy) {
             sprintf(buf, "%5.1f cm", test_ultrasonic_dist);
-            LCD_ShowString(24, 154, buf, theme_text, theme_card_bg);
+            LCD_ShowString(24, 134, buf, theme_text, theme_card_bg);
             
             float dist = test_ultrasonic_dist;
             if (dist > 100.0f) dist = 100.0f;
             if (dist < 0.0f) dist = 0.0f;
             uint16_t active_segs = (uint16_t)(dist * 10.0f / 100.0f);
-            uint16_t bar_color = (dist < 15.0f) ? theme_red : ((dist < 50.0f) ? theme_yellow : theme_green);
-            Draw_SegmentedBar(24, 178, active_segs, 10, bar_color, theme_bg);
+            uint16_t bar_color = (dist < alarm_threshold_dist) ? theme_red : ((dist < warn_threshold_dist) ? theme_yellow : theme_green);
+            Draw_SegmentedBar(24, 156, active_segs, 10, bar_color, theme_bg);
         } else {
-            LCD_ShowString(24, 154, "[ERROR]  ", theme_red, theme_card_bg);
-            Draw_SegmentedBar(24, 178, 0, 10, theme_red, theme_bg);
+            LCD_ShowString(24, 134, "[ERROR]  ", theme_red, theme_card_bg);
+            Draw_SegmentedBar(24, 156, 0, 10, theme_red, theme_bg);
         }
         
-        // Alarm status text
+        // Alarm status text (Y: 182)
         if (!security_alert_mode) {
-            LCD_ShowString(24, 228, "INACTIVE", theme_text_muted, theme_card_bg);
+            LCD_ShowString(88, 182, "INACTIVE", theme_text_muted, theme_card_bg);
         } else {
-            if (test_ultrasonic_dist < 15.0f) {
-                LCD_ShowString(24, 228, "ALARM!!!", theme_red, theme_card_bg);
-            } else if (test_ultrasonic_dist < 50.0f) {
-                LCD_ShowString(24, 228, "WARNING ", theme_yellow, theme_card_bg);
+            if (test_ultrasonic_dist < alarm_threshold_dist) {
+                LCD_ShowString(88, 182, "ALARM!!!", theme_red, theme_card_bg);
+            } else if (test_ultrasonic_dist < warn_threshold_dist) {
+                LCD_ShowString(88, 182, "WARNING ", theme_yellow, theme_card_bg);
             } else {
-                LCD_ShowString(24, 228, "SAFE    ", theme_green, theme_card_bg);
+                LCD_ShowString(88, 182, "SAFE    ", theme_green, theme_card_bg);
             }
         }
+        
+        // Threshold text (Y: 208)
+        sprintf(buf, "%2.0f cm", alarm_threshold_dist);
+        LCD_ShowString(88, 208, buf, theme_yellow, theme_card_bg);
         
         // ------------------ 右侧趋势图卡片 ------------------
         if (force_refresh) {
@@ -829,6 +852,81 @@ void Check_And_SendWeChatAlert(const char* event_type, const char* details) {
     ESP8266_SendWeChatAlert(SERVER_CHAN_KEY, event_type, details);
 }
 
+/* ---- 触屏输入处理逻辑 (仅在 Build B 触屏分支启用) ---- */
+static void Process_Touch_Input(void) {
+    if (tp_dev.sta & TP_CATH_PRES) {
+        tp_dev.sta &= ~TP_CATH_PRES; // 清除本次点击标志
+        
+        uint16_t tx = tp_dev.x;
+        uint16_t ty = tp_dev.y;
+        
+        // 1. 顶部栏主题切换按钮 (X: 410..450, Y: 0..30)
+        if (tx >= 410 && tx <= 450 && ty <= 30) {
+            current_theme = !current_theme;
+            Theme_Apply();
+            Display_Refresh(1);
+            return;
+        }
+        
+        // 2. 底部左右导航翻页按钮 (X: 0..100 或 380..480, Y: 290..320)
+        if (ty >= 290 && ty <= 320) {
+            if (tx <= 100) {
+                current_page = (current_page + 5) % 6;
+                if (current_page == 3) {
+                    Game_Init();
+                }
+                Display_Refresh(1);
+                return;
+            }
+            if (tx >= 380 && tx <= 480) {
+                current_page = (current_page + 1) % 6;
+                if (current_page == 3) {
+                    Game_Init();
+                }
+                Display_Refresh(1);
+                return;
+            }
+        }
+        
+        // 3. 页面内特定触控交互
+        if (current_page == 1) {
+            // AI 页面: 右上角 [RST] 复位学习按钮 (X: 405..465, Y: 54..82)
+            if (tx >= 405 && tx <= 465 && ty >= 54 && ty <= 82) {
+                AI_Init(&my_detector, 0.2f, 100);
+                current_ai_state = AI_STATE_LEARNING;
+                system_mode      = 0;
+                aht20_fail_cnt   = 0;
+                test_aht20_init_status  = AHT20_Init();
+                aht20_healthy           = (test_aht20_init_status  == 0);
+                LED_Off(0);
+                Display_Refresh(1);
+                return;
+            }
+        }
+        else if (current_page == 4) {
+            // 防盗警戒页面: 调整阈值 [-] 和 [+]
+            // [-] 按钮 X: 24..84, Y: 236..268
+            if (tx >= 24 && tx <= 84 && ty >= 236 && ty <= 268) {
+                if (alarm_threshold_dist > 5.0f) {
+                    alarm_threshold_dist -= 5.0f;
+                    warn_threshold_dist = alarm_threshold_dist + 35.0f;
+                    Display_Refresh(1);
+                }
+                return;
+            }
+            // [+] 按钮 X: 116..176, Y: 236..268
+            if (tx >= 116 && tx <= 176 && ty >= 236 && ty <= 268) {
+                if (alarm_threshold_dist < 80.0f) {
+                    alarm_threshold_dist += 5.0f;
+                    warn_threshold_dist = alarm_threshold_dist + 35.0f;
+                    Display_Refresh(1);
+                }
+                return;
+            }
+        }
+    }
+}
+
 /* ============================================================
  * main
  * ============================================================ */
@@ -848,12 +946,16 @@ int main(void) {
     /* 初始化 BH1750 (软件 I2C) */
     bh1750_healthy = (BH1750_Init() == 0);
     
-    /* 重新配置并启用 SD 卡 (MISO已移至PA11) */
-    sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+    /* 重新配置并启用 SD 卡 (在触屏固件中禁用，防止引脚冲突) */
+    // sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+    sd_healthy = 1; // 假装 SD 卡正常，防止状态机报故障
     
     /* 初始化 TM1637 数码管及 HC-SR04 超声波测距 */
     TM1637_Init();
     SR04_Init();
+    
+    /* 初始化 XPT2046 触摸屏 */
+    TP_Init();
     
     /* 配置面包板 KEY3 按键 (PB9 上拉输入) 和蜂鸣器 (PB15 推挽输出) */
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
@@ -867,6 +969,8 @@ int main(void) {
     GPIOB->CRH |=  0x30000000;
     GPIOB->BRR = GPIO_Pin_15;  // 初始静音
 
+    /* 触屏固件中禁用 SD 扇区扫描 */
+    #if 0
     if (sd_healthy) {
         /* 自动扫描 SD 卡空闲扇区以恢复数据记录 */
         uint8_t temp_sector[512];
@@ -884,6 +988,7 @@ int main(void) {
             }
         }
     }
+    #endif
 
     /* 传感器初始化 */
     test_aht20_init_status  = AHT20_Init();
@@ -938,7 +1043,8 @@ int main(void) {
             system_uptime_s++; 
             Increment_LocalClock();
             
-            /* 每秒数据向 SD 卡缓存写入一次 */
+            /* 每秒数据向 SD 卡缓存写入一次 (触屏固件中禁用) */
+            #if 0
             if (sd_healthy) {
                 char log_entry[65];
                 int len = sprintf(log_entry, "%s T:%5.2fC H:%5.2f%% L:%5.1flx A:%d M:%d",
@@ -973,6 +1079,7 @@ int main(void) {
                     }
                 }
             }
+            #endif
         }
 
         /* 按键扫描与缓存机制 (以防止 30ms 游戏循环漏按) */
@@ -1045,12 +1152,14 @@ int main(void) {
                 }
             }
 
-            /* SD Card 自动重连 */
+            /* SD Card 自动重连 (触屏固件中禁用) */
+            #if 0
             if (!sd_healthy) {
                 if (SD_Init() == SD_RESPONSE_NO_ERROR) {
                     sd_healthy = 1;
                 }
             }
+            #endif
 
             /* WiFi 周期性校准时钟与获取天气 (每10分钟=600秒) */
             if (wifi_connected) {
@@ -1096,7 +1205,7 @@ int main(void) {
             }
 
             /* 防盗入侵微信推送报警 */
-            if (security_alert_mode && ultrasonic_healthy && test_ultrasonic_dist < 15.0f) {
+            if (security_alert_mode && ultrasonic_healthy && test_ultrasonic_dist < alarm_threshold_dist) {
                 char details[32];
                 sprintf(details, "Dist_%.1fcm", test_ultrasonic_dist);
                 Check_And_SendWeChatAlert("Intruder_Alarm", details);
@@ -1175,8 +1284,8 @@ int main(void) {
                     GPIOB->BRR = GPIO_Pin_15;
                 } else {
                     float dist = test_ultrasonic_dist;
-                    if (dist < 15.0f) {
-                        // 报警级（<15cm）：红、黄、绿三色 LED 同步闪烁，蜂鸣器常鸣
+                    if (dist < alarm_threshold_dist) {
+                        // 报警级：红、黄、绿三色 LED 同步闪烁，蜂鸣器常鸣
                         LED_Toggle(1);
                         LED_Toggle(2);
                         LED_Toggle(3);
@@ -1188,14 +1297,14 @@ int main(void) {
                         LED_Write(3, sync_state);
                         
                         GPIOB->BSRR = GPIO_Pin_15;
-                    } else if (dist < 50.0f) {
-                        // 警告级（15~50cm）：黄色 LED 常亮，其余常灭，蜂鸣器关闭
+                    } else if (dist < warn_threshold_dist) {
+                        // 警告级：黄色 LED 常亮，其余常灭，蜂鸣器关闭
                         LED_Off(1);
                         LED_On(2);
                         LED_Off(3);
                         GPIOB->BRR = GPIO_Pin_15;
                     } else {
-                        // 安全级（>50cm）：绿色 LED 常亮，其余常灭，蜂鸣器关闭
+                        // 安全级：绿色 LED 常亮，其余常灭，蜂鸣器关闭
                         LED_Off(1);
                         LED_Off(2);
                         LED_On(3);
@@ -1206,8 +1315,8 @@ int main(void) {
                 /* ==================== DISARMED 撤防模式 ==================== */
                 GPIOB->BRR = GPIO_Pin_15; // 撤防时蜂鸣器始终关闭
                 
-                if (!aht20_healthy || !bh1750_healthy || !sd_healthy) {
-                    // 硬件故障：红色 LED 常亮，其余常灭
+                if (!aht20_healthy || !bh1750_healthy) {
+                    // 硬件故障：红色 LED 常亮，其余常灭 (在触屏固件中不检测 SD 卡状态)
                     LED_On(1);
                     LED_Off(2);
                     LED_Off(3);
@@ -1232,6 +1341,27 @@ int main(void) {
         /* 呼吸灯平滑更新 (每 10ms 周期执行) */
         if (!security_alert_mode && aht20_healthy && bh1750_healthy && sd_healthy && current_ai_state == AI_STATE_NORMAL) {
             LED_ProcessBreathing();
+        }
+
+        /* 触摸屏扫描与事件处理 */
+        if (current_page != 3) {
+            // 常规页面以 50ms 频率扫描触屏 (5 * 10ms)
+            static uint8_t touch_div = 0;
+            touch_div++;
+            if (touch_div >= 5) {
+                touch_div = 0;
+                TP_Scan(0);
+                Process_Touch_Input();
+            }
+        } else {
+            // 游戏页面以更快的频率扫描以实现灵敏交互
+            TP_Scan(0);
+            if (tp_dev.sta & TP_CATH_PRES) {
+                tp_dev.sta &= ~TP_CATH_PRES; // 清除点击标记
+                if (tp_dev.x >= 20 && tp_dev.x <= 460 && tp_dev.y >= 56 && tp_dev.y <= 286) {
+                    game_key = 2; // 触碰游戏区，触发飞跃/开始/重新开始
+                }
+            }
         }
 
         Delay(72000);   /* ~10ms 循环节 */

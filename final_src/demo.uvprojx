@@ -559,6 +559,16 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\esp8266.h</FilePath>
             </File>
+            <File>
+              <FileName>touch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\touch.c</FilePath>
+            </File>
+            <File>
+              <FileName>touch.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\touch.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
