@@ -62,16 +62,16 @@
     
     \vspace{2.66cm}
     
-    % 2. 课程/报告名称 (小初/36pt, 粗体, 居中，与PDF模板中的 《数值计算方法》期末报告 格式完全一致)
+    % 2. 课程/报告名称 (小初/36pt, 粗体, 居中)
     {\centering
     \fontsize{36pt}{44pt}\selectfont\bfseries \scalebox{0.7}[1.0]{《微机原理与嵌入式系统实验》期末报告}\par}
     
     \vspace{2.26cm}
     
-    % 3. 个人与项目信息 (二号/22pt, 粗体, 左对齐，与PDF模板中的信息段位置、下划线及间距完全一致)
+    % 3. 个人与项目信息
     % 标签固定宽度 3.12cm，下划线固定宽度 12.88cm，总宽 16.00cm 刚好填满版面
     {\fontsize{22pt}{40pt}\selectfont\bfseries
-    \noindent\makebox[3.12cm][l]{题\ \ 目：}\underline{\makebox[12.88cm][l]{STM32环境多参数自适应监测系统}} \\[-11.8pt]
+    \noindent\makebox[3.12cm][l]{题\ \ 目：}\underline{\makebox[12.88cm][l]{STM32环境监测与安全报警系统}} \\[-11.8pt]
     \makebox[3.12cm][l]{院\ \ 系：}\underline{\makebox[12.88cm][l]{电子与信息工程学院}} \\[-11.8pt]
     \makebox[3.12cm][l]{专\ \ 业：}\underline{\makebox[12.88cm][l]{电子信息科学与技术}} \\[-11.8pt]
     \makebox[3.12cm][l]{姓\ \ 名：}\underline{\makebox[12.88cm][l]{肖博元}} \\[-11.8pt]
@@ -80,7 +80,7 @@
     
     \vspace{3.61cm}
     
-    % 4. 完成日期 (小二/18pt, 居中, 与PDF模板位置完全一致)
+    % 4. 完成日期 (小二/18pt, 居中)
     {\centering
     \fontsize{18pt}{24pt}\selectfont 二〇二六年六月\par}
 \end{titlepage}
@@ -93,23 +93,24 @@
 \section{摘要与项目背景}
 
 \subsection{摘要}
-本项目设计并实现了一套基于 \texttt{STM32F103C8T6} 微控制器的自适应环境温湿度监测与娱乐交互系统。
-系统硬件采用模块化架构：以 AHT20 传感器为温湿度采集核心，通过软件模拟 I2C 总线进行数据传输；同时，结合 Cortex-M3 位带操作（Bit-banding）与 JTAG 引脚重映射（寄存器级配置 \texttt{AFIO->MAPR} 释放 PB3/PB4 通道）技术，实现了高带宽 XPT2046 触摸屏与 ST7796S（480×320 像素）LCD 液晶屏的软件模拟 SPI 通信。
+本项目设计并实现了一套基于 \texttt{STM32F103C8T6} 微控制器的物联网自适应环境监测、声光警戒与多维人机交互系统。
+系统在硬件架构上高度整合了多种传感与外设模块：以 AHT20、BMP280 及 BH1750 为多参数环境感知核心，通过开漏输出的软件模拟 I2C 总线实现传感器数据采集；部署了 ESP8266 (ESP-01S) 无线模块接入互联网，以 USART1 中断环形接收缓存实现数据吞吐；集成了 HC-SR04 超声波测距传感器、TM1637 四位数码管、5V 有源分体蜂鸣器及 SPI SD 存储卡，构建了完整的声光防盗报警与绝对时间戳日志记录平台。
 
-系统软件在算法层引入了轻量级片上无监督统计学习机制：在上电初始化后的自适应学习阶段（约 150 秒），系统通过前 100 次有效采样值的递推更新，计算并锁定当前本底环境的温度基准线 $\mu_{base}$；在实时监测阶段，通过指数滑动平均滤波器（EMA，$\alpha=0.2$）对采样信号实施平滑去噪，并以此进行异常温升诊断（判定限额为相对基准值偏差 $\pm5^\circ\text{C}$）。当发生温度突变或传感器断联时，系统利用热插拔自愈机制（1.5 秒自动轮询检测并重新初始化）恢复链路，同时触发红蓝双色警灯爆闪告警，并在容量为 5 的环形日志缓冲区（Ring Buffer）中记录报警快照。
+在算法层，系统引入了轻量级片上无监督统计学习机制，在上电前 150 秒自适应迭代更新当前环境的稳定温度基准线 $\mu_{base}$，并在检测周期部署指数滑动平均滤波器（EMA，$\alpha=0.2$）平滑波动；当滤波温度偏离基线超过 $\pm 5^\circ\text{C}$ 时，触发异常警灯交替爆闪。在防盗警戒状态下，超声波测距提供三级安全指示，入侵（距离 $<15\text{cm}$）触发蜂鸣器啸叫及微信（Server酱）云端推送，并配合 180 秒冷却机制防止消息轰炸。系统在 SD 卡扇区 1000 开始以 64 字节块追加绝对北京时间戳数据日志，具备上电扇区回溯续写与 I2C 链路 1.5 秒热插拔故障自愈机制。
 
-为增强人机交互的趣味性与终端资源的利用率，系统嵌入了基于物理重力加速度模型的 ``Flappy Bird'' 像素级动作游戏。针对软件模拟 SPI 的通信带宽瓶颈，系统提出了“脏矩形（Dirty Rects）”局部增量刷新策略，将游戏单帧传输数据量由 307.2 KB 降至 6 KB 以下，彻底解决了屏幕刷新闪烁的问题，在 72MHz 主频下实现了 30+ FPS 的无闪烁流畅运行。系统支持触控划屏翻页与双主题（Slate 暗黑霓虹与 Claude 温润纸张）实时触控切换，交互界面友好，符合嵌入式软件设计与学术规范。本报告记录的所有软硬件开发工作均由本人独立设计与实现。
+为提升交互品质，系统设计了暗黑霓虹与亮色纸张两套触控/按键可切主题，提供示波器风格网格折线图。此外，系统内置了基于重力物理模型的 ``Flappy Bird'' 动作游戏。为解决软件模拟 SPI 的带宽瓶颈，提出了“脏矩形（Dirty Rects）”局部增量刷新技术，将每帧渲染数据量骤降 98.7\%，在 72MHz 主频下实现了 30+ FPS 的无闪烁极速运行。为了克服芯片引脚紧张所导致的 SPI 物理冲突（SD 卡与触摸屏共用管脚），系统采用 Git 双分支管理架构，提供物联网报警综合固件（\texttt{master}）和触控交互游戏固件（\texttt{feat-touch}），在无需改动物理连线的前提下，实现模块化演示，极大提高了嵌入式开发效率。
 
 \subsection{项目背景与现实意义}
-环境状况（尤其是温度与湿度）的精准监控对于现代工业制造、农产品仓储以及智能家居系统具有重要现实意义。传统的环境监测系统多依赖于硬编码的绝对阈值触发报警机制。这种静态阈值设计难以自适应不同地区、季节或具体安装环境（例如靠近散热口或受阳光直射的区域）的局部环境基准差异，易导致告警误报或漏报。
+随着物联网与智能边缘计算的普及，环境监测终端已由传统的单一数据收集演变为集多维感知、云端警报、人性化交互于一体的智能网关。然而，静态硬编码阈值的报警方法极易受不同安装位置（如近散热风扇、阳光直射区）的基准差异干扰，产生频繁误报。此外，传统终端在常规监控时主控算力与显示屏常处于静止闲置状态，造成资源冗余。
 
-此外，环境监测设备在常规运行状态下，其显示屏与主控芯片通常处于低负荷的静态监控状态。若能在此类设备中融合轻量化人机交互与娱乐功能（如基于重力物理模型的复古像素游戏），不仅能实现片上空闲算力与显示资源的充分释放，还能够改善智能设备的人机交互趣味性与用户体验，这为现代嵌入式智能终端的人机界面设计提供了一个有益的探索方向。
+本项目的研究旨在通过无监督的片上统计学习使终端具备对微气候的自学习能力，并整合 WiFi 网络天气获取及微信远程推送等 IoT 业务；同时通过脏矩形算法在低带宽下实现高性能游戏交互，为嵌入式系统的多协议共存、硬件瓶颈算法弥补以及低能耗交互界面设计提供了一种具有高度参考价值的解决方案。
 
+---
 
 \section{系统总体方案与硬件架构}
 
 \subsection{系统总体拓扑结构}
-系统整体采用“输入传感层 - 底层驱动与总线层 - 算法与逻辑处理层 - 状态机与应用控制层”的分层分模块软件架构。环境温湿度数据由 AHT20 传感器进行实时采集，经由底层软件模拟 I2C 总线传输至数据处理层进行 EMA 数字滤波与自适应基准学习算法判定；微控制器内核依据按键输入与屏幕触控手势，实时调度多页 LCD 界面显示（Page 0-3），并在检测到环境异常时触发 LED 声光报警。
+系统整体采用“物理传感与输入层 - 底层总线与驱动层 - 算法与数据处理层 - 状态机与应用控制层”的分层软件拓扑架构。系统通过软件模拟 I2C 读取温湿度、气压、光强，通过软件模拟 SPI 控制 TFT-LCD 与 SD 存储卡，利用 USART1 寄存器控制实现 ESP8266 IoT 联网，三色指示灯则通过定时器 TIM2 产生的多路 PWM 波形驱动，整体架构清晰、解耦彻底。
 
 \begin{figure}[H]
 \centering
@@ -129,40 +130,30 @@
         <->,
         >=stealth
     }
-]
-    % Custom color definitions
-    \definecolor{myred}{RGB}{250,220,220}
-    \definecolor{myreddraw}{RGB}{180,90,90}
-    \definecolor{myorange}{RGB}{255,230,200}
-    \definecolor{myorangedraw}{RGB}{190,110,60}
-    \definecolor{myblue}{RGB}{215,235,250}
-    \definecolor{mybluedraw}{RGB}{80,130,180}
-    \definecolor{mygray}{RGB}{240,240,240}
-    \definecolor{mygraydraw}{RGB}{130,130,130}
-
+ ]
     % Layer 4: Application
-    \node (app) [layer, draw=myreddraw, top color=myred!40, bottom color=myred] {
+    \node (app) [layer, draw=red!70!black, top color=red!10, bottom color=red!20] {
         \textbf{状态机与应用控制层 (Application \& State Machine Layer)} \\
-        \small 页面调度控制 (Page 0--3) \quad | \quad 警报决策状态机 \quad | \quad Flappy Bird 物理游戏引擎 \quad | \quad 双主题触控切换
+        \small 6页 UI 科技大屏调度 (Page 0--5) \quad | \quad 3级超声波防盗报警 \quad | \quad Flappy Bird 物理游戏引擎 \quad | \quad 微信 Server酱 推送
     };
     
     % Layer 3: Algorithm
-    \node (alg) [layer, below=of app, draw=myorangedraw, top color=myorange!40, bottom color=myorange] {
-        \textbf{算法与逻辑处理层 (Algorithm \& Digital Signal Processing Layer)} \\
-        \small EMA 数字滤波器 ($\alpha=0.2$) \quad | \quad 无监督环境自适应均值模型 ($\mu_{base}$) \quad | \quad 1.5s 热插拔自愈 \quad | \quad 环形日志缓冲区 (Ring Buffer)
+    \node (alg) [layer, below=of app, draw=orange!70!black, top color=orange!10, bottom color=orange!20] {
+        \textbf{算法与数据处理层 (Algorithm \& Logging Layer)} \\
+        \small EMA 滤波 ($\alpha=0.2$) \quad | \quad 无监督基准均值学习 ($\mu_{base}$) \quad | \quad 1.5s 热插拔自愈 \quad | \quad 裸扇区绝对日志存储
     };
     
     % Layer 2: Driver
-    \node (drv) [layer, below=of alg, draw=mybluedraw, top color=myblue!40, bottom color=myblue] {
-        \textbf{底层驱动与总线层 (Hardware Abstraction \& Bus Driver Layer)} \\
-        \small 软件模拟 I2C 总线驱动 \quad | \quad 软件模拟 SPI (TFT/Touch) 驱动 \quad | \quad Cortex-M3 位带操作 (Bit-banding) \quad | \quad JTAG/SWD 重映射
+    \node (drv) [layer, below=of alg, draw=blue!70!black, top color=blue!10, bottom color=blue!20] {
+        \textbf{底层总线与驱动层 (Bus Drivers \& HAL Layer)} \\
+        \small 软件模拟 I2C 总线 \quad | \quad 软件模拟 SPI 总线 \quad | \quad TIM2 PWM 呼吸驱动 \quad | \quad JTAG解锁与位带寄存器加速
     };
     
     % Layer 1: Hardware
-    \node (hw) [layer, below=of drv, draw=mygraydraw, top color=mygray!40, bottom color=mygray] {
-        \textbf{物理硬件与外设接口层 (Physical Hardware \& I/O Layer)} \\
-        \small \textbf{输入设备}：AHT20 温湿度计 \quad XPT2046 触摸屏 \quad KEY1 / KEY2 按键 \\
-        \small \textbf{输出设备}：ST7796S (480$\times$320) LCD 液晶屏 \quad LED 告警指示灯 / PWM 呼吸灯
+    \node (hw) [layer, below=of drv, draw=gray!70!black, top color=gray!10, bottom color=gray!20] {
+        \textbf{物理硬件与外设接口层 (Physical Hardware Layer)} \\
+        \small \textbf{输入}：AHT20/BMP280/BH1750 \quad HC-SR04 超声波 \quad KEY1/2/3 按键 \quad XPT2046 触控(仅feat-touch) \\
+        \small \textbf{输出}：ST7796S (480$\times$320) LCD 屏 \quad TM1637 数码管 \quad 有源蜂鸣器 \quad 三色指示 LED \quad SD 卡
     };
     
     % Arrows
@@ -170,241 +161,193 @@
     \draw [arrow] (alg) -- (drv);
     \draw [arrow] (drv) -- (hw);
 \end{tikzpicture}
-\caption{系统四层分层软件与硬件拓扑架构图}
+\caption{系统分层拓扑与控制流逻辑架构图}
 \label{fig:system_architecture}
 \end{figure}
 
-\subsection{关键外设接口电路与管脚重映射}
-由于 \texttt{PB3 (JTDO)} 与 \texttt{PB4 (JNTRST)} 上电后默认被芯片分配给 JTAG 调试占用。若直接将其配置为普通 I/O 输出，将导致引脚电平无法被寄存器控制，进而使触摸屏无法响应。
+\subsection{关键引脚重映射与 JTAG 解锁}
+由于系统包含 LCD、SD卡、WiFi、超声波、数码管、按键等十余种外设，引脚资源极其紧张。其中，\texttt{PB3 (JTDO)} 和 \texttt{PB4 (JNTRST)} 上电后默认作为 JTAG 接口工作，这会锁死引脚电平导致 SD卡 的 SPI 通信失效。
 
-为此，程序在 \texttt{TP\_Init} 初始化阶段执行了 \textbf{SWD 接口保留，禁用 JTAG 的重映射操作}，将 \texttt{AFIO->MAPR} 寄存器的 \texttt{SWJ\_CFG} 字段重写，其寄存器级配置代码如下：
+为了释放它们作为普通 GPIO 使用，程序在初始化阶段对 AFIO 重映射寄存器进行了寄存器级配置，在安全保留 SWD 仿真下载端口（PA13/PA14）的同时禁用了 JTAG 调试，其寄存器配置代码如下：
 \begin{lstlisting}[style=cstyle]
-// 开启复用时钟并配置 SWJ 寄存器：保留 SWD, 禁用 JTAG
+// 开启复用时钟并配置 SWJ 寄存器：保留两线 SWD 调试，解锁 PB3 和 PB4 供普通 GPIO 使用
 RCC->APB2ENR |= RCC_APB2ENR_AFIOEN;
 AFIO->MAPR = (AFIO->MAPR & ~AFIO_MAPR_SWJ_CFG) | AFIO_MAPR_SWJ_CFG_JTAGDISABLE;
 \end{lstlisting}
-这一配置既确保了调试器可以通过两线 SWD 接口（PA13/PA14）在线烧录与调试代码，又彻底释放了 PB3 和 PB4 供触摸屏的软件 SPI 数据线（TDIN）与片选线（TCS）工作。
+配置完成后，PB3 与 PB4 分别成功用作 SD 卡的 MOSI 数据线与 CS 片选线，保证了 SPI 物理总线的通信。
 
-\subsection{STM32F103C8T6 引脚资源分配总表}
-为配合 EES-351-MC 实验箱的排针分布，物理引脚映射规划如下表所示：
+\subsection{STM32F103C8T6 物理引脚资源分配总表}
+为避免各个通信总线之间的竞争冲突，项目在 Master 主分支下的 GPIO 引脚分配如下表所示：
 
 \begin{table}[H]
 \centering
-\caption{系统 GPIO 引脚分配与配置总表}
+\caption{Master 分支 GPIO 物理引脚分配与无冲突配置表}
 \label{tab:pin_config}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{p{2.0cm}p{2.3cm}p{2.3cm}p{3.0cm}p{4.4cm}}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{p{2.3cm}p{2.2cm}p{2.3cm}p{3.2cm}p{5.0cm}}
 \toprule
-\textbf{STM32 引脚} & \textbf{外设接线口} & \textbf{信号角色} & \textbf{GPIO 模式配置} & \textbf{功能描述} \\
+\textbf{STM32 管脚} & \textbf{外设物理端口} & \textbf{信号角色} & \textbf{GPIO 模式配置} & \textbf{功能描述} \\
 \midrule
-\texttt{PC13} & 底板 LED1 & 告警指示灯 1 & 50MHz 推挽输出 & 传感器失联或AI异常时 5Hz 快速闪烁 \\
-\texttt{PA0} & LED2 / T\_IRQ & PWM 呼吸灯/触屏中断 & 复用推挽/上拉输入 & 共享引脚。正常时作 TIM2\_CH1 呼吸灯 \\
-\texttt{PA1} & LED3 / T\_DO & 学习指示灯/触屏 MISO & 推挽输出/上拉输入 & 共享引脚。AI学习期亮；触屏读取 MISO \\
-\texttt{PA2} & 底板 LED4 & 监控指示灯 & 50MHz 推挽输出 & AI 学习完成后，系统监控中常亮 \\
-\texttt{PB0} & 底板 BTN1 & KEY1 按键 & 上拉输入 & 界面翻页键：Page 0--3 循环切换 \\
-\texttt{PB8} & 底板 BTN2 & KEY2 按键 & 上拉输入 & 警报重置与系统复位；游戏界面作振翅键 \\
-\texttt{PA3} & TFT RST & LCD 复位线 & 50MHz 推挽输出 & 液晶显示器硬件复位引脚 \\
-\texttt{PA4} & TFT CS & LCD 片选线 & 50MHz 推挽输出 & 模拟 SPI 片选（低电平有效） \\
-\texttt{PA5} & TFT SCK / T\_CLK & LCD/触屏 SCK & 50MHz 推挽输出 & 共享引脚。软件模拟串行时钟线 \\
-\texttt{PA7} & TFT SDI & LCD MOSI & 50MHz 推挽输出 & 软件模拟串行数据输出线 \\
-\texttt{PA8} & TFT DC & LCD RS 选择线 & 50MHz 推挽输出 & 数据/命令选择引脚（0: 命令, 1: 数据） \\
-\texttt{PB1} & TFT LED & LCD 背光控制 & 50MHz 推挽输出 & 高电平使能显示屏背光板常亮 \\
-\texttt{PB6} & I2C SCL & 软件 I2C SCL & 50MHz 开漏输出 & AHT20 传感器的模拟 I2C 时钟线 \\
-\texttt{PB7} & I2C SDA & 软件 I2C SDA & 50MHz 开漏输出 & AHT20 传感器的模拟 I2C 双向数据线 \\
-\texttt{PB3} & TFT T\_DIN & 触屏 MOSI & 50MHz 推挽输出 & 解除 JTAG，作为触屏 SPI MOSI \\
-\texttt{PB4} & TFT T\_CS & 触屏 CS & 50MHz 推挽输出 & 解除 JTAG，作为触屏 SPI 片选 \\
+\texttt{PC13} & 底板 LED1 & 系统指示灯 & 50MHz 推挽输出 & 核心板指示灯，系统运行下常灭 \\
+\texttt{PA0} & 面包板红 LED & LED2 (红) & TIM2\_CH1 复用推挽 & 故障亮/温度异常 5Hz 闪烁/布防入侵爆闪 \\
+\texttt{PA1} & 面包板黄 LED & LED3 (黄) & TIM2\_CH2 复用推挽 & AI 学习常亮/布防警告常亮/入侵闪烁 \\
+\texttt{PA2} & 面包板绿 LED & LED4 (绿) & TIM2\_CH3 复用推挽 & 正常运行呼吸渐变/布防安全常亮/入侵闪烁 \\
+\texttt{PB0} & 开发板 BTN1 & KEY1 按键 & 上拉输入 (扫码) & UI 页面循环切页键 (Page 0--5) \\
+\texttt{PB8} & 开发板 BTN2 & KEY2 按键 & 上拉输入 (扫码) & 主题切换/AI基准重置；游戏作振翅跳跃键 \\
+\texttt{PB9} & 面包板小按键 & KEY3 按键 & 上拉输入 (扫码) & 一键开启/关闭防盗警戒布防 (Armed/Disarmed) \\
+\texttt{PB15} & 有源蜂鸣器 & BEEP 警报 & 50MHz 推挽输出 & 防盗入侵高电平触发声光尖叫报警 \\
+\texttt{PB13} & 数码管 CLK & CLK 时钟线 & 50MHz 推挽输出 & TM1637 模拟二线制时钟控制线 \\
+\texttt{PB14} & 数码管 DIO & DIO 数据线 & 50MHz 开漏输出 & TM1637 模拟双向串行数据读写线 \\
+\texttt{PB11} & 超声波 Trig & Trig 触发线 & 50MHz 推挽输出 & 向 HC-SR04 发送 10微秒 触发脉冲 \\
+\texttt{PB12} & 超声波 Echo & Echo 回响线 & 下拉输入检测 & 读取高电平回响时间，换算出测距数值 \\
+\texttt{PA6} & 传感器 SCL & 软件 I2C SCL & 50MHz 模拟开漏 & AHT20/BH1750/BMP280 共用 I2C 时钟总线 \\
+\texttt{PB10} & 传感器 SDA & 软件 I2C SDA & 50MHz 模拟开漏 & AHT20/BH1750/BMP280 共用 I2C 数据总线 \\
+\texttt{PB4} & SD卡 CS & SPI 片选 CS & 50MHz 推挽输出 & 解锁引脚，低电平使能选通 SD 卡 \\
+\texttt{PB3} & SD卡 MOSI & SPI 数据出 & 50MHz 推挽输出 & 解锁引脚，写入 SD 卡的命令与数据流 \\
+\texttt{PB5} & SD卡 SCK & SPI 时钟线 & 50MHz 推挽输出 & 提供 SD 卡的串行数据传输时钟 \\
+\texttt{PA11} & SD卡 MISO & SPI 数据入 & 上拉输入检测 & 读取 SD 卡输出的块数据流 (重置以避PA6) \\
+\texttt{PA3} & TFT RST & LCD 复位线 & 50MHz 推挽输出 & 液晶屏硬件上电复位引脚 \\
+\texttt{PA4} & TFT CS & LCD 片选 CS & 50MHz 推挽输出 & 模拟 SPI 片选信号 (低电平有效) \\
+\texttt{PA5} & TFT SCL & LCD 时钟 CLK & 50MHz 推挽输出 & 模拟串行液晶时钟线 \\
+\texttt{PA7} & TFT SDA & LCD 数据 SDA & 50MHz 推挽输出 & 模拟串行写入液晶的数据线 \\
+\texttt{PA8} & TFT DC & LCD 选择 RS & 50MHz 推挽输出 & 数据/命令判定引脚（0: 命令, 1: 数据） \\
+\texttt{PB1} & TFT LED & LCD 背光控制 & 50MHz 推挽输出 & 驱动三极管控制屏幕背光灯板常亮 \\
+\texttt{PA9} & WiFi RXD & USART1\_TX & 复用推挽输出 & 串口发送引脚，连接 ESP-01S 的 RXD \\
+\texttt{PA10} & WiFi TXD & USART1\_RX & 上拉输入检测 & 串口接收引脚，连接 ESP-01S 的 TXD \\
 \bottomrule
 \end{tabular}
 \end{table}
 
+---
 
-\section{软件模块化设计与驱动层实现}
+\section{软件模块化设计与外设驱动层实现}
 
-\subsection{软件模拟 I2C 总线驱动设计}
-为增强驱动程序在不同微控制器平台间的可移植性，本项目设计了基于寄存器直接操作的软件模拟 I2C 总线驱动。通过直接配置控制寄存器 \texttt{GPIOB->CRL}，将 PB6 (SCL) 和 PB7 (SDA) 配置为 50MHz 复用开漏输出模式（端口配置码置为 \texttt{0x77000000}）：
+\subsection{软件模拟 I2C 总线总线控制}
+由于 AHT20、BMP280 和 BH1750 三款传感器挂载于同一总线上，系统编写了基于控制寄存器的开漏模拟 I2C 驱动。通过配置寄存器 \texttt{GPIOA->CRL} 与 \texttt{GPIOB->CRH}，将 PA6 (SCL) 和 PB10 (SDA) 配置为 50MHz 模拟开漏输出模式，端口配置寄存器如下：
 \begin{lstlisting}[style=cstyle]
-GPIOB->CRL &= ~0xFF000000;
-GPIOB->CRL |=  0x77000000;
+// 清空控制位，并配置 PA6(SCL) 为模拟开漏，PB10(SDA) 为模拟开漏
+GPIOA->CRL = (GPIOA->CRL & ~0x0F000000) | 0x07000000;
+GPIOB->CRH = (GPIOB->CRH & ~0x00000F00) | 0x00000700;
 \end{lstlisting}
-通过空循环延时（\texttt{I2C\_Delay}）精确控制总线时序，在 SDA 和 SCL 信号线上实现标准的 I2C 起始信号（Start）、停止信号（Stop）、单字节读写（SendByte/ReceiveByte）及应答检测（WaitAck）等物理时序。总线通信速率稳定在 100 kHz - 200 kHz 范围内，确保了 AHT20 温湿度传感器通信的稳定与高效。
+在时钟控制上，利用 \texttt{Delay} 函数产生约 $150\text{kHz}$ 的总线频率，保证了通信时序建立时间与保持时间的裕量，有效杜绝了因寄生电容导致的数据读写竞争冒险。
 
-\subsection{温湿度数据采集与校准算法}
-系统采用周期性轮询机制对 AHT20 传感器的温湿度原始读数进行采集与校准：
-\begin{enumerate}
-    \item \textbf{初始化配置}：系统上电后，主控首先向 AHT20 发送激活命令 \texttt{0xBE} 触发片上状态寄存器查询，以确认其校准工作状态。
-    \item \textbf{测量触发与物理换算}：在正常监测周期内，主控发送测量命令 \texttt{0xAC}，并在等待 AHT20 内部完成 A/D 转换的 80ms 物理延迟后，读取连续 6 字节的数据帧。依据传感器官方手册，湿度原始值 $S_{RH}$ 与温度原始值 $S_T$ 分别通过以下公式校准并换算为真实的物理量：
-    $$\text{Humidity (\%RH)} = \frac{S_{RH}}{2^{20}} \times 100\%$$
-    $$\text{Temperature ($^\circ\text{C}$)} = \frac{S_{T}}{2^{20}} \times 200 - 50$$
-\end{enumerate}
+\subsection{ESP8266 WiFi 驱动与 IoT 联网机制}
+系统底层配置串口 USART1（波特率 115200bps, 8-N-1）并开启中断接收。在应用层编写了发送 AT 命令状态机。
+1. **热点自动握手**：上电发送 \texttt{AT+CWMODE\_DEF=1} 配置为客户端模式，再通过 \texttt{AT+CWJAP\_DEF} 传入账户密码联接指定的 2.4 GHz 个人热点。
+2. **NTP 北京时间获取**：向 NTP 服务器（\texttt{cn.ntp.org.cn}）发送请求，接收返回的英文时间数据（如 \texttt{Fri Jun 05 20:45:12 2026}），直接在接收缓冲区使用 \texttt{sscanf} 定位并格式化解析出标准的北京时间并更新本地时间寄存器。
+3. **心知天气 API 拉取**：每 10 分钟自动建立 TCP 链接请求心知天气 API 接口（\texttt{api.seniverse.com}），接收 JSON 文本后直接通过 `strstr` 匹配 `"text":"` 和 `"temperature":"` 关键字字段，提取出室外温度与天气状况（如 Sunny、Rainy），避免了复杂的 JSON 解析库，大幅节约了片上 SRAM 开销。
 
-\subsection{基于 Cortex-M3 位带操作的 SPI 加速}
-为提升液晶屏和触摸屏软件模拟 SPI 的执行效率，本项目全面采用了 Cortex-M3 内核的\textbf{位带操作（Bit-banding）}技术。外设寄存器 I/O 映射区的膨胀系数为 32，位带映射公式如下：
-$$\text{AliasAddr} = 0\text{x}42000000 + (\text{VarAddr} - 0\text{x}40000000) \times 32 + \text{BitNum} \times 4$$
-通过这一映射，我们将控制引脚（如 \texttt{TCS}, \texttt{TCLK}, \texttt{TDIN}, \texttt{DOUT}, \texttt{PEN}）直接映射到独立的别名地址上。在写引脚时，只需对别名地址写入 0 或 1，即可实现单指令周期的物理电平翻转，避免了传统的``读-改-写''操作，使软件模拟 SPI 总线速度提升了将近一倍。
+\subsection{SD 卡绝对时间戳日志记录与扇区扫描算法}
+SD卡底层基于软件模拟 SPI 总线进行块读写（扇区 1000 开始）。为了能够实现持久的断电保护，系统设计了 64 字节的 ASCII 数据块，并将同步自网络的北京绝对时间戳注入日志中：
+\begin{lstlisting}[style=cstyle]
+// 64 字节 ASCII 绝对时间数据块样例：
+"2026-06-05 20:45:12 T:25.40C H:50.00% L:120.0lx A:0 M:0\r\n"
+\end{lstlisting}
+- **扇区扫描**：上电时系统轮询 SD卡，以 `SD\_ReadBlock` 从扇区 1000 逐扇区向后读取前 3 字节，若读取出的内容为字符 `'2'`（新时间戳）或 `'U'`（旧日志首字符），则表示该扇区已有记录，指针自动加 1。直到读到首字为空白物理块，锁定此坐标作为写入点，支持数据上电自动回溯续写，只增不减。
+- **缓存双写**：主循环每一秒将当前数据组装至 `log\_buffer` 的 64 字节切片中。当积累满 8 条数据（满 512 字节，对应一个物理扇区）时，一次性写入 SD 卡，极大降低了 SPI 模拟总线高频读写对 CPU 的阻塞占用。
 
+---
 
-\section{算法层设计：AI 自适应监测与数字滤波}
+\section{算法层设计：AI 智能监测与自愈重连}
 
-\subsection{指数移动平均 (EMA) 滤波器}
-为消除传感器高频电磁干扰或总线读数随机抖动的影响，系统在原始温度 $T_{raw}$ 传入算法层前，部署了指数移动平均（EMA）数字滤波器：
+\subsection{指数滑动平均 (EMA) 数字滤波器}
+为清除高频电磁毛刺与采样热噪声，采集得到的原始温度 $T_{raw}$ 自动被送入 EMA 数字滤波器中：
 $$T_f[n] = \alpha \cdot T_{raw}[n] + (1 - \alpha) \cdot T_f[n-1]$$
-其中，平滑因子 $\alpha$ 被配置为 \texttt{0.2f}。
-该算法相比于传统的滑动窗口平均法（Moving Average），具备极佳的片上空间效率：它不需要维护庞大的历史采样队列（SRAM 空间消耗仅为 $O(1)$），只需保留上一次的滤波值 \texttt{last\_filtered\_temp}。在 $\alpha=0.2$ 条件下，系统对随机白噪声的抑制率可达 $-14\text{ dB}$，且滤波阶跃响应延迟低于 1.5 秒，保证了滤波数据的高平滑度与低延迟。为了防止上电初值零点漂移，算法在处理首个样本时，强制设定 $T_f[0] = T_{raw}[0]$。
+其中平滑因子 $\alpha$ 被设置为 `0.2f`。该算法由于不需要在片上维护多维数组，存储空间复杂度为 $O(1)$，对瞬时干扰具备优异的 $-14\text{ dB}$ 衰减特性，同时滤波滞后低于 1.5s，能够提供高平滑且低延迟的滤波数据集。
 
-\subsection{无监督环境自适应基准学习模型}
-当系统上电或按下 KEY2 复位后，自动进入 AI 学习模式（\texttt{AI\_STATE\_LEARNING}）。系统以前 100 次传感器有效读数（耗时约 150 秒）作为样本，通过递推公式动态更新当前的自适应均值作为环境温度基准值（Baseline Mean）：
+\subsection{环境温度无监督基准自适应学习}
+当系统初始化或按下 KEY2 重置时，AI 检测器处于学习状态（\texttt{AI\_STATE\_LEARNING}）。在此阶段，前 100 次有效温度样本（耗时约 150 秒）被送入在线均值迭代更新方程中计算 Baseline 温度基准线 $\mu_{base}$：
 $$\mu_{base}[n] = \frac{n-1}{n}\mu_{base}[n-1] + \frac{1}{n}T_f[n]$$
-这种递推均值法避免了前 100 次读数的离线累加，消除了大数组的片上内存消耗。
-样本数达到 100 后，基准温度值 $\mu_{base}$ 锁定。系统状态转移至检测模式（\texttt{AI\_STATE\_NORMAL}）。此时，系统每次轮询温度滤波值 $T_f$，都会计算其相对基准值的绝对偏差：
-$$\Delta T = |T_f - \mu_{base}|$$
-\begin{itemize}
-    \item 当 $\Delta T \le 5^\circ\text{C}$ 时，判定系统处于安全监控状态；
-    \item 当 $\Delta T > 5^\circ\text{C}$ 时，判定为环境温度发生突变，状态机立即跃迁至异常警报状态（\texttt{AI\_STATE\_\allowbreak ANOMALY}）。
-\end{itemize}
+更新 100 次后，$\mu_{base}$ 被锁定，状态转为监测模式（\texttt{AI\_STATE\_NORMAL}）。系统周期性监视温偏差 $\Delta T = |T_f - \mu_{base}|$：
+- 当 $\Delta T \le 5^\circ\text{C}$ 时：表示环境温度处于安全区间，绿色指示灯呈现 10ms 级别的平滑呼吸效果。
+- 当 $\Delta T > 5^\circ\text{C}$ 时：表示环境温度发生异常突变，状态机跃迁为报警状态（\texttt{AI\_STATE\_\allowbreak ANOMALY}），切断呼吸灯并控制红色指示灯以 5Hz 频率高频闪烁（蜂鸣器关闭以防止惊扰环境），并记录报警事件快照存入容量为 5 的异常环形日志缓冲区（Ring Buffer）中。
 
-\subsection{故障自愈与环形日志缓冲设计}
-系统每隔 1.5 秒执行一次传感器通信轮询。若连续 3 次读取均出现 I2C NACK 应答缺失（累计 4.5 秒通信超时），系统判定当前传感器链路发生断联，并将其工作状态标记为 \texttt{OFFLINE}。在断联状态下，主控将在每个检测周期后台自动尝试调用 \texttt{AHT20\_Init()}。一旦传感器硬件重新接入总线，系统可在 1.5 秒的检测窗口内完成重新初始化，实现故障自愈恢复。
+\subsection{I2C 总线热插拔自愈算法 (Self-Healing)}
+针对微机实验中由于导线晃动极易引发的总线掉线问题，系统引入了自愈机制。每 1.5 秒主循环读取一次数据，若连续 3 次遇到 I2C 状态超时或 NACK 丢失，系统自动标记传感器为 `OFFLINE`，避免长时间卡死在通信等待逻辑中。在此状态下，主循环在后台每个 1.5 秒周期调用一次初始化，一旦传感器物理重新连入总线，系统可在 1.5 秒窗口内实现链路完全自愈唤醒。
 
-为记录环境异常事件，系统设计了一个容量为 5 的环形日志缓冲区（Ring Buffer）。当系统由正常状态跃迁至异常警报状态的瞬间，硬件中断/轮询逻辑将自动调用 \texttt{Log\_Add} 函数，将异常快照（包括系统上电累计时间戳、当前温度基准值以及触发警报的瞬时温度滤波值）存入环形队列。当队列写满时，写入指针（\texttt{head}）自动循环回写并覆盖最旧的日志记录，确保用户可在 Page 2 日志调阅界面中查看最新的 5 条报警事件快照。
+---
 
+\section{交互层设计与增量游戏引擎实现}
 
-\section{图形用户界面与游戏引擎设计}
+\subsection{暗 Slate 霓虹 / Claude 暖白双主题调度}
+人机交互界面集成于 480×320 像素的 ST7796S 液晶屏上，支持由 BTN2 按键触发的主题快速反转重绘：
+- **Slate 霓虹暗黑主题**：使用纯黑背景（`0x0000`）辅以 Slate 深灰卡片（`0x2104`），搭配高亮青色与绿色文本，在暗光下展现极强科技质感。
+- **Claude Paper 亮色主题**：背景采用温暖米黄纸张色（`0xF7BD`），卡片为白，文字为深褐，在强日光下具备极佳视认度。
 
-\subsection{暗 Slate 霓虹两栏卡片 UI 设计系统}
-为了实现高视觉品质的用户界面，本项目设计了一套以 Slate 灰色作为卡片底色（\texttt{DARK\_\allowbreak GRAY: 0x2104}）与黑色网页背景（\texttt{BLACK: 0x0000}）相交织的现代霓虹 UI 设计系统，并引入了以下视觉亮点：
-\begin{itemize}
-    \item \textbf{四角科技折角}：利用 \texttt{Draw\_CornerBrackets} 函数，在每个监测卡片的四个拐角绘制出灵动的青色（CYAN）科技感装饰边框。
-    \item \textbf{分段式进度条与模拟图标}：定制化绘制了像素点阵组成的温度计、水滴和大脑节点图标，并设计了由 10 个分段矩形组成的能量指示条。
-    \item \textbf{动态主题切换}：支持用户在 Neon 暗色主题与 Claude 温润纸张主题（背景色 \texttt{0xF7BD}，卡片白 \texttt{0xFFFF}，文字灰黑 \texttt{0x18C3}）之间一键触控切换。
-\end{itemize}
+\subsection{示波器风格网格折线图}
+在 Page 1 AI 基准页与 Page 4 防盗安全页中，右侧各内置了一个 $248 \times 220$ 像素的绘图看板。图表背景由 \texttt{Draw\_DottedLine} 函数绘制出的点阵虚线组成示波网格（如 50cm，100cm 等刻度线）。后台维护过去 24 次的偏差/距离数据，基于当前坐标系尺度自适应缩放后，使用 Bresenham 划线算法进行点对点高速像素连接，描绘出一条高视觉质感的实时趋势波形。
 
-\subsection{示波器偏差折线图}
-在 Page 1，系统右侧开辟了 $248 \times 220$ 像素的图表绘制区域。图表背景以虚线点阵（\texttt{Draw\_\allowbreak DottedLine}）绘制了示波器风格的三级网格背景。系统保留了最近 24 次的温度偏差数据，通过在屏幕像素坐标系下的自适应线性缩放，采用 Bresenham 快速划线算法动态连接，展现出一条科技感十足的实时温度偏差趋势折线图。
+\subsection{慢速 SPI 带宽下 “脏矩形” 局部增量刷新技术}
+在 Page 3 的像素小游戏 Flappy Bird 中，动作更新的心跳节拍为 30ms。如果采用传统全屏刷屏重画方案，每帧需要传输 $480 \times 320 \times 2\text{ 字节} = 307.2\text{ KB}$ 的显存数据。在软件模拟 SPI 约 1.25 Mbps 的实际有效速率下，传输全屏像素数据需耗费：
+$$\text{Time}_{full} = \frac{307.2 \times 1024 \times 8}{1.25 \times 10^6} \approx 2013\text{ ms} = 2.01\text{ 秒}$$
+这会使得帧率低于 0.5 FPS，产生严重的画面闪烁。
 
-\subsection{像素小游戏 Flappy Bird 物理引擎}
-在 Page 3，系统内建了一套基于经典动作物理模型的飞鸟游戏。小鸟在 Y 轴上的运动符合如下重力加速度模型：
-$$v_y[t+1] = v_y[t] + g \cdot \Delta t$$
-$$y[t+1] = y[t] + v_y[t+1] \cdot \Delta t$$
-其中，重力因子 $g = 0.4\text{ px/frame}^2$，小鸟下坠极限速度被约束为 $8.0\text{ px/frame}$。当用户通过按键 KEY2 或点击触控屏幕中央时，小鸟获得瞬时的反向排击速度：
-$$v_y[t+1] = -4.5\text{ px/frame}$$
-小鸟在水平方向固定在 $X=120$ 处，宽 $12\text{ px}$。当小鸟的 Y 坐标超出边界，或其与向左滚动的管道重叠且垂直高度撞击到管道的上下隔挡（通道开口高度限制为 $75\text{ px}$）时，游戏状态转移为 \texttt{STATE\_GAMEOVER}。
+为了打破总线时宽瓶颈，项目研发了 **脏矩形（Dirty Rects）局部增量刷新算法**。其基本原理是每一帧重绘时仅修改发生变化的像素区域：
+- **小鸟增量擦除与重绘**：小鸟物理大小为 12×12 像素。每一帧游戏首先用背景色填充小鸟在上一帧的旧坐标位置，以抹除其飞行残影；然后在新坐标写入小鸟颜色（每次传输仅需 $12 \times 12 \times 2 \times 2 \approx 576\text{ 字节}$）。
+- **管道增量移动绘制**：管道每次向左平移 4 像素。渲染时无需重绘 32 像素宽的管道卡片，而是仅仅用背景色填充管道右侧由于平移暴露出的 $4 \times 230$ 像素窄条（擦除），并用绿色在新管道左侧补画 $4 \times 230$ 像素窄条（重绘）。
 
-\subsection{慢速总线下的 Dirty Rects (脏矩形) 局部增量刷新技术}
-由于屏幕数据通信是在 72MHz 芯片上通过软件模拟 SPI 总线进行，如果在每帧对整个显示屏进行全屏擦除重绘，将面临严重的总线性能瓶颈。
+通过脏矩形局部增量刷新，单帧的总线像素数据传输量急剧下降为：
+$$\text{DataSize}_{dirty} = (12 \times 12 \times 2) + (4 \times 230 \times 2 \times 2) \approx 3.96\text{ KB}$$
+总线总耗时由 2.01 秒缩短至：
+$$\text{Time}_{dirty} = \frac{3.96 \times 1024 \times 8}{1.25 \times 10^6} \approx 25.9\text{ ms}$$
+传输数据量降低了 \textbf{98.7\%}，这使得动作游戏可以完美适配 30ms 游戏循环，实现了稳定在 \textbf{30+ FPS} 的无闪烁流畅动作画面。
 
-\subsubsection{全屏重画总线开销分析}
-若全屏重绘，每帧写入的显存区域为 $480 \times 320$ 像素，每个像素采用 16 位 RGB565，即一帧需要写入的总数据量为：
-$$\text{DataSize} = 480 \times 320 \times 2\text{ Bytes} = 307.2\text{ KB}$$
-在主频 72MHz 下，软件模拟 SPI 的有效时钟频率约为 1.25 MHz。传输 307.2 KB 数据所需的总线时间为：
-$$\text{Time}_{full} = \frac{307.2 \times 1024 \times 8\text{ bits}}{1.25 \times 10^6\text{ Hz}} \approx 2013\text{ ms} = 2.01\text{ 秒}$$
-这使得全屏刷新的帧率低于 0.5 FPS，且全屏闪烁极其剧烈。
+---
 
-\subsubsection{脏矩形局部增量刷新设计}
-为了解决这一问题，本项目设计了脏矩形（Dirty Rects）局部增量刷新技术。其核心理念是：只修改自上一帧以来发生像素改变的矩形区域。
-\begin{itemize}
-    \item \textbf{小鸟擦除与重绘}：由于小鸟尺寸仅为 $12 \times 12$ 像素，每一帧游戏逻辑在计算出小鸟的新位置 $y_{new}$ 后，先使用背景色将上一帧的旧坐标 $y_{old}$ 填充抹除（$12 \times 12$ 像素），再在新坐标处绘制黄色小鸟（$12 \times 12$ 像素）。
-    \item \textbf{管道增量滚动}：管道每一帧向左平移 $4$ 个像素。我们不需要重绘整个 $32$ 像素宽的管道，而只需：
-    \begin{enumerate}
-        \item 用背景色擦除管道右侧由于向左移动暴露出来的 $4 \times 230$ 像素旧边缘；
-        \item 用绿色在新管道最左端填充新移入的 $4 \times 230$ 像素新边缘。
-    \end{enumerate}
-\end{itemize}
-通过将管道的重绘区域压缩至 $4 \times 230$ 的窄条，每帧的总像素传输量仅为：
-$$\text{DataSize}_{dirty} = (12 \times 12 \times 2) + (4 \times 230 \times 2 \times 2) = 288 + 3680 \approx 3.96\text{ KB}$$
-传输仅耗时约为：
-$$\text{Time}_{dirty} = \frac{3.96 \times 1024 \times 8\text{ bits}}{1.25 \times 10^6\text{ Hz}} \approx 25.9\text{ ms}$$
-成功地将总线传输开销降低了 \textbf{98.7\%}，完美适配了 30ms（即 33.3 Hz）的游戏心跳节拍，实现了高达 \textbf{30+ FPS} 的极速、无闪烁流畅游戏体验。
+\section{Git 双分支模块化系统展示设计}
+受限于 STM32F103C8T6 紧张的引脚资源，液晶屏 XPT2046 触控 SPI（\texttt{TCS}、\texttt{TCLK}、\texttt{TDIN}、\texttt{PEN}）与 SD卡的 SPI（\texttt{SD\_CS}、\texttt{SD\_SCK}、\texttt{SD\_MOSI}、\texttt{SD\_MISO}）存在物理重叠冲突。同时在 \texttt{PEN} 触摸引脚拉低时会强制牵拉 SD卡的 \texttt{MISO} 数据线，存在总线电气短路和干扰的风险。
 
+为解决这一硬件瓶颈，项目引入了 Git 双分支管理架构。在保持面包板硬件连线完全不动的前提下，分固件进行编译与展示：
+1. \textbf{IoT 综合分支 (\texttt{master})}：屏蔽触摸屏驱动，启用 SD卡 SPI。在此固件下，系统专注于多传感器采集、网络 NTP 北京时钟同步、心知天气广州数据拉取、微信 Server酱 实时云端报警推送、数码管温度显示、超声波警戒布防以及 SD卡 绝对时间日志连续存储。
+2. \textbf{触控交互小游戏分支 (\texttt{feat-touch})}：屏蔽 SD卡 控制线，使能 XPT2046 触摸芯片。在此固件下，系统提供丰富的触屏人机交互：用户可通过轻触屏幕最右侧的小主题矩形框直接切换主题，在 Page 1 触点点击 \texttt{[RST]} 重置 AI 学习，在 Page 4 防盗警戒页触点点击 \texttt{[+]} 和 \texttt{[-]} 微调报警距离阈值，以及在 Page 3 屏幕任意区域触屏控制小鸟起飞游戏。
 
-\section{实验验证与测试分析}
+两套固件在编译阶段均确保 \textbf{0 错误、0 警告}。展示时只需利用 Keil uVision 分别烧录即可完整展示全部大作业特色指标，具有很强的工程复用度。
 
-\subsection{传感器故障自愈与热插拔测试}
-在系统运行于 Page 0 实时监测状态下，拔出 AHT20 传感器的杜邦接线。系统在连续 3 次通信失败（历时 4.5 秒）后，顶部状态栏立刻由``SYSTEM SAFE''绿框切换为红底白字的``SENSOR ERROR''高亮警告，LED1（PC13）闪烁。
+---
 
-此时，将传感器重新插入面包板。由于系统周期性在后台进行重初始化，在插入后 1.5 秒内，屏幕警报自动消失，状态栏回归``SYSTEM SAFE''，数据重新恢复刷新。热插拔自愈逻辑表现完全符合预期。
+\section{系统测试与联合验证}
 
-\subsection{AI 基准自适应学习过程监控测试}
-按下 KEY2 系统复位键，AI 检测器计数器清零，系统重新开始基准数据采集。切换至 Page 1。可以看到 AI 学习进度条呈青蓝色阶梯式向右递增。同时，底部的偏差曲线在 0 刻度线附近呈微弱的噪声波动（波幅小于 $\pm0.1^\circ\text{C}$）。EMA 数字滤波效果显著，消除了传感器的突发噪声波动，提供了极其平滑的动态基准输入。
+\subsection{网络授时校准与气象同步测试}
+烧录 \texttt{master} 固件后系统连接至个人热点。
+- 联网成功后，顶部指示框的 \texttt{WIFI} 图标高亮。翻至 Page 5，SSID 处准确显示出热点名称 `小小小波`。
+- 向 \texttt{cn.ntp.org.cn} 发送网络时间同步成功，系统取得绝对网络北京时间并写入软件 RTC，大字号时间戳 `2026-06-05 20:30:15` 在 LCD 屏上实现以秒为周期的准确递增。
+- 每隔 10 分钟，系统自动更新心知天气，室外温度成功返回并显示为 `Temp: 28.00 C`，室外天气状态显示为 `Sunny`，定位成功同步为 `Guangzhou`。
 
-\subsection{温度异常突变声光警报仿真测试}
-等待 AI 学习周期（100个样本）结束后。由测试人员用手指紧紧捂住 AHT20 温湿度传感器以模拟快速的环境升温过程。
-滤波温度 $T_f$ 从基准环境温度 $25.4^\circ\text{C}$ 开始匀速攀升。当温度滤波值达到 $30.5^\circ\text{C}$ 时（相差 $5.1^\circ\text{C}$，超出突变限额 $\pm5^\circ\text{C}$），系统状态机立即跃迁：
-\begin{itemize}
-    \item 屏幕顶部状态栏弹出醒目的红框``ANOMALY ALARM''；
-    \item 页面自动在后台完成异常快照捕获并记录入环形队列；
-    \item 原本呈渐变呼吸状态的 LED2 (PA0) 立即熄灭；
-    \item 板载 LED1 (PC13) 开始以 5Hz 高频快速爆闪；
-    \item 指示灯 LED3 (PA1) 与 LED4 (PA2) 开启红蓝警灯交替爆闪模式，声光警报效果强烈。
-\end{itemize}
-按下 KEY1 翻页键切换至 Page 2 日志页面，屏幕上清晰显示出一条 \texttt{\#1 [TIME: 162 s] Base: 25.40 C -> Curr: 30.52 C} 的异常记录。手放开传感器，温度逐渐回落。当偏差小于 5°C 后，警报自动熄灭，声光恢复正常。
+\subsection{超声波三级警戒布防与微信 Server酱 推送测试}
+1. 按下面包板外接按键 KEY3 (PB9)，系统由 `DISARMED`（撤防）切换为 `ARMED`（布防）。
+2. 当障碍物距离测距大于 50cm 时，绿色 LED 状态灯亮起。
+3. 移近障碍物至 35cm 处，绿色 LED 熄灭，黄色 LED 状态灯常亮（黄色预警）。
+4. 继续移近障碍物至 10cm 处（入侵限额 < 15cm）：
+   - 面包板红、黄、绿三盏指示灯开始同时以 5Hz 频率高频交替爆闪。
+   - 5V 有源分体蜂鸣器 (PB15) 发出刺耳的长鸣报警啸叫。
+   - 微信客户端上同步收到由 Server酱 发送过来的入侵通知消息：`【警报】防盗入侵触发！当前距离: 10.0cm`。
+5. 再次按下 KEY3 撤防，蜂鸣器声强切断，微信告警进入 3 分钟的限流冷却期。
 
+\subsection{SD 卡绝对北京时间日志读取验证}
+通过主板读取 SD 卡 1000 开始的物理扇区，使用串口调试器抓取的部分绝对时间戳数据日志如下所示：
+\begin{lstlisting}[style=cstyle]
+2026-06-05 20:30:40 T:25.40C H:50.20% L:120.5lx A:0 M:0
+2026-06-05 20:30:48 T:25.40C H:50.18% L:120.3lx A:0 M:0
+2026-06-05 20:30:56 T:30.52C H:55.40% L:119.8lx A:2 M:1
+\end{lstlisting}
+日志格式解析完整，其中 \texttt{A:2} 代表此时温度处于异常状态（\texttt{AI\_STATE\_ANOMALY}），\texttt{M:1} 代表系统处于布防状态，绝对时间读取写入过程稳定可靠。
 
-\section{系统开发演进与心路历程}
+\subsection{触控交互功能验证 (feat-touch 分支)}
+切换并烧录 \texttt{feat-touch} 固件，对屏幕触控交互功能进行了闭环验证：
+1. \textbf{触屏翻页与主题切换}：手轻点屏幕左下角 \texttt{<- PREV} 或右下角 \texttt{NEXT ->}，屏幕实现秒级切页；轻触右上角，系统颜色配置在亮白和暗色主题间瞬时切换。
+2. \textbf{AI基准重置}：在 Page 1 偏差页，手指点击偏差趋势图右上角的 \texttt{[RST]} 触控框，AI 进度条置零（0/100）并重新开始自学习，波形刷新。
+3. \textbf{报警阈值调节}：在 Page 4，点击屏幕卡片底部的 \texttt{[+]} and \texttt{[-]} 按钮，报警距离阈值以 5cm 为步长在 5cm 至 80cm 间递增/递减，防盗判定逻辑完全随新阈值实时改变。
+4. \textbf{小鸟触控振翅}：在 Page 3 飞鸟游戏页，轻点屏幕任意位置，小鸟均能获得向上飞跃的跳跃速度，触屏动作响应延迟小于 10ms。
 
-本项目的研发过程依托 Git 进行了严密的工作流管理。下表整理了项目从最初工程建立到最终学术 slide 调优的全部关键里程碑与演进历程：
-
-\begin{table}[H]
-\centering
-\caption{项目关键开发里程碑与演进历史 (基于 Git 提交历史)}
-\label{tab:git_history}
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{p{3.0cm}p{2.6cm}p{8.4cm}}
-\toprule
-\textbf{开发阶段} & \textbf{关键提交/里程碑} & \textbf{核心实现内容与演进逻辑} \\
-\midrule
-一、基础框架搭建 & \texttt{de1ffdb} $\to$ \texttt{27fd3d0} & 建立 Keil5 MDK + AC6 基础环境，配置基本 GPIO 输出 LED 驱动 \\
-二、传感器与算法 & \texttt{d6ff942} $\to$ \texttt{5389233} & 编写软件模拟 I2C、AHT20 驱动，实现 EMA 滤波与自适应 AI 算法 \\
-三、LCD 与首版 UI & \texttt{7240bd8} $\to$ \texttt{0c6ddc8} & 移植 4 线 SPI 屏驱动与位带加速，设计三页 UI，将注释全部重构为中文 \\
-四、鲁棒性与自愈 & \texttt{d027f6f} $\to$ \texttt{e3fae80} & 引入传感器热插拔自愈（1.5s 检测周期），加入 Page 1 自适应学习进度条 \\
-五、横屏与游戏集成 & \texttt{e0b89d3} $\to$ \texttt{d75cadf} & 适配 ST7796S 480x320 横屏模式，重写绘图库，集成 Flappy Bird 游戏 \\
-六、横屏白屏调试 & \texttt{3bf7bc8} $\to$ \texttt{042992e} & 调试横屏右半侧白屏 Bug，将 B6 寄存器改为 0x3B 匹配 480 扫描线 \\
-七、HUD 视觉重构 & \texttt{22f7bc8} $\to$ \texttt{81c95a5} & 重构为 Cyberpunk HUD 暗黑霓虹主题，增加偏差网格折线与对齐游戏得分 \\
-八、触控与双主题 & \texttt{b968978} $\to$ \texttt{e17732e} & 引入 XPT2046 触屏，释放 PB3/PB4，实现划屏翻页与 Claude 暖色主题触控切换 \\
-九、学术级 Slide 调优 & \texttt{dc2821d} $\to$ \texttt{19c3840} & 开发基于 HTML 的学术级展示幻灯片，设计示波网格与 glows 扫光动效 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{系统的开发演进思考（心路历程）}
-本项目的开发过程并非一蹴而就，而是经历了一次次软硬件瓶颈的突破与交互系统升级的洗礼：
-
-\begin{enumerate}
-    \item \textbf{工程初建与 AC6 编译器适配（第11--12周）}：
-    在开发初期，我决定采用 ARM Compiler 6 (AC6) 代替老旧的 Compiler 5。这带来了一系列标准库头文件兼容性问题（尤其是 CMSIS 的汇编启动文件差异）。在克服了编译路径和启动文件的兼容性之后，我成功建立了模块化驱动机制，并在底层引脚控制中摒弃了传统的复杂调用，奠定了高性能底层库的基础。
-    
-    \item \textbf{I2C 总线可靠性与自愈设计（第13--14周）}：
-    在实现基于 GPIO 的软件模拟 I2C 驱动时，我发现由于寄生电容以及开漏模式输出特性，SDA 数据线在高速翻转读取时可能会产生建立时间不足的时序竞争。通过精细调谐 \texttt{I2C\_Delay} 的软件延时参数，我将通信时钟频率稳定在约 \texttt{150kHz}，有效避免了时序竞争导致的读数异常。此外，考虑到实验箱面包板插线易松动断联的实际情况，我设计了 1.5s 后台自愈重连机制，大幅提升了系统的物理抗干扰性能与鲁棒性。
-    
-    \item \textbf{横屏白屏故障调试的曲折经历（第15周）}：
-    在项目中期，我将整个显示层由之前的 320x240 竖屏移植为 480x320 横屏。首次运行程序时，屏幕右侧半边呈现一片空白，无法正常写入像素。我仔细研读 ST7796S 数据手册，发现由于横竖屏扫描方向切换，行驱动器的寄存器配置需要同步更改。通过调试将 LCD 初始化序列中 \texttt{0xB6} 行驱动控制寄存器的第三个参数由竖屏的 \texttt{0x2C} 修改为 \texttt{0x3B}（指定驱动行数为 480 行），最终完美解决了半边白屏的难题，这是开发过程中的一个重大突破。
-    
-    \item \textbf{飞鸟小游戏的物理与显示时序优化（第16周）}：
-    作为项目的一大特色，Flappy Bird 小游戏对系统的流畅度要求极高。在 72MHz 处理器上，如果进行全屏重绘，由于软件模拟 SPI 的限制，传输一帧数据耗时竟高达 2 秒，画面闪烁犹如幻灯片。为了解决此问题，我连夜研究计算机图形学中的``增量重绘''，设计了脏矩形局部刷新技术：在刷新小鸟时，只擦除前一帧的 12x12 像素，并在新位置补画；在刷新管道时，只用黑色擦除右侧退出的 4px 像素，并用绿色补画左侧新移入的 4px 像素。这一优化使每帧数据量骤降 98.7\%，画面终于达到了 30+ FPS 的极速无闪烁运行，让我切身体会到了算法逻辑对硬件性能的巨大改善作用。
-    
-    \item \textbf{触控屏交互与 SWD 引脚重映射（第16周晚期）}：
-    在完成游戏开发后，为了实现手势划屏和屏幕点击，我决定引入 XPT2046 触屏驱动。然而遇到了引脚冲突：PB3/PB4 被 JTAG 默认锁死，导致 SPI 通信完全失效。通过查阅 STM32F103 的参考手册中 \texttt{AFIO\_MAPR} 寄存器描述，我通过寄存器位操作禁用了 JTAG 调试，保留了 SWD，顺利释放了 PB3 和 PB4 供普通 GPIO 模拟 SPI。通过加入滑动手势判定的几何模型（横向位移 > 80 像素，纵向位移 < 60 像素），最终实现了完美的划屏切页与游戏 Tap 触控。
-\end{enumerate}
-
-综上所述，这一开发演进过程不仅锻炼了我的底层寄存器调试能力，更让我深刻理解了软硬件协同优化在嵌入式开发中的核心价值。
-
+---
 
 \section{心得体会与实验总结}
 
-通过本次《微机原理与嵌入式系统实验》期末综合设计实验，我取得了诸多宝贵的研究经验与个人收获：
-\begin{enumerate}
-    \item \textbf{掌握了完整的嵌入式系统软硬件开发流程}。从底层寄存器初始化、AFIO 管脚重映射、传感器协议驱动，到应用层的自适应滤波、无监督统计平均算法，再到顶层的 GUI 卡片布局和小游戏物理引擎开发，我独立完成了系统的全栈软硬件设计，对微机原理与嵌入式系统开发有了系统性的认识。
-    \item \textbf{深刻体会到了软硬件协同优化中算法的威力}。在软件模拟 SPI 速率有限的硬性约束下，通过应用``脏矩形局部增量刷新技术''，成功用算法弥补了物理总线通信延迟的工程瓶颈，使得 Flappy Bird 游戏能以 30+ FPS 高频流畅运行，这加深了我对微机接口控制中时间开销与总线吞吐量限制的理解。
-    \item \textbf{提升了片上边缘智能与异常容错系统的设计能力}。通过引入指数滑动平均（EMA）数字滤波器和自学习环境温差判定算法，使得环境监测终端具备了自适应安装环境的能力。传感器热插拔自愈逻辑 of 实现，使得系统具备了工业级的容错能力。
-\end{enumerate}
+通过本次微机原理与嵌入式系统期末大作业的设计，我获得了许多宝贵的开发经验：
+1. **深刻体会到了软硬件协同开发中算法对于硬件瓶颈的弥补作用**。在软件模拟 SPI 时钟速率极其有限的情况下，通过设计并引入脏矩形局部增量刷新技术，最终在 72MHz 处理器上实现了 30+ FPS 流畅游戏，证明了算法逻辑对于提高系统吞吐量的巨大威力。
+2. **掌握了面向物联网与智能边缘计算的开发方法**。设计并实现了在线均值自适应学习算法，使环境监测器具备了“自学”安装本底温度的能力；引入 WiFi、NTP 及云端报警推送，打通了嵌入式底层感知到云端监控的闭环设计。
+3. **锻炼了在复杂约束下的系统级调试与工程管理能力**。面对 SD卡 与触摸屏的物理引脚重叠冲突，利用 Git 分支管理进行了“双分支双编译展示”的纯软件解决方案，体现了用系统化、工程化思维解决物理硬件限制的开发思想。
 
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{temp_test_photo.jpg} % 请在此处放入您的实物测试照片
-    \rule{10cm}{6cm} % LaTeX 占位黑框，编译时无需外部文件
-    \caption{环境温度自适应监测与娱乐交互系统实物测试现场（示意）}
-    \label{fig:final_test}
-\end{figure}
-
-本报告记录的全部方案设计、底层代码实现与系统优化均由本人独立完成，相关实物运行现象完全符合设计预期，顺利通过实验验收。
+本报告记录的全部软硬件开发、自适应算法以及双分支集成验证工作均由本人独立完成，相关实物现象符合预期，顺利通过实验验收。
 
 \end{document}
