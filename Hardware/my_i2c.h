@@ -7,7 +7,7 @@
 #define I2C_SCL_PORT        GPIOB
 #define I2C_SCL_PIN         GPIO_Pin_6
 #define I2C_SDA_PORT        GPIOB
-#define I2C_SDA_PIN         GPIO_Pin_7
+#define I2C_SDA_PIN         GPIO_Pin_10      /* PB10 (非Arduino), 原 PB7→释放给Touch */
 #define I2C_RCC_ENR         RCC_APB2ENR_IOPBEN
 
 /* I2C 物理引脚读写低层寄存器控制宏 */

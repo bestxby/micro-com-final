@@ -18,11 +18,12 @@ void I2C_Init(void)
     RCC->APB2ENR |= I2C_RCC_ENR;
     (void)RCC->APB2ENR; /* 刷新流水线 */
 
-    /* 2. 配置 PB6 (SCL) 和 PB7 (SDA) 为 50MHz 开漏输出模式
-       GPIOB->CRL 寄存器中，24..27位控制 PB6，28..31位控制 PB7。
-       配置 CNF=01 (开漏输出), MODE=11 (50MHz 输出速度) -> 即 CNF+MODE = 0x7 */
-    GPIOB->CRL &= ~0xFF000000;
-    GPIOB->CRL |=  0x77000000;
+    /* 2. 配置 PB6 (SCL) 为 50MHz 开漏输出 (CRL bits 27:24 = 0x7)
+       配置 PB10 (SDA) 为 50MHz 开漏输出 (CRH bits 11:8 = 0x7) */
+    GPIOB->CRL &= ~0x0F000000;
+    GPIOB->CRL |=  0x07000000;
+    GPIOB->CRH &= ~0x00000F00;
+    GPIOB->CRH |=  0x00000700;
 
     /* 3. 将信号线默认拉高，置为空闲状态 */
     I2C_SCL_H();
