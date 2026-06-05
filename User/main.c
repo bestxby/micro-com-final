@@ -8,6 +8,8 @@
 #include "game.h"
 #include "bh1750.h"
 #include "sd.h"
+#include "tm1637.h"
+#include "sr04.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +33,12 @@ volatile uint8_t sd_healthy         = 1;
 uint32_t log_sector_cursor          = 1000;
 uint8_t log_buffer[512]             = {0};
 uint16_t log_buffer_index           = 0;
+
+/* 超声波测距与防盗监控状态变量 */
+volatile float test_ultrasonic_dist = 0.0f;
+volatile uint8_t ultrasonic_healthy = 1;
+volatile uint8_t security_alert_mode = 0; /* 0=Disarmed, 1=Armed */
+volatile float distance_history[24] = {0.0f};
 
 AI_Detector     my_detector;
 AnomalyLogBuffer my_log_buffer;
@@ -96,12 +104,13 @@ static void Draw_DropIcon(uint16_t x, uint16_t y, uint16_t color) {
     LCD_FillCircle(x + 3, y + 7, 1, theme_blue);
 }
 
-/* 绘制气压表图标 */
+/* 绘制气压表图标 (注释以消除未引用警告)
 static void Draw_GaugeIcon(uint16_t x, uint16_t y, uint16_t color) {
     LCD_DrawCircle(x + 6, y + 6, 6, color);
     LCD_DrawLine(x + 6, y + 6, x + 9, y + 3, theme_accent);
     LCD_DrawPoint(x + 6, y + 6, color);
 }
+*/
 
 /* 绘制大脑 (AI) 节点图标 */
 static void Draw_BrainIcon(uint16_t x, uint16_t y, uint16_t color) {
@@ -215,8 +224,8 @@ static void Draw_Header(const char *title) {
 
 /* ---- 绘制底部翻页指示点（呼吸棱形） ---- */
 static void Draw_PageDots(void) {
-    uint16_t dots[4] = {210, 230, 250, 270};
-    for (uint8_t i = 0; i < 4; i++) {
+    uint16_t dots[5] = {200, 220, 240, 260, 280};
+    for (uint8_t i = 0; i < 5; i++) {
         if (i == current_page) {
             LCD_FillCircle(dots[i], PAGE_DOT_Y, 3, theme_accent);
             LCD_DrawCircle(dots[i], PAGE_DOT_Y, 5, theme_accent);
@@ -281,6 +290,53 @@ static void Draw_DevChart(void) {
     }
 }
 
+/* ---- Page 4: 距离网格历史曲线 ---- */
+static void Draw_DistanceChart(void) {
+    uint16_t cx = 216, cy = 56, cw = 248, ch = 220;
+    
+    // 清空图表内部区域
+    LCD_FillRect(cx + 1, cy + 8, cw - 2, ch - 10, theme_card_bg);
+    
+    // 重新绘制图表标题
+    LCD_ShowString(cx + 12, cy + 6, "Distance Trend (0-150cm)", theme_accent, theme_card_bg);
+    
+    // 绘制示波器点虚线网格 (例如 50cm 和 100cm 刻度)
+    // 150cm 高度 -> scale: (ch - 20) / 150.0f = 200 / 150.0f = 1.333f
+    float scale = 1.333f;
+    uint16_t y_50 = cy + ch - 10 - (uint16_t)(50.0f * scale);
+    uint16_t y_100 = cy + ch - 10 - (uint16_t)(100.0f * scale);
+    
+    Draw_DottedLine(cx + 6, y_50, cx + cw - 7, y_50, theme_border);  /* 50cm 线 */
+    Draw_DottedLine(cx + 6, y_100, cx + cw - 7, y_100, theme_border); /* 100cm 线 */
+    
+    for (uint16_t gx = cx + 30; gx < cx + cw - 10; gx += 38) {
+        Draw_DottedLine(gx, cy + 10, gx, cy + ch - 10, theme_border);
+    }
+    
+    LCD_DrawLine(cx + 6, cy + 10, cx + 6, cy + ch - 10, theme_border);         /* 左轴 */
+    LCD_DrawLine(cx + cw - 6, cy + 10, cx + cw - 6, cy + ch - 10, theme_border); /* 右轴 */
+
+    /* 历史数据折线绘制 */
+    for (uint8_t i = 0; i < 23; i++) {
+        uint16_t x1 = cx + 12 + i * 10;
+        uint16_t x2 = cx + 12 + (i + 1) * 10;
+        float d1 = distance_history[i];
+        float d2 = distance_history[i+1];
+        if (d1 > 150.0f) d1 = 150.0f;
+        if (d2 > 150.0f) d2 = 150.0f;
+        float y1_val = (float)(cy + ch - 10) - d1 * scale;
+        float y2_val = (float)(cy + ch - 10) - d2 * scale;
+
+        if (y1_val < cy + 10) y1_val = cy + 10;
+        if (y1_val > cy + ch - 10) y1_val = cy + ch - 10;
+        if (y2_val < cy + 10) y2_val = cy + 10;
+        if (y2_val > cy + ch - 10) y2_val = cy + ch - 10;
+
+        LCD_DrawLine(x1, (uint16_t)y1_val, x2, (uint16_t)y2_val, theme_accent);
+        LCD_FillCircle(x2, (uint16_t)y2_val, 1, theme_accent); // 绘制数据接点
+    }
+}
+
 /* ============================================================
  * Display_Refresh — 主 UI 绘制函数
  * ============================================================ */
@@ -307,6 +363,8 @@ void Display_Refresh(uint8_t force_refresh) {
             Draw_Header("[3] ANOMALY HISTORY LOGS");
         else if (current_page == 3)
             Draw_Header("[4] FLAPPY BIRD MINI-GAME");
+        else if (current_page == 4)
+            Draw_Header("[5] SECURITY GUARD MODE");
     }
 
     /* ================================================================
@@ -553,6 +611,66 @@ void Display_Refresh(uint8_t force_refresh) {
     else if (current_page == 3) {
         Game_Draw(force_refresh);
     }
+    
+    /* ================================================================
+     * PAGE 4: 防盗监控 (左栏 HUD 卡片 + 右栏趋势图)
+     * ================================================================ */
+    else if (current_page == 4) {
+        // ------------------ 左侧诊断卡片 ------------------
+        if (force_refresh) {
+            LCD_FillRect(16, 56, 184, 220, theme_card_bg);
+            LCD_DrawRect(16, 56, 184, 220, theme_border);
+            Draw_CornerBrackets(16, 56, 184, 220, 6, theme_accent);
+            
+            LCD_ShowString(24, 62, "Security Mode:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 130, "Current Dist:", theme_accent, theme_card_bg);
+            LCD_ShowString(24, 204, "Alarm Status:", theme_accent, theme_card_bg);
+        }
+        
+        // Security mode text
+        if (security_alert_mode) {
+            LCD_ShowString(24, 86, "ARMED    ", theme_red, theme_card_bg);
+        } else {
+            LCD_ShowString(24, 86, "DISARMED ", theme_text_muted, theme_card_bg);
+        }
+        
+        // Current distance text
+        if (ultrasonic_healthy) {
+            sprintf(buf, "%5.1f cm", test_ultrasonic_dist);
+            LCD_ShowString(24, 154, buf, theme_text, theme_card_bg);
+            
+            float dist = test_ultrasonic_dist;
+            if (dist > 100.0f) dist = 100.0f;
+            if (dist < 0.0f) dist = 0.0f;
+            uint16_t active_segs = (uint16_t)(dist * 10.0f / 100.0f);
+            uint16_t bar_color = (dist < 15.0f) ? theme_red : ((dist < 50.0f) ? theme_yellow : theme_green);
+            Draw_SegmentedBar(24, 178, active_segs, 10, bar_color, theme_bg);
+        } else {
+            LCD_ShowString(24, 154, "[ERROR]  ", theme_red, theme_card_bg);
+            Draw_SegmentedBar(24, 178, 0, 10, theme_red, theme_bg);
+        }
+        
+        // Alarm status text
+        if (!security_alert_mode) {
+            LCD_ShowString(24, 228, "INACTIVE", theme_text_muted, theme_card_bg);
+        } else {
+            if (test_ultrasonic_dist < 15.0f) {
+                LCD_ShowString(24, 228, "ALARM!!!", theme_red, theme_card_bg);
+            } else if (test_ultrasonic_dist < 50.0f) {
+                LCD_ShowString(24, 228, "WARNING ", theme_yellow, theme_card_bg);
+            } else {
+                LCD_ShowString(24, 228, "SAFE    ", theme_green, theme_card_bg);
+            }
+        }
+        
+        // ------------------ 右侧趋势图卡片 ------------------
+        if (force_refresh) {
+            LCD_FillRect(216, 56, 248, 220, theme_card_bg);
+            LCD_DrawRect(216, 56, 248, 220, theme_border);
+            Draw_CornerBrackets(216, 56, 248, 220, 6, theme_border);
+        }
+        Draw_DistanceChart();
+    }
 
     /* ---- 底部信息 & 翻页点 ---- */
     Draw_BottomInfo();
@@ -576,6 +694,24 @@ static void Draw_Beacon(void) {
     }
 }
 
+/* ---- KEY3 Scan for security mode toggle ---- */
+static uint8_t KEY3_Scan(void) {
+    static uint8_t key3_up = 1;
+    uint8_t key3_low = (GPIOB->IDR & GPIO_Pin_9) ? 0 : 1;
+    if (key3_up && key3_low) {
+        // Simple software delay debounce
+        for (volatile uint32_t i = 0; i < 7200 * 20; i++);
+        key3_low = (GPIOB->IDR & GPIO_Pin_9) ? 0 : 1;
+        if (key3_low) {
+            key3_up = 0;
+            return 1;
+        }
+    } else if (!key3_low) {
+        key3_up = 1;
+    }
+    return 0;
+}
+
 /* ============================================================
  * main
  * ============================================================ */
@@ -594,7 +730,25 @@ int main(void) {
 
     /* 初始化 BH1750 (软件 I2C) */
     bh1750_healthy = (BH1750_Init() == 0);
-    sd_healthy = 0; /* 禁用 SD 卡以避免与 I2C SCL (PA6) 冲突 */
+    
+    /* 重新配置并启用 SD 卡 (MISO已移至PA11) */
+    sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+    
+    /* 初始化 TM1637 数码管及 HC-SR04 超声波测距 */
+    TM1637_Init();
+    SR04_Init();
+    
+    /* 配置面包板 KEY3 按键 (PB9 上拉输入) 和蜂鸣器 (PB15 推挽输出) */
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
+    (void)RCC->APB2ENR;
+    
+    GPIOB->CRH &= ~0x000000F0;
+    GPIOB->CRH |=  0x00000080;
+    GPIOB->ODR |= GPIO_Pin_9;  // 开启上拉
+    
+    GPIOB->CRH &= ~0xF0000000;
+    GPIOB->CRH |=  0x30000000;
+    GPIOB->BRR = GPIO_Pin_15;  // 初始静音
 
     if (sd_healthy) {
         /* 自动扫描 SD 卡空闲扇区以恢复数据记录 */
@@ -678,9 +832,16 @@ int main(void) {
             game_key = key;
         }
 
+        /* 扫描 KEY3 切换布防/撤防状态 */
+        if (KEY3_Scan()) {
+            security_alert_mode = !security_alert_mode;
+            ui_dirty = 1;
+            flash_cnt = 10; // 强制下一个循环立即更新 LED & 蜂鸣器
+        }
+
         if (key == KEY1_PRESS) {
-            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 0) */
-            current_page = (current_page + 1) % 4;
+            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 4 -> 0) */
+            current_page = (current_page + 1) % 5;
             if (current_page == 3) {
                 Game_Init(); /* 切到游戏页面时初始化游戏数据 */
             }
@@ -734,7 +895,35 @@ int main(void) {
                 }
             }
 
-            /* SD Card 自动重连已禁用，避免与 I2C SCL (PA6) 产生引脚冲突 */
+            /* SD Card 自动重连 */
+            if (!sd_healthy) {
+                if (SD_Init() == SD_RESPONSE_NO_ERROR) {
+                    sd_healthy = 1;
+                }
+            }
+
+            /* 轮询超声波测距传感器并滚动历史记录 */
+            {
+                float new_dist = 0.0f;
+                if (SR04_GetDistance(&new_dist) == 0) {
+                    test_ultrasonic_dist = new_dist;
+                    ultrasonic_healthy = 1;
+                } else {
+                    ultrasonic_healthy = 0;
+                }
+                
+                for (uint8_t i = 0; i < 23; i++) {
+                    distance_history[i] = distance_history[i + 1];
+                }
+                distance_history[23] = test_ultrasonic_dist;
+            }
+
+            /* TM1637 显示当前温度 */
+            if (aht20_healthy) {
+                TM1637_DisplayTemp(test_aht20_temp);
+            } else {
+                TM1637_DisplayClear();
+            }
 
             /* AI 突变检测 */
             if (aht20_healthy) {
@@ -779,35 +968,72 @@ int main(void) {
         /* Beacon 心跳 */
         Draw_Beacon();
 
-        /* LED 驱动调度 (利用板载 PA1 LED3 & PA2 LED4 指示AI状态及闪烁告警) */
-        if (system_mode == 0) {
-            /* 正常模式：LED1 (PC13) 常灭，LED2 (PA0) 呼吸渐变 */
-            LED_Off(0);
-            LED_ProcessBreathing();
+        /* LED与蜂鸣器综合状态机调度 (5Hz频率, 每100ms周期刷新) */
+        LED_Off(0); // 核心板载 LED PC13 保持常灭
+        
+        flash_cnt++;
+        if (flash_cnt >= 10) { // 10 * 10ms = 100ms (5Hz 周期)
+            flash_cnt = 0;
             
-            /* LED3 & LED4 指示 AI 学习/监控状态 */
-            if (current_ai_state == AI_STATE_LEARNING) {
-                LED_On(2);  /* 学习中：LED3 (PA1) 亮 */
-                LED_Off(3); /* LED4 (PA2) 灭 */
+            if (security_alert_mode) {
+                /* ==================== ARMED 布防模式 ==================== */
+                if (!ultrasonic_healthy) {
+                    // 超声波异常：黄色 LED 闪烁，其余常灭，蜂鸣器关闭
+                    LED_Off(1);
+                    LED_Toggle(2);
+                    LED_Off(3);
+                    GPIOB->BRR = GPIO_Pin_15;
+                } else {
+                    float dist = test_ultrasonic_dist;
+                    if (dist < 15.0f) {
+                        // 报警级（<15cm）：红、黄、绿三色 LED 同步闪烁，蜂鸣器常鸣
+                        LED_Toggle(1);
+                        LED_Toggle(2);
+                        LED_Toggle(3);
+                        
+                        // 同步所有 LED 的物理状态
+                        uint8_t sync_state = (GPIOA->ODR & GPIO_Pin_1) ? 1 : 0;
+                        LED_Write(1, sync_state);
+                        LED_Write(2, sync_state);
+                        LED_Write(3, sync_state);
+                        
+                        GPIOB->BSRR = GPIO_Pin_15;
+                    } else if (dist < 50.0f) {
+                        // 警告级（15~50cm）：黄色 LED 常亮，其余常灭，蜂鸣器关闭
+                        LED_Off(1);
+                        LED_On(2);
+                        LED_Off(3);
+                        GPIOB->BRR = GPIO_Pin_15;
+                    } else {
+                        // 安全级（>50cm）：绿色 LED 常亮，其余常灭，蜂鸣器关闭
+                        LED_Off(1);
+                        LED_Off(2);
+                        LED_On(3);
+                        GPIOB->BRR = GPIO_Pin_15;
+                    }
+                }
             } else {
-                LED_Off(2); /* 学习完成：LED3 (PA1) 灭 */
-                LED_On(3);  /* 监控中：LED4 (PA2) 亮 */
-            }
-        } else {
-            /* 异常模式：LED2 (PA0) 强制熄灭，LED1 (PC13) 及 LED3/LED4 高频 (5Hz) 交替闪烁 */
-            LED_Off(1);
-            flash_cnt++;
-            if (flash_cnt >= 10) { // 10 * 10ms = 100ms (5Hz 周期性闪烁)
-                flash_cnt = 0;
-                LED_Toggle(0);
+                /* ==================== DISARMED 撤防模式 ==================== */
+                GPIOB->BRR = GPIO_Pin_15; // 撤防时蜂鸣器始终关闭
                 
-                /* LED3 与 LED4 进行红蓝警灯式交替闪烁 */
-                static uint8_t alt_state = 0;
-                alt_state = !alt_state;
-                if (alt_state) {
+                if (!aht20_healthy || !bh1750_healthy || !sd_healthy) {
+                    // 硬件故障：红色 LED 常亮，其余常灭
+                    LED_On(1);
+                    LED_Off(2);
+                    LED_Off(3);
+                } else if (current_ai_state == AI_STATE_ANOMALY) {
+                    // 温度异常（偏差超过正负5C）：红色 LED 闪烁，其余常灭
+                    LED_Toggle(1);
+                    LED_Off(2);
+                    LED_Off(3);
+                } else if (current_ai_state == AI_STATE_LEARNING) {
+                    // AI学习：黄色 LED 常亮，其余常灭
+                    LED_Off(1);
                     LED_On(2);
                     LED_Off(3);
                 } else {
+                    // 安全监控中：绿色 LED 常亮，其余常灭
+                    LED_Off(1);
                     LED_Off(2);
                     LED_On(3);
                 }

@@ -59,43 +59,9 @@ void LED_Init(void)
             enabled |= led_table[i].rcc_enr;
         }
         
-        if (i == 1) {
-            /* LED2 (PA0) 对应 TIM2 通道 1 的 PWM 输出。
-               我们需要将其配置为复用推挽输出模式 (CNF=10, MODE=11 -> 0xB) */
-            GPIOA->CRL &= ~0x0000000F;
-            GPIOA->CRL |=  0x0000000B;
-        } else {
-            gpio_config_output(&led_table[i]);
-        }
-        
+        gpio_config_output(&led_table[i]);
         LED_Off(i);  /* 初始化完毕默认关闭 */
     }
-
-    /* 配置 TIM2 产生用于呼吸灯的通道 1 PWM 输出 */
-    /* 1. 开启 TIM2 的 APB1 外设时钟 */
-    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
-    (void)RCC->APB1ENR; /* 刷新流水线 */
-
-    /* 2. 配置预分频器及自动重装载寄存器实现大约 720 Hz 的 PWM 输出
-          PSC = 999 (72MHz / 1000 = 72kHz 的定时器时钟节拍)
-          ARR = 99 (计数周期 = 100 次 -> 72kHz / 100 = 720Hz PWM 频率) */
-    TIM2->PSC = 999;
-    TIM2->ARR = 99;
-
-    /* 3. 配置捕获/比较模式寄存器 1 (CCMR1)
-          OC1M = 110 (配置为 PWM 模式 1)
-          OC1PE = 1 (开启通道 1 的影子预装载寄存器) */
-    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M;
-    TIM2->CCMR1 |= (6U << 4) | TIM_CCMR1_OC1PE;
-
-    /* 4. 开启 Capture/Compare Enable Register (CCER) 的通道 1 输出 */
-    TIM2->CCER |= 0x0001U; /* CC1E: 通道1输出使能 */
-
-    /* 5. 开启 TIM2 计数器 (CEN) */
-    TIM2->CR1 |= TIM_CR1_CEN;
-
-    /* 6. 将通道初始占空比置 0 (LED2 初始关闭) */
-    TIM2->CCR1 = 0;
 }
 
 /* ---- 内部函数: 将 GPIO 电平写入引脚的“有效激活”电平 ---- */
@@ -124,11 +90,7 @@ static __inline void led_reset_pin(const LED_Desc *led)
 void LED_On(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    if (index == 1) {
-        TIM2->CCR1 = 99; /* 最大占空比 */
-    } else {
-        led_set_pin(&led_table[index]);
-    }
+    led_set_pin(&led_table[index]);
 }
 
 /* ============================================================
@@ -137,11 +99,7 @@ void LED_On(uint8_t index)
 void LED_Off(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    if (index == 1) {
-        TIM2->CCR1 = 0; /* 0 占空比 */
-    } else {
-        led_reset_pin(&led_table[index]);
-    }
+    led_reset_pin(&led_table[index]);
 }
 
 /* ============================================================
@@ -150,20 +108,12 @@ void LED_Off(uint8_t index)
 void LED_Toggle(uint8_t index)
 {
     if (index >= LED_COUNT) return;
-    if (index == 1) {
-        if (TIM2->CCR1 > 0) {
-            TIM2->CCR1 = 0;
-        } else {
-            TIM2->CCR1 = 99;
-        }
+    const LED_Desc *led = &led_table[index];
+    /* 直接读写 ODR 寄存器物理电平进行逻辑翻转 */
+    if (led->port->ODR & led->pin) {
+        led->port->BRR = led->pin;
     } else {
-        const LED_Desc *led = &led_table[index];
-        /* 直接读写 ODR 寄存器物理电平进行逻辑翻转 */
-        if (led->port->ODR & led->pin) {
-            led->port->BRR = led->pin;
-        } else {
-            led->port->BSRR = led->pin;
-        }
+        led->port->BSRR = led->pin;
     }
 }
 

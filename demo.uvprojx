@@ -519,6 +519,26 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\sd.h</FilePath>
             </File>
+            <File>
+              <FileName>tm1637.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\tm1637.c</FilePath>
+            </File>
+            <File>
+              <FileName>tm1637.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\tm1637.h</FilePath>
+            </File>
+            <File>
+              <FileName>sr04.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\sr04.c</FilePath>
+            </File>
+            <File>
+              <FileName>sr04.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\sr04.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
