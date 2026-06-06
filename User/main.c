@@ -58,6 +58,7 @@ volatile uint8_t  last_page       = 99;
  * ESP8266 IoT 全局状态变量与 NTP/微信推送参数
  * ============================================================ */
 volatile uint8_t wifi_connected = 0;
+volatile uint8_t wifi_hw_online = 0;
 char current_net_time[24] = "2026-06-05 20:00:00";
 float outdoor_temp = 0.0f;
 char outdoor_weather[16] = "N/A";
@@ -471,15 +472,16 @@ void Display_Refresh(uint8_t force_refresh) {
             LCD_ShowString(260, 114, "STATE: SENSOR ERR", theme_red, theme_card_bg);
         }
 
-        // Card 4: Hardware Status (Y: 176..276, height 100)
+        // Card 4: Hardware Status (Y: 176..286, height 110)
         if (force_refresh) {
-            LCD_FillRect(248, 176, 216, 100, theme_card_bg);
-            LCD_DrawRect(248, 176, 216, 100, theme_border);
-            Draw_CornerBrackets(248, 176, 216, 100, 6, theme_accent);
+            LCD_FillRect(248, 176, 216, 110, theme_card_bg);
+            LCD_DrawRect(248, 176, 216, 110, theme_border);
+            Draw_CornerBrackets(248, 176, 216, 110, 6, theme_accent);
             LCD_ShowString(260, 184, "HARDWARE STATUS:", theme_accent, theme_card_bg);
             LCD_ShowString(260, 202, "AHT20 :", theme_text_muted, theme_card_bg);
-            LCD_ShowString(260, 220, "BH175 :", theme_text_muted, theme_card_bg);
-            LCD_ShowString(260, 238, "SD LOG:", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 218, "BH175 :", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 234, "SD LOG:", theme_text_muted, theme_card_bg);
+            LCD_ShowString(260, 250, "WIFI  :", theme_text_muted, theme_card_bg);
         }
         
         /* AHT20 online status */
@@ -487,19 +489,31 @@ void Display_Refresh(uint8_t force_refresh) {
         LCD_FillCircle(316, 209, 3, aht20_healthy ? theme_green : theme_red);
         
         /* BH1750 online status */
-        LCD_ShowString(324, 220, bh1750_healthy ? "ONLINE " : "OFFLINE", bh1750_healthy ? theme_green : theme_red, theme_card_bg);
-        LCD_FillCircle(316, 227, 3, bh1750_healthy ? theme_green : theme_red);
+        LCD_ShowString(324, 218, bh1750_healthy ? "ONLINE " : "OFFLINE", bh1750_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(316, 225, 3, bh1750_healthy ? theme_green : theme_red);
         
         /* SD Card online status */
-        LCD_ShowString(324, 238, sd_healthy ? "ONLINE " : "OFFLINE", sd_healthy ? theme_green : theme_red, theme_card_bg);
-        LCD_FillCircle(316, 245, 3, sd_healthy ? theme_green : theme_red);
+        LCD_ShowString(324, 234, sd_healthy ? "ONLINE " : "OFFLINE", sd_healthy ? theme_green : theme_red, theme_card_bg);
+        LCD_FillCircle(316, 241, 3, sd_healthy ? theme_green : theme_red);
+        
+        /* WiFi online status */
+        if (!wifi_hw_online) {
+            LCD_ShowString(324, 250, "NO MOD ", theme_red, theme_card_bg);
+            LCD_FillCircle(316, 257, 3, theme_red);
+        } else if (wifi_connected) {
+            LCD_ShowString(324, 250, "ONLINE ", theme_green, theme_card_bg);
+            LCD_FillCircle(316, 257, 3, theme_green);
+        } else {
+            LCD_ShowString(324, 250, "DISC   ", theme_yellow, theme_card_bg);
+            LCD_FillCircle(316, 257, 3, theme_yellow);
+        }
         
         /* Light Intensity lux raw reading */
         if (bh1750_healthy) {
             sprintf(buf, "LIGHT : %5.1f lx", test_bh1750_lux);
-            LCD_ShowString(260, 256, buf, theme_yellow, theme_card_bg);
+            LCD_ShowString(260, 268, buf, theme_yellow, theme_card_bg);
         } else {
-            LCD_ShowString(260, 256, "LIGHT : [ERROR]  ", theme_red, theme_card_bg);
+            LCD_ShowString(260, 268, "LIGHT : [ERROR]  ", theme_red, theme_card_bg);
         }
     }
 
@@ -737,11 +751,28 @@ void Display_Refresh(uint8_t force_refresh) {
         
         // Display WiFi status
         if (wifi_connected) {
-            sprintf(buf, "WiFi: Connected (%s)", "小小小波");
+            sprintf(buf, "WiFi: Connected (%s)           ", "xiaobo");
             LCD_ShowString(32, 220, buf, theme_green, theme_card_bg);
+        } else if (wifi_hw_online) {
+            const char *err_msg = "UNKNOWN";
+            if (wifi_conn_error == 1) err_msg = "TIMEOUT";
+            else if (wifi_conn_error == 2) err_msg = "WRONG PWD";
+            else if (wifi_conn_error == 3) err_msg = "NO AP FOUND";
+            else if (wifi_conn_error == 4) err_msg = "CONN FAIL";
+            else if (wifi_conn_error == 5) err_msg = "DHCP FAIL";
+            else if (wifi_conn_error == 9) err_msg = "RESP TIMEOUT";
+            else if (wifi_conn_error == 10) err_msg = "MODE ERR";
+            else if (wifi_conn_error == 20) err_msg = "MUX ERR";
+            
+            sprintf(buf, "WiFi: Disconnected (%s)       ", err_msg);
+            LCD_ShowString(32, 220, buf, theme_yellow, theme_card_bg);
         } else {
-            LCD_ShowString(32, 220, "WiFi: Disconnected      ", theme_red, theme_card_bg);
+            LCD_ShowString(32, 220, "WiFi: No Module (HW ERR)     ", theme_red, theme_card_bg);
         }
+        
+        // Display raw AT debug log message
+        snprintf(buf, sizeof(buf), "DBG : %-30s", wifi_debug_msg);
+        LCD_ShowString(32, 242, buf, theme_text_muted, theme_card_bg);
     }
 
     /* ---- 底部信息 & 翻页点 ---- */
@@ -889,9 +920,10 @@ int main(void) {
     test_aht20_init_status  = AHT20_Init();
     aht20_healthy           = (test_aht20_init_status  == 0);
 
-    /* ESP8266 IoT 初始化与联网 (SSID: 小小小波, PWD: 11111111) */
+    /* ESP8266 IoT 初始化与联网 (SSID: xiaobo, PWD: 11111111) */
     if (ESP8266_Init() == 0) {
-        if (ESP8266_ConnectWiFi("小小小波", "11111111") == 0) {
+        wifi_hw_online = 1;
+        if (ESP8266_ConnectWiFi("xiaobo", "11111111") == 0) {
             wifi_connected = 1;
             if (ESP8266_SyncNTP() == 0) {
                 // 等待系统短时间稳定后，同步NTP服务器时间
@@ -918,6 +950,8 @@ int main(void) {
                 strcpy(outdoor_weather, w_txt);
             }
         }
+    } else {
+        wifi_hw_online = 0;
     }
 
     /* AI & 日志初始化 (适配 MAX_ANOMALY_LOGS 为 7) */
@@ -990,15 +1024,8 @@ int main(void) {
         }
 
         if (key == KEY1_PRESS) {
-            /* KEY1 按键: 循环切换页面 (0 -> 1 -> 2 -> 3 -> 4 -> 5 -> 0) */
-            current_page = (current_page + 1) % 6;
-            if (current_page == 3) {
-                Game_Init(); /* 切到游戏页面时初始化游戏数据 */
-            }
-            Display_Refresh(1);
-        } else if (key == KEY2_PRESS) {
             if (current_page != 3) {
-                /* KEY2 按键 (其他常规页面模式): 硬件自愈重置 + 切换主题 */
+                /* KEY1 按键 (中间键 PB17): 硬件自愈重置 + 切换主题 */
                 current_theme = !current_theme;
                 Theme_Apply();
                 
@@ -1011,6 +1038,20 @@ int main(void) {
                 LED_Off(0);
                 Display_Refresh(1);
             }
+        } else if (key == KEY_LEFT_PRESS) {
+            /* 左键 (S2 / PB19): 向左循环切换页面 */
+            current_page = (current_page + 5) % 6;
+            if (current_page == 3) {
+                Game_Init(); /* 切到游戏页面时初始化游戏数据 */
+            }
+            Display_Refresh(1);
+        } else if (key == KEY_RIGHT_PRESS) {
+            /* 右键 (S3 / PB20): 向右循环切换页面 */
+            current_page = (current_page + 1) % 6;
+            if (current_page == 3) {
+                Game_Init(); /* 切到游戏页面时初始化游戏数据 */
+            }
+            Display_Refresh(1);
         }
 
         /* 1.5 秒传感器采样轮询 */
@@ -1052,29 +1093,116 @@ int main(void) {
                 }
             }
 
-            /* WiFi 周期性校准时钟与获取天气 (每10分钟=600秒) */
+            /* WiFi 周期性校准时钟与获取天气 (每10分钟=600秒) / 自动检测重连 (每15秒=10个周期) */
             if (wifi_connected) {
-                if (system_uptime_s - last_time_sync_sec >= 600) {
-                    last_time_sync_sec = system_uptime_s;
+                wifi_hw_online = 1;
+                static uint8_t initial_sync_retry_cnt = 0;
+                uint8_t need_sync = 0;
+                
+                if (last_time_sync_sec == 0) {
+                    initial_sync_retry_cnt++;
+                    if (initial_sync_retry_cnt >= 3) { /* ~5 秒 */
+                        initial_sync_retry_cnt = 0;
+                        need_sync = 1;
+                    }
+                } else if (system_uptime_s - last_time_sync_sec >= 600) {
+                    need_sync = 1;
+                }
+                
+                if (need_sync) {
                     char temp_time[24];
+                    uint8_t ntp_ok = 0;
+                    uint8_t weather_ok = 0;
+                    
+                    /* 尝试同步 NTP 时钟 */
+                    (void)ESP8266_SyncNTP();
+                    for (volatile int d = 0; d < 720000; d++);
+                    
                     if (ESP8266_GetNTPTime(temp_time) == 0) {
                         strcpy(current_net_time, temp_time);
-                        int y, m, d, hh, mm, ss;
-                        if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hh, &mm, &ss) == 6) {
+                        int y, m, d_val, hh, mm, ss;
+                        if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d_val, &hh, &mm, &ss) == 6) {
                             net_year = y;
                             net_month = m;
-                            net_day = d;
+                            net_day = d_val;
                             net_hour = hh;
                             net_minute = mm;
                             net_second = ss;
+                            ntp_ok = 1;
                         }
                     }
                     
+                    /* 尝试拉取天气 (天气获取成功时会自动解析 HTTP 头部 Date 并同步时钟作为备用) */
                     float w_temp = 0.0f;
                     char w_txt[16] = {0};
                     if (ESP8266_GetWeather(&w_temp, w_txt) == 0) {
                         outdoor_temp = w_temp;
                         strcpy(outdoor_weather, w_txt);
+                        weather_ok = 1;
+                    }
+                    
+                    if (ntp_ok || weather_ok) {
+                        last_time_sync_sec = system_uptime_s; /* 任意一个成功即认为本次校准完成 */
+                    } else {
+                        last_time_sync_sec = 0; /* 全部失败，下次循环继续尝试 */
+                        /* 检查是否 WiFi 硬件断开或网络断开 */
+                        if (ESP8266_IsHardwareOnline() == 0) {
+                            wifi_hw_online = 0;
+                            wifi_connected = 0;
+                        } else if (ESP8266_IsConnected() == 0) {
+                            wifi_connected = 0;
+                        }
+                    }
+                }
+            } else {
+                static uint8_t wifi_check_cnt = 0;
+                static uint8_t wifi_reconnect_timer = 0;
+                wifi_check_cnt++;
+                if (wifi_check_cnt >= 3) { /* ~5 秒 */
+                    wifi_check_cnt = 0;
+                    if (ESP8266_IsHardwareOnline() == 1) {
+                        wifi_hw_online = 1;
+                        if (ESP8266_IsConnected() == 1) {
+                            wifi_connected = 1;
+                            wifi_reconnect_timer = 0;
+                            last_time_sync_sec = system_uptime_s;
+                            /* 同步 NTP 时间 */
+                            if (ESP8266_SyncNTP() == 0) {
+                                for (volatile int d = 0; d < 720000; d++);
+                                char temp_time[24];
+                                if (ESP8266_GetNTPTime(temp_time) == 0) {
+                                    strcpy(current_net_time, temp_time);
+                                    int y, m, d, hh, mm, ss;
+                                    if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hh, &mm, &ss) == 6) {
+                                        net_year = y; net_month = m; net_day = d;
+                                        net_hour = hh; net_minute = mm; net_second = ss;
+                                    }
+                                }
+                            }
+                            /* 获取天气 */
+                            float w_temp = 0.0f;
+                            char w_txt[16] = {0};
+                            if (ESP8266_GetWeather(&w_temp, w_txt) == 0) {
+                                outdoor_temp = w_temp;
+                                strcpy(outdoor_weather, w_txt);
+                            }
+                        } else {
+                            /* 硬件在线，但网络未连接，周期性触发连接指令 (每 30 秒 = 6 次检测) */
+                            wifi_reconnect_timer++;
+                            if (wifi_reconnect_timer >= 6) {
+                                wifi_reconnect_timer = 0;
+                                ESP8266_ConnectWiFi("xiaobo", "11111111");
+                            }
+                        }
+                    } else {
+                        wifi_hw_online = 0;
+                        wifi_connected = 0;
+                        wifi_reconnect_timer = 0;
+                        /* 尝试重新初始化硬件并连接 */
+                        if (ESP8266_Init() == 0) {
+                            wifi_hw_online = 1;
+                            ESP8266_ConnectWiFi("xiaobo", "11111111");
+                        }
                     }
                 }
             }
@@ -1159,7 +1287,11 @@ int main(void) {
         Draw_Beacon();
 
         /* LED与蜂鸣器综合状态机调度 (5Hz频率, 每100ms周期刷新) */
-        LED_Off(0); // 核心板载 LED PC13 保持常灭
+        if (wifi_connected) {
+            LED_On(0); // WiFi连接成功时板载 LED PC13 常亮
+        } else {
+            LED_Off(0); // 未连接时熄灭
+        }
         
         flash_cnt++;
         if (flash_cnt >= 10) { // 10 * 10ms = 100ms (5Hz 周期)
@@ -1168,37 +1300,22 @@ int main(void) {
             if (security_alert_mode) {
                 /* ==================== ARMED 布防模式 ==================== */
                 if (!ultrasonic_healthy) {
-                    // 超声波异常：黄色 LED 闪烁，其余常灭，蜂鸣器关闭
-                    LED_Off(1);
-                    LED_Toggle(2);
-                    LED_Off(3);
+                    // 超声波异常：LED2 闪烁，蜂鸣器关闭
+                    LED_Toggle(1);
                     GPIOB->BRR = GPIO_Pin_15;
                 } else {
                     float dist = test_ultrasonic_dist;
                     if (dist < 15.0f) {
-                        // 报警级（<15cm）：红、黄、绿三色 LED 同步闪烁，蜂鸣器常鸣
+                        // 报警级（<15cm）：LED2 闪烁，蜂鸣器常鸣
                         LED_Toggle(1);
-                        LED_Toggle(2);
-                        LED_Toggle(3);
-                        
-                        // 同步所有 LED 的物理状态
-                        uint8_t sync_state = (GPIOA->ODR & GPIO_Pin_1) ? 1 : 0;
-                        LED_Write(1, sync_state);
-                        LED_Write(2, sync_state);
-                        LED_Write(3, sync_state);
-                        
                         GPIOB->BSRR = GPIO_Pin_15;
                     } else if (dist < 50.0f) {
-                        // 警告级（15~50cm）：黄色 LED 常亮，其余常灭，蜂鸣器关闭
-                        LED_Off(1);
-                        LED_On(2);
-                        LED_Off(3);
+                        // 警告级（15~50cm）：LED2 常亮，蜂鸣器关闭
+                        LED_On(1);
                         GPIOB->BRR = GPIO_Pin_15;
                     } else {
-                        // 安全级（>50cm）：绿色 LED 常亮，其余常灭，蜂鸣器关闭
+                        // 安全级（>50cm）：LED2 熄灭，蜂鸣器关闭
                         LED_Off(1);
-                        LED_Off(2);
-                        LED_On(3);
                         GPIOB->BRR = GPIO_Pin_15;
                     }
                 }
@@ -1207,24 +1324,16 @@ int main(void) {
                 GPIOB->BRR = GPIO_Pin_15; // 撤防时蜂鸣器始终关闭
                 
                 if (!aht20_healthy || !bh1750_healthy || !sd_healthy) {
-                    // 硬件故障：红色 LED 常亮，其余常灭
+                    // 硬件故障：LED2 常亮
                     LED_On(1);
-                    LED_Off(2);
-                    LED_Off(3);
                 } else if (current_ai_state == AI_STATE_ANOMALY) {
-                    // 温度异常（偏差超过正负5C）：红色 LED 闪烁，其余常灭
+                    // 温度异常（偏差超过正负5C）：LED2 闪烁
                     LED_Toggle(1);
-                    LED_Off(2);
-                    LED_Off(3);
                 } else if (current_ai_state == AI_STATE_LEARNING) {
-                    // AI学习：黄色 LED 常亮，其余常灭
-                    LED_Off(1);
-                    LED_On(2);
-                    LED_Off(3);
+                    // AI学习：LED2 常亮
+                    LED_On(1);
                 } else {
-                    // 安全监控中：绿色 LED 呼吸，其余常灭
-                    LED_Off(1);
-                    LED_Off(2);
+                    // 安全监控中：由 LED_ProcessBreathing() 呼吸控制，这里不强制修改
                 }
             }
         }

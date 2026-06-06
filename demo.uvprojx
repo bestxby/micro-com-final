@@ -429,6 +429,16 @@
               <FileType>5</FileType>
               <FilePath>.\User\stm32f10x_conf.h</FilePath>
             </File>
+            <File>
+              <FileName>game.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\game.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\User\stm32f10x.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -558,6 +568,21 @@
               <FileName>esp8266.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\Hardware\esp8266.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\stm32f10x.h</FilePath>
+            </File>
+            <File>
+              <FileName>touch.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\touch.c</FilePath>
+            </File>
+            <File>
+              <FileName>touch.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\touch.h</FilePath>
             </File>
           </Files>
         </Group>

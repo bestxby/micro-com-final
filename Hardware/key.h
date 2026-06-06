@@ -5,8 +5,10 @@
 
 /* 按键扫描状态返回值 */
 #define KEY_NONE        0   /* 无按键按下 */
-#define KEY1_PRESS      1   /* KEY1 (PB0) 按下 */
-#define KEY2_PRESS      2   /* KEY2 (PB8) 按下 */
+#define KEY1_PRESS      1   /* KEY1 (PB0) 按下 - 中间 */
+#define KEY2_PRESS      2   /* KEY2 (PB8) 按下 - 上 */
+#define KEY_LEFT_PRESS  3   /* 左键 (PA15) 按下 */
+#define KEY_RIGHT_PRESS 4   /* 右键 (PA12) 按下 */
 
 /* 按键硬件端口及引脚定义 */
 #define KEY1_PORT       GPIOB

@@ -20,20 +20,8 @@
 #define LED2_RCC_ENR          RCC_APB2ENR_IOPAEN
 #define LED2_ACTIVE_LEVEL     1   /* 1 = 高电平点亮 */
 
-/* ---- LED3 (默认PA1) ---- */
-#define LED3_PORT             GPIOA
-#define LED3_PIN              1
-#define LED3_RCC_ENR          RCC_APB2ENR_IOPAEN
-#define LED3_ACTIVE_LEVEL     1
-
-/* ---- LED4 (默认PA2) ---- */
-#define LED4_PORT             GPIOA
-#define LED4_PIN              2
-#define LED4_RCC_ENR          RCC_APB2ENR_IOPAEN
-#define LED4_ACTIVE_LEVEL     1
-
 /* ---- 控制灯的总数 ---- */
-#define LED_COUNT             4
+#define LED_COUNT             2
 
 /* ============================================================
  * 外部公开接口

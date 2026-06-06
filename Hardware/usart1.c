@@ -12,28 +12,31 @@ volatile uint16_t usart_rx_tail = 0;
   */
 void USART1_Init(uint32_t baudrate)
 {
-    /* 1. Enable GPIOA, USART1 and AFIO clock in APB2 */
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_USART1EN | RCC_APB2ENR_AFIOEN;
+    /* 1. Enable GPIOB, USART1 and AFIO clock in APB2 */
+    RCC->APB2ENR |= RCC_APB2ENR_IOPBEN | RCC_APB2ENR_USART1EN | RCC_APB2ENR_AFIOEN;
     (void)RCC->APB2ENR; // Refresh pipeline
     
     /* 2. Configure GPIO pins
-     *    PA9 (TX): Alternate Function Push-Pull 50MHz (CNF=10, MODE=11 -> 0xB)
-     *    PA10 (RX): Input with Pull-Up/Down (CNF=10, MODE=00 -> 0x8)
+     *    PB6 (TX): Alternate Function Push-Pull 50MHz (CNF=10, MODE=11 -> 0xB)
+     *    PB7 (RX): Input with Pull-Up (CNF=10, MODE=00 -> 0x8)
      */
-    GPIOA->CRH &= ~0x00000FF0;
-    GPIOA->CRH |=  0x000008B0;
+    GPIOB->CRL &= ~0xFF000000;
+    GPIOB->CRL |=  0x8B000000;
     
-    /* Enable Pull-Up on PA10 by writing 1 to ODR */
-    GPIOA->ODR |= GPIO_Pin_10;
+    /* Enable Pull-Up on PB7 by writing 1 to ODR */
+    GPIOB->ODR |= GPIO_Pin_7;
     
-    /* 3. Compute and set USART Baud Rate (USART1 is on APB2, 72MHz) */
+    /* 3. Enable USART1 Remap in AFIO register */
+    AFIO->MAPR |= AFIO_MAPR_USART1_REMAP;
+    
+    /* 4. Compute and set USART Baud Rate (USART1 is on APB2, 72MHz) */
     uint32_t apb2_clk = 72000000;
     float divider = (float)apb2_clk / (16.0f * baudrate);
     uint16_t mantissa = (uint16_t)divider;
     uint16_t fraction = (uint16_t)((divider - mantissa) * 16.0f + 0.5f);
     USART1->BRR = (mantissa << 4) | (fraction & 0x0F);
     
-    /* 4. Configure USART1:
+    /* 5. Configure USART1:
      *    TE = 1 (Transmitter enable)
      *    RE = 1 (Receiver enable)
      *    RXNEIE = 1 (RXNE interrupt enable)
@@ -43,7 +46,7 @@ void USART1_Init(uint32_t baudrate)
     USART1->CR2 = 0;
     USART1->CR3 = 0;
     
-    /* 5. Configure NVIC for USART1 Interrupt */
+    /* 6. Configure NVIC for USART1 Interrupt */
     /* Set priority group 2, priority 0,0 for USART1 (highest responsive) */
     NVIC_SetPriority(USART1_IRQn, NVIC_EncodePriority(4, 1, 1));
     NVIC_EnableIRQ(USART1_IRQn);

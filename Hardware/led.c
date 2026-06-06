@@ -13,8 +13,6 @@ typedef struct {
 static const LED_Desc led_table[LED_COUNT] = {
     { LED1_PORT, (1U << LED1_PIN), LED1_RCC_ENR, LED1_ACTIVE_LEVEL },
     { LED2_PORT, (1U << LED2_PIN), LED2_RCC_ENR, LED2_ACTIVE_LEVEL },
-    { LED3_PORT, (1U << LED3_PIN), LED3_RCC_ENR, LED3_ACTIVE_LEVEL },
-    { LED4_PORT, (1U << LED4_PIN), LED4_RCC_ENR, LED4_ACTIVE_LEVEL },
 };
 
 /* ---- 开启指定的 GPIO 端口时钟 (幂等写入) ---- */
@@ -66,34 +64,28 @@ void LED_Init(void)
     RCC->APB2ENR |= RCC_APB2ENR_IOPAEN;
     (void)RCC->APB2ENR;
 
-    /* 3. 配置 PA0, PA1, PA2 为复用推挽输出 50MHz (CNF=10, MODE=11) */
-    GPIOA->CRL &= ~0x00000FFF;
-    GPIOA->CRL |=  0x00000BBB;
+    /* 3. 配置 PA0 为复用推挽输出 50MHz (CNF=10, MODE=11 -> 0xB) */
+    GPIOA->CRL &= ~0x0000000F;
+    GPIOA->CRL |=  0x0000000B;
 
     /* 4. 配置 TIM2 寄存器参数以产生约 1kHz PWM */
     TIM2->PSC = 719; // 72MHz / 720 = 100kHz clock
     TIM2->ARR = 99;  // 100kHz / 100 = 1kHz PWM frequency
 
-    // 配置通道 1, 2, 3 为 PWM 模式 1 (OCxM = 110) 且使能预装载
-    TIM2->CCMR1 &= ~(TIM_CCMR1_OC1M | TIM_CCMR1_OC2M);
-    TIM2->CCMR1 |= (6 << 4) | (6 << 12);
-    TIM2->CCMR1 |= TIM_CCMR1_OC1PE | TIM_CCMR1_OC2PE;
+    // 配置通道 1 为 PWM 模式 1 (OC1M = 110) 且使能预装载
+    TIM2->CCMR1 &= ~TIM_CCMR1_OC1M;
+    TIM2->CCMR1 |= (6 << 4);
+    TIM2->CCMR1 |= TIM_CCMR1_OC1PE;
 
-    TIM2->CCMR2 &= ~TIM_CCMR2_OC3M;
-    TIM2->CCMR2 |= (6 << 4);
-    TIM2->CCMR2 |= TIM_CCMR2_OC3PE;
-
-    // 使能通道 1, 2, 3 输出比较
-    TIM2->CCER |= TIM_CCER_CC1E | TIM_CCER_CC2E | TIM_CCER_CC3E;
+    // 使使通道 1 输出比较
+    TIM2->CCER |= TIM_CCER_CC1E;
 
     // 启用 TIM2 主计数器
     TIM2->CR1 |= TIM_CR1_ARPE | TIM_CR1_CEN;
     TIM2->EGR = TIM_EGR_UG;
 
-    // 默认关闭所有通道 (CCR = 0)
+    // 默认关闭通道 (CCR = 0)
     TIM2->CCR1 = 0;
-    TIM2->CCR2 = 0;
-    TIM2->CCR3 = 0;
 }
 
 /* ============================================================
@@ -102,11 +94,7 @@ void LED_Init(void)
 void LED_On(uint8_t index)
 {
     if (index == 1) {
-        TIM2->CCR1 = 99; // PA0
-    } else if (index == 2) {
-        TIM2->CCR2 = 99; // PA1
-    } else if (index == 3) {
-        TIM2->CCR3 = 99; // PA2
+        TIM2->CCR1 = 99; // PA0 (LED2)
     } else if (index == 0) {
         if (led_table[0].active_level) {
             led_table[0].port->BSRR = led_table[0].pin;
@@ -122,11 +110,7 @@ void LED_On(uint8_t index)
 void LED_Off(uint8_t index)
 {
     if (index == 1) {
-        TIM2->CCR1 = 0; // PA0
-    } else if (index == 2) {
-        TIM2->CCR2 = 0; // PA1
-    } else if (index == 3) {
-        TIM2->CCR3 = 0; // PA2
+        TIM2->CCR1 = 0; // PA0 (LED2)
     } else if (index == 0) {
         if (led_table[0].active_level) {
             led_table[0].port->BRR  = led_table[0].pin;
@@ -142,11 +126,7 @@ void LED_Off(uint8_t index)
 void LED_Toggle(uint8_t index)
 {
     if (index == 1) {
-        TIM2->CCR1 = (TIM2->CCR1 > 0) ? 0 : 99;
-    } else if (index == 2) {
-        TIM2->CCR2 = (TIM2->CCR2 > 0) ? 0 : 99;
-    } else if (index == 3) {
-        TIM2->CCR3 = (TIM2->CCR3 > 0) ? 0 : 99;
+        TIM2->CCR1 = (TIM2->CCR1 > 0) ? 0 : 99; // PA0 (LED2)
     } else if (index == 0) {
         const LED_Desc *led = &led_table[0];
         if (led->port->ODR & led->pin) {
@@ -170,18 +150,18 @@ void LED_Write(uint8_t index, uint8_t state)
 }
 
 /* ============================================================
- * LED_SetBreathingDuty — 直接写入 TIM2 通道 3 (绿灯) 的 PWM 占空比
+ * LED_SetBreathingDuty — 直接写入 TIM2 通道 1 (LED2) 的 PWM 占空比
  * ============================================================ */
 void LED_SetBreathingDuty(uint16_t duty)
 {
     if (duty > 99) {
         duty = 99;
     }
-    TIM2->CCR3 = duty;
+    TIM2->CCR1 = duty;
 }
 
 /* ============================================================
- * LED_ProcessBreathing — 平滑增减 PWM 占空比的呼吸处理函数 (作用于绿灯)
+ * LED_ProcessBreathing — 平滑增减 PWM 占空比的呼吸处理函数 (作用于 LED2)
  * ============================================================ */
 void LED_ProcessBreathing(void)
 {
@@ -197,5 +177,5 @@ void LED_ProcessBreathing(void)
         dir = 1;
     }
     
-    TIM2->CCR3 = duty;
+    TIM2->CCR1 = duty;
 }

@@ -172,8 +172,8 @@ void Game_Draw(uint8_t force_refresh)
         if (game_state == STATE_START) {
             LCD_FillRect(376, 26, 100, 19, theme_bg);
             LCD_ShowString(188, 120, "FLAPPY BIRD", theme_yellow, theme_bg);
-            LCD_ShowString(152, 165, "Press KEY2 to FLAP", theme_text, theme_bg);
-            LCD_ShowString(152, 195, "Press KEY1 to EXIT", theme_text_muted, theme_bg);
+            LCD_ShowString(152, 165, "Press UP to FLAP", theme_text, theme_bg);
+            LCD_ShowString(152, 195, "Press L/R to EXIT", theme_text_muted, theme_bg);
         }
         last_drawn_score = -1;
     }
@@ -257,6 +257,6 @@ void Game_Draw(uint8_t force_refresh)
         LCD_ShowString(188, 120, "GAME OVER", theme_red, theme_bg);
         sprintf(text_buf, "Final Score: %2d", score);
         LCD_ShowString(164, 155, text_buf, theme_yellow, theme_bg);
-        LCD_ShowString(132, 190, "Press KEY2 to Restart", theme_text, theme_bg);
+        LCD_ShowString(132, 190, "Press UP to Restart", theme_text, theme_bg);
     }
 }
