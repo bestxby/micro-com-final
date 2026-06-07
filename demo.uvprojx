@@ -584,6 +584,17 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\touch.h</FilePath>
             </File>
+            <File>
+              <FileName>ir.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\ir.c</FilePath>
+            </File>
+            <File>
+              <FileName>ir.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\ir.h</FilePath>
+            </File>
+
           </Files>
         </Group>
         <Group>

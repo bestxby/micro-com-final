@@ -12,9 +12,11 @@
 #include "sr04.h"
 #include "usart1.h"
 #include "esp8266.h"
+#include "ir.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 
 /* ============================================================
  * 全局变量 (传感器 / AI / 系统状态)
@@ -72,7 +74,7 @@ volatile uint8_t net_minute = 0;
 volatile uint8_t net_second = 0;
 
 static uint32_t last_wechat_alert_sec = 0;
-const char* SERVER_CHAN_KEY = "SCT227361T2vYl3B5x8K5cWk3x";
+const char* SERVER_CHAN_KEY = "SCT360551Tr979wHzigggHm2byctWnwZXD";
 
 /* ============================================================
  * 布局常量 (480×320 横屏适配布局)
@@ -872,8 +874,10 @@ int main(void) {
     /* 硬件初始化 */
     LED_Init();
     KEY_Init();
+    IR_Init();
     LCD_Init();
     Theme_Init();
+
     LCD_Clear(theme_bg);
 
     /* 初始化 BH1750 (软件 I2C) */
@@ -1015,6 +1019,49 @@ int main(void) {
         if (key != KEY_NONE) {
             game_key = key;
         }
+
+        /* 扫描红外遥控接收 */
+        uint8_t ir_cmd = 0;
+        if (IR_GetData(&ir_cmd)) {
+            // 通过串口1发送红外键值，方便调试与自定义修改
+            char dbg_buf[32];
+            sprintf(dbg_buf, "IR Received CMD: 0x%02X\r\n", ir_cmd);
+            USART1_SendString(dbg_buf);
+
+            // 1. 左右键翻页
+            if (ir_cmd == IR_KEY_LEFT) {
+                current_page = (current_page + 5) % 6;
+                if (current_page == 3) {
+                    Game_Init();
+                }
+                Display_Refresh(1);
+            } else if (ir_cmd == IR_KEY_RIGHT) {
+                current_page = (current_page + 1) % 6;
+                if (current_page == 3) {
+                    Game_Init();
+                }
+                Display_Refresh(1);
+            }
+            // 2. OK键/POWER键切换防盗布防模式
+            else if (ir_cmd == IR_KEY_OK || ir_cmd == IR_KEY_POWER) {
+                security_alert_mode = !security_alert_mode;
+                ui_dirty = 1;
+                flash_cnt = 10; // 强制声光指示立即刷新
+            }
+            // 3. MENU键/RETURN键切换 LCD 主题
+            else if (ir_cmd == IR_KEY_MENU || ir_cmd == IR_KEY_RETURN) {
+                current_theme = !current_theme;
+                Theme_Apply();
+                Display_Refresh(1);
+            }
+            // 4. UP键/2键映射至 Flappy Bird 游戏跳跃 (KEY2_PRESS)
+            else if (ir_cmd == IR_KEY_UP || ir_cmd == IR_KEY_2) {
+                if (current_page == 3) {
+                    game_key = KEY2_PRESS;
+                }
+            }
+        }
+
 
         /* 扫描 KEY3 切换布防/撤防状态 */
         if (KEY3_Scan()) {

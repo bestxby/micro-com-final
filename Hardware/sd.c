@@ -111,7 +111,7 @@ static void SD_SendCmd(uint8_t Cmd, uint32_t Arg, uint8_t Crc)
   */
 static SD_Error SD_GetResponse(uint8_t Response)
 {
-    uint32_t count = 0xFFFF;
+    uint32_t count = 0x1FFF; /* 降低超时等待上限，防止拔卡后死循环死机 */
     while (count--)
     {
         if (SD_ReadByte() == Response)
@@ -129,7 +129,7 @@ static SD_Error SD_GetResponse(uint8_t Response)
   */
 static uint8_t SD_GetDataResponse(void)
 {
-    uint32_t count = 0xFFFF;
+    uint32_t count = 0x1FFF; /* 降低超时上限 */
     uint8_t response;
     
     while (count--)
@@ -142,8 +142,11 @@ static uint8_t SD_GetDataResponse(void)
         }
     }
     
-    /* 等待 SD 卡忙信号 (拉低为忙) 结束 */
-    while (SD_ReadByte() == 0x00);
+    /* 等待 SD 卡忙信号 (拉低为忙) 结束，增加防死循环 */
+    uint32_t busy_count = 0x1FFF;
+    while (SD_ReadByte() == 0x00) {
+        if (--busy_count == 0) break;
+    }
     
     return response;
 }
@@ -185,7 +188,7 @@ SD_Error SD_Init(void)
     while (SD_GoIdleState() != SD_IN_IDLE_STATE)
     {
         retry++;
-        if (retry > 100)
+        if (retry > 10) /* 原为 100，现降低为 10 次重试，防止拔卡后长时间宕机 */
         {
             return SD_RESPONSE_FAILURE; /* 复位失败 */
         }

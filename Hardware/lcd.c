@@ -338,17 +338,18 @@ void Theme_Apply(void)
         theme_red = RED;
         theme_yellow = YELLOW;
     } else {
-        // Light Theme (Claude warm paper style)
-        theme_bg = 0xF7BD;        // Warm cream page bg (#F7F4EB)
-        theme_card_bg = 0xFFFF;   // Clean white card bg (#FFFFFF)
-        theme_text = 0x18C3;      // Charcoal brown text (#1E1B18)
-        theme_text_muted = 0x7BEF;// Muted gray-brown text (#7E7B78)
-        theme_border = 0xD6BA;    // Soft warm gray border (#D6D3C9)
-        theme_accent = 0xDB48;    // Warm terracotta/orange accent (#D96B43)
-        theme_green = 0x24C8;     // Soft green (#209840)
-        theme_blue = 0x1B35;      // Deep soft blue (#1F619F)
-        theme_red = 0xC104;       // Crimson red (#C02020)
-        theme_yellow = 0xB440;    // Ochre/amber yellow (#B48800)
+        // Theme 1: Deep Space Blue (Premium High-Contrast Cyberpunk Style)
+        // 专门针对低分辨率 LCD 优化的深色调主题，隐藏像素锯齿，色彩对比度极高
+        theme_bg = 0x0885;        // Deep ocean blue bg (#0A1128)
+        theme_card_bg = 0x1A48;   // Darker blue card (#1C2541)
+        theme_text = 0xFFFF;      // Pure white text (#FFFFFF)
+        theme_text_muted = 0x7477;// Muted blue-gray text (#758EBF)
+        theme_border = 0x3A8D;    // Soft blue border (#3A506B)
+        theme_accent = 0x07F9;    // Cyan/Mint accent (#00FFCC)
+        theme_green = 0x07E0;     // Bright Green (#00FF00)
+        theme_blue = 0x34DF;      // Light blue (#3399FF)
+        theme_red = 0xF98C;       // Pinkish red (#FF3366)
+        theme_yellow = 0xFED0;    // Cyber yellow (#FFCC00)
     }
 }
 
