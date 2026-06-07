@@ -61,7 +61,10 @@
     overflow: hidden;
     transform-style: preserve-3d; /* 3D Card Flip support */
   }
-  iframe {
+  #stage iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     border: 0;
@@ -284,7 +287,8 @@
 <div class="transition-toast" id="transitionToast"></div>
 
 <div id="stage">
-  <iframe id="frame" src="about:blank"></iframe>
+  <iframe id="frame1" src="about:blank" style="opacity: 1; z-index: 2;"></iframe>
+  <iframe id="frame2" src="about:blank" style="opacity: 0; z-index: 1; pointer-events: none;"></iframe>
 </div>
 
 <div class="nav-zone left"  id="navL"><div class="nav-hint">‹</div></div>
@@ -309,7 +313,11 @@
   const H = window.DECK_HEIGHT || 1080;
   const deck = window.DECK_MANIFEST || [];
   const stage = document.getElementById('stage');
-  const frame = document.getElementById('frame');
+  const frame1 = document.getElementById('frame1');
+  const frame2 = document.getElementById('frame2');
+  let currentFrame = frame1;
+  let nextFrame = frame2;
+
   const counter = document.getElementById('counter');
   const printStack = document.getElementById('printStack');
   const storageKey = 'deck-index-' + location.pathname;
@@ -333,7 +341,9 @@
     if (idx < 0 || idx >= deck.length) return;
     current = idx;
     
-    frame.src = deck[idx].file + '?v=' + Date.now();
+    // Load the slide into the hidden nextFrame to prevent any white flash
+    nextFrame.src = deck[idx].file + '?v=' + Date.now();
+
     counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
     try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
     if (location.hash !== '#' + (idx + 1)) {
@@ -341,40 +351,61 @@
     }
     updateMenuHighlight(idx);
     
-    // Set styles instantly with no transitions or fades
+    // Ensure parent stage style is set correctly
     stage.style.opacity = '1';
     stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
   }
 
-  frame.addEventListener('load', () => {
-    try {
-      const doc = frame.contentDocument || frame.contentWindow.document;
-      if (doc && doc.head) {
-        const style = doc.createElement('style');
-        style.textContent = '.slide-footer .slide-number { display: none !important; }';
-        doc.head.appendChild(style);
+  function setupFrameListener(frame) {
+    frame.addEventListener('load', () => {
+      if (frame === nextFrame) {
+        try {
+          const doc = frame.contentDocument || frame.contentWindow.document;
+          if (doc && doc.head) {
+            const style = doc.createElement('style');
+            style.textContent = '.slide-footer .slide-number { display: none !important; }';
+            doc.head.appendChild(style);
+          }
+          
+          // Forward keydown events from the iframe to the parent window to support keyboard navigation when focused inside the iframe
+          if (frame.contentWindow) {
+            frame.contentWindow.addEventListener('keydown', (e) => {
+              document.dispatchEvent(new KeyboardEvent('keydown', {
+                key: e.key,
+                code: e.code,
+                keyCode: e.keyCode,
+                which: e.which,
+                bubbles: true,
+                ctrlKey: e.ctrlKey,
+                shiftKey: e.shiftKey,
+                altKey: e.altKey,
+                metaKey: e.metaKey
+              }));
+            });
+          }
+        } catch (e) {
+          console.warn("Could not inject style or add event forwarding inside iframe:", e);
+        }
+
+        // SWAP! Make the loaded iframe visible instantly and hide the previous active iframe
+        nextFrame.style.opacity = '1';
+        nextFrame.style.zIndex = '2';
+        nextFrame.style.pointerEvents = 'auto';
+
+        currentFrame.style.opacity = '0';
+        currentFrame.style.zIndex = '1';
+        currentFrame.style.pointerEvents = 'none';
+
+        // Rotate frame references
+        const temp = currentFrame;
+        currentFrame = nextFrame;
+        nextFrame = temp;
       }
-      
-      // Forward keydown events from the iframe to the parent window to support keyboard navigation when focused inside the iframe
-      if (frame.contentWindow) {
-        frame.contentWindow.addEventListener('keydown', (e) => {
-          document.dispatchEvent(new KeyboardEvent('keydown', {
-            key: e.key,
-            code: e.code,
-            keyCode: e.keyCode,
-            which: e.which,
-            bubbles: true,
-            ctrlKey: e.ctrlKey,
-            shiftKey: e.shiftKey,
-            altKey: e.altKey,
-            metaKey: e.metaKey
-          }));
-        });
-      }
-    } catch (e) {
-      console.warn("Could not inject style or add event forwarding inside iframe:", e);
-    }
-  });
+    });
+  }
+
+  setupFrameListener(frame1);
+  setupFrameListener(frame2);
 
   function next() { show(Math.min(current + 1, deck.length - 1)); }
   function prev() { show(Math.max(current - 1, 0)); }
