@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>13 系统联合测试与运行指标验证 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+  }
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  
+  .metric-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0;
+  }
+  .metric-table th, .metric-table td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+    font-size: 20px;
+  }
+  .metric-table th {
+    font-weight: 800;
+    color: var(--brand-secondary);
+    border-bottom: 2px solid var(--card-border);
+  }
+  .metric-table td {
+    color: var(--text-secondary);
+  }
+  .metric-val {
+    font-family: var(--font-family); font-variant-numeric: tabular-nums;
+    font-weight: bold;
+    color: var(--text-primary);
+  }
+  
+  /* Floating Video Button at Bottom Right */
+  .view-video-btn {
+    position: absolute;
+    right: 80px;
+    bottom: 110px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: var(--brand-primary);
+    border: 1px solid rgba(25, 24, 22, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+  .view-video-btn:hover {
+    transform: scale(1.05);
+    background: var(--brand-secondary);
+    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+  }
+  .play-icon {
+    font-size: 20px;
+  }
+
+  /* Fullscreen Video Modal */
+  .video-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(25, 24, 22, 0.96);
+    backdrop-filter: blur(16px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-modal-content {
+    position: relative;
+    width: 85%;
+    max-width: 1400px;
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
+  }
+  .video-modal-content video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+  }
+  .close-modal-btn {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(252, 250, 247, 0.1);
+    border: 1px solid rgba(252, 250, 247, 0.15);
+    color: #FCFAF7;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10000;
+  }
+  .close-modal-btn:hover {
+    background: var(--alert-red);
+    border-color: var(--alert-red);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">系统联合验证</div>
+</div>
+
+<h1 class="slide-title">系统联合测试与<span class="highlight-gradient">运行指标验证</span></h1>
+<p class="slide-subtitle">System Joint Integration Testing and Performance Benchmarks</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left: Benchmarks table -->
+    <div class="left-col">
+      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 16px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">实测硬件运行指标</h2>
+      <p style="font-size: 20px; color: var(--text-secondary); line-height: 1.8; margin-bottom: 16px;">
+        系统在面包板及 EES-351 综合实验箱上进行了 72 小时连续不间断运行测试。固件在 Keil AC6 编译器下获得完美编译。
+      </p>
+      
+      <table class="metric-table">
+        <thead>
+          <tr>
+            <th>测试项目</th>
+            <th>技术指标 / 要求</th>
+            <th>实测表现</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>固件编译状况</td>
+            <td>Keil v5 (AC6) 支持</td>
+            <td class="metric-val" style="color: #22c55e;">0 警告，0 错误</td>
+          </tr>
+          <tr>
+            <td>LCD 游戏帧率</td>
+            <td>大于 25 FPS</td>
+            <td class="metric-val">30 ~ 33 FPS</td>
+          </tr>
+          <tr>
+            <td>基线学习耗时</td>
+            <td>平稳状态温升自学习</td>
+            <td class="metric-val">150 秒精确锁定</td>
+          </tr>
+          <tr>
+            <td>微信警报响应时延</td>
+            <td>小于 5 秒</td>
+            <td class="metric-val">1.8 ~ 2.4 秒</td>
+          </tr>
+          <tr>
+            <td>总线断线自愈耗时</td>
+            <td>传感器热插拔异常诊断</td>
+            <td class="metric-val">&lt; 1.5 秒恢复正常</td>
+          </tr>
+          <tr>
+            <td>微信消息推送冷却限制</td>
+            <td>防接口轰炸限制</td>
+            <td class="metric-val">180 秒严格冷却</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+  
+  <!-- "查看视频演示" Button at Bottom Right -->
+  <button class="view-video-btn" id="openModalBtn">
+    <span class="play-icon">▶</span> 查看视频演示
+  </button>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">07. 系统联合测试与运行指标验证</div>
+  <div class="slide-number">Page 21 / 24</div>
+</div>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
+  <div class="video-modal-content">
+    <video id="modalVideo" src="../shared/videos/joint_demo.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+<script>
+  const openModalBtn = document.getElementById("openModalBtn");
+  const videoModal = document.getElementById("videoModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalVideo = document.getElementById("modalVideo");
+
+  openModalBtn.addEventListener("click", () => {
+    videoModal.style.display = "flex";
+    modalVideo.play().catch(err => {
+      console.log("Modal video autoplay failed or file not found:", err);
+    });
+  });
+
+  function closeModal() {
+    videoModal.style.display = "none";
+    modalVideo.pause();
+  }
+
+  closeModalBtn.addEventListener("click", closeModal);
+  videoModal.addEventListener("click", (e) => {
+    if (e.target === videoModal) closeModal();
+  });
+</script>
+
+</body>
+</html>

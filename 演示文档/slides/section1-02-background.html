@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>02 研究背景与智能家居系统架构 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .left-col {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 20px;
+  }
+  .right-col {
+    flex: 0.9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 20px;
+    position: relative;
+  }
+  .pain-list {
+    margin-top: 30px;
+    list-style: none;
+  }
+  .pain-list li {
+    font-size: 20px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    position: relative;
+    padding-left: 36px;
+  }
+  .pain-list li::before {
+    content: "✦";
+    position: absolute;
+    left: 0;
+    color: var(--brand-secondary);
+    font-weight: 800;
+  }
+  .pain-list li strong {
+    color: var(--text-primary);
+  }
+  
+  /* 5-Layer Topology Diagram CSS */
+  .topo-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    max-width: 650px;
+    padding: 24px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+  }
+  .topo-layer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 16px 20px;
+    background: rgba(252, 250, 247, 0.95);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: default;
+  }
+  .topo-layer:hover {
+    transform: translateX(8px);
+    border-color: var(--brand-secondary);
+    background: #FCFAF7;
+    box-shadow: 0 8px 25px rgba(15, 118, 110, 0.15);
+  }
+  .layer-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--brand-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .layer-info h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .layer-info p {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">环境温度监测系统综合设计</div>
+</div>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="left-col">
+    <h1 class="slide-title">研究背景与<span class="highlight-gradient">系统设计定位</span></h1>
+    <p class="slide-subtitle">Project Background & System Architectural Positioning</p>
+    
+    <ul class="pain-list">
+      <li><strong>痛点背景</strong>：传统居家安防监测设备存在误报率高、抗噪性弱、网络掉线挂死、无法本地与云端数据协同等设计瓶颈。</li>
+      <li><strong>系统定位</strong>：本项目设计了一款<strong>环境自适应自愈型智能居家安全网关</strong>，以 STM32F103 主控为核心，集多维环境感知、安全防御、本地日志以及云端微信推送于一体。</li>
+      <li><strong>优化策略</strong>：打破传统的静态阈值与高耗能全屏刷新，引入<strong>温湿度一阶 EMA 滤波</strong>、<strong>自学习决策基准模型</strong>、<strong>增量脏矩形屏显算法</strong>及<strong>网络自愈心跳机制</strong>，实现高可靠与高流程度运行。</li>
+    </ul>
+  </div>
+
+  <div class="right-col">
+    <div class="topo-container">
+      <div class="topo-layer">
+        <div class="layer-num">5</div>
+        <div class="layer-info">
+          <h3>云边端层 (Cloud & IoT Services)</h3>
+          <p>ESP8266 WiFi • NTP北京时间校准 • 心知天气 • 微信Server酱警报推送</p>
+        </div>
+      </div>
+      <div class="topo-layer">
+        <div class="layer-num">4</div>
+        <div class="layer-info">
+          <h3>人机交互层 (Human-Machine Interface)</h3>
+          <p>TFT-LCD 6大子页面 • 物理按键扫描消抖 • HX1838 红外遥控异步接收</p>
+        </div>
+      </div>
+      <div class="topo-layer">
+        <div class="layer-num">3</div>
+        <div class="layer-info">
+          <h3>边缘计算与算法层 (Edge Computing)</h3>
+          <p>EMA 一阶低通去噪 • 150s 渐进式环境基准学习 • ±5°C 突变温度判定边界</p>
+        </div>
+      </div>
+      <div class="topo-layer">
+        <div class="layer-num">2</div>
+        <div class="layer-info">
+          <h3>底层驱动与优化层 (Drivers & Optimization)</h3>
+          <p>模拟 I2C/SPI 位带操作 • USART 接收中断环形队列 • 脏矩形增量更新</p>
+        </div>
+      </div>
+      <div class="topo-layer">
+        <div class="layer-num">1</div>
+        <div class="layer-info">
+          <h3>物理感知与执行层 (Physical Peripherals)</h3>
+          <p>AHT20/BMP280/BH1750 • HC-SR04 • TM1637数码管 • SD卡 • 蜂鸣器</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">01. 项目背景与应用场景定位</div>
+  <div class="slide-number">Page 4 / 24</div>
+</div>
+
+</body>
+</html>

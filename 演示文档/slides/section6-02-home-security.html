@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>11 智能居家多级安全防护功能设计 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+  }
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .fsm-box {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 12px;
+    padding: 24px;
+    margin-top: 32px;
+  }
+  .state-badge {
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: bold;
+    display: inline-block;
+  }
+  .badge-safe { background: rgba(15, 118, 110, 0.08); color: var(--brand-secondary); border: 1px solid rgba(15, 118, 110, 0.2); }
+  .badge-warning { background: rgba(204, 90, 1, 0.08); color: var(--brand-primary); border: 1px solid rgba(204, 90, 1, 0.2); }
+  .badge-alarm { background: rgba(220, 38, 38, 0.08); color: var(--alert-red); border: 1px solid rgba(220, 38, 38, 0.2); }
+  
+  .desc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .desc-list li {
+    font-size: 19px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .desc-list li strong {
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+  
+  /* Floating Video Button at Bottom Right */
+  .view-video-btn {
+    position: absolute;
+    right: 80px;
+    bottom: 110px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: var(--brand-primary);
+    border: 1px solid rgba(25, 24, 22, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+  .view-video-btn:hover {
+    transform: scale(1.05);
+    background: var(--brand-secondary);
+    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+  }
+  .play-icon {
+    font-size: 20px;
+  }
+
+  /* Fullscreen Video Modal */
+  .video-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(25, 24, 22, 0.96);
+    backdrop-filter: blur(16px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-modal-content {
+    position: relative;
+    width: 85%;
+    max-width: 1400px;
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
+  }
+  .video-modal-content video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+  }
+  .close-modal-btn {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(252, 250, 247, 0.1);
+    border: 1px solid rgba(252, 250, 247, 0.15);
+    color: #FCFAF7;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10000;
+  }
+  .close-modal-btn:hover {
+    background: var(--alert-red);
+    border-color: var(--alert-red);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">居家安全防护</div>
+</div>
+
+<h1 class="slide-title">智能居家多级<span class="highlight-gradient">安全防护与状态机</span></h1>
+<p class="slide-subtitle">Multi-Level Home Security Logic and Finite State Machine Control</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left: FSM and Logic Descriptions -->
+    <div class="left-col">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">声光防盗多级警戒逻辑</h2>
+      <ul class="desc-list">
+        <li>
+          <span class="state-badge badge-safe">SAFE 状态</span> &nbsp;&nbsp;(超声波测距 &ge; 30cm 或撤防模式)<br>
+          <strong>外设动作</strong>：绿灯 (LED4) 平滑呼吸运行，有源蜂鸣器静音。
+        </li>
+        <li>
+          <span class="state-badge badge-warning">WARNING 状态</span> &nbsp;&nbsp;(布防下，距离 15cm 至 30cm)<br>
+          <strong>外设动作</strong>：黄灯 (LED3) 保持常亮，蜂鸣器静音，数码管显示实时距离。
+        </li>
+        <li>
+          <span class="state-badge badge-alarm">ALARM 状态</span> &nbsp;&nbsp;(布防下，距离 &lt; 15cm)<br>
+          <strong>外设动作</strong>：红灯 (LED2) 5Hz 高频爆闪，蜂鸣器断续声鸣警报，屏幕弹窗警报，并触发<strong>微信警报推送 (180s 冷却限制)</strong>。
+        </li>
+      </ul>
+      
+      <div class="fsm-box">
+        <h3 style="font-size: 19px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (FSM)</h3>
+        <p style="font-size: 17px; color: var(--text-muted); line-height: 1.6;">
+          • 撤防模式 (Disarmed) &rarr; 按 KEY3 / 红外OK &rarr; 布防监测 (Armed)<br>
+          • Armed 状态下，系统持续轮询测距：当超声波距离突变触发特定边界时，直接进行 <strong>Safe &harr; Warning &harr; Alarm</strong> 物理映射。撤防操作将强制重置为 Safe 状态。
+        </p>
+      </div>
+    </div>
+
+    <!-- Right: LARGE Video Viewport -->
+  </div>
+  
+  <!-- "查看视频演示" Button at Bottom Right -->
+  <button class="view-video-btn" id="openModalBtn">
+    <span class="play-icon">▶</span> 查看视频演示
+  </button>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">06. 智能居家多级安全防护功能设计</div>
+  <div class="slide-number">Page 18 / 24</div>
+</div>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
+  <div class="video-modal-content">
+    <video id="modalVideo" src="../shared/videos/security_demo.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+<script>
+  const openModalBtn = document.getElementById("openModalBtn");
+  const videoModal = document.getElementById("videoModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalVideo = document.getElementById("modalVideo");
+
+  openModalBtn.addEventListener("click", () => {
+    videoModal.style.display = "flex";
+    modalVideo.play().catch(err => {
+      console.log("Modal video autoplay failed or file not found:", err);
+    });
+  });
+
+  function closeModal() {
+    videoModal.style.display = "none";
+    modalVideo.pause();
+  }
+
+  closeModalBtn.addEventListener("click", closeModal);
+  videoModal.addEventListener("click", (e) => {
+    if (e.target === videoModal) closeModal();
+  });
+</script>
+
+</body>
+</html>

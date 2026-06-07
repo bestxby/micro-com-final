@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>04 引脚冲突规避与物理重排重映射 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .content-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
+  .left-list {
+    flex: 1.1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .right-diagram {
+    flex: 0.9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .conflict-card {
+    padding: 24px 28px;
+    border-left: 5px solid var(--alert-red);
+    transition: all 0.3s ease;
+  }
+  .conflict-card.resolved {
+    border-left-color: var(--brand-secondary);
+  }
+  .conflict-card:hover {
+    transform: translateX(8px);
+    background: rgba(25, 24, 22, 0.03);
+  }
+  .conflict-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .conflict-badge {
+    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  .badge-red {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--alert-red);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .badge-green {
+    background: rgba(15, 118, 110, 0.1);
+    color: var(--brand-secondary);
+    border: 1px solid rgba(15, 118, 110, 0.2);
+  }
+  .conflict-desc {
+    font-size: 16px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .conflict-desc code {
+    font-family: var(--font-family);
+    font-size: 15px;
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-weight: 700;
+  }
+  
+  /* STM32 Chip Drawing */
+  .mcu-package {
+    position: relative;
+    width: 420px; /* Increased from 320px */
+    height: 420px; /* Increased from 320px */
+    border: 2px solid var(--card-border);
+    border-radius: 16px;
+    background: #252422; /* Premium dark warm charcoal package */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.6), 0 10px 25px rgba(25,24,22,0.15);
+  }
+  .mcu-label {
+    font-size: 26px; /* Increased from 20px */
+    font-weight: 800;
+    color: #FCFAF7; /* Clean off-white for contrast against the dark package */
+    letter-spacing: 0.05em;
+  }
+  .mcu-sublabel {
+    font-size: 15px; /* Increased from 13px */
+    color: #A29B91; /* Light warm grey for readability */
+    margin-top: 6px;
+  }
+  
+  /* Pins placement around chip */
+  .pin-node {
+    position: absolute;
+    width: 110px; /* Increased from 76px */
+    height: 36px; /* Increased from 28px */
+    background: #FCFAF7;
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-size: 15px; /* Increased from 12px */
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+    font-weight: bold;
+  }
+  .pin-node.highlight-red {
+    border-color: var(--alert-red);
+    color: var(--alert-red);
+    background: rgba(220, 38, 38, 0.05);
+    box-shadow: 0 0 10px rgba(220, 38, 38, 0.15);
+  }
+  .pin-node.highlight-green {
+    border-color: var(--brand-secondary);
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.05);
+    box-shadow: 0 0 10px rgba(15, 118, 110, 0.15);
+  }
+  
+  /* Top pins */
+  #pin-pb6  { top: -18px; left: 80px; }
+  #pin-pb7  { top: -18px; left: 230px; }
+  /* Bottom pins */
+  #pin-pb3  { bottom: -18px; left: 80px; }
+  #pin-pb4  { bottom: -18px; left: 230px; }
+  /* Left pins */
+  #pin-pa6  { left: -55px; top: 100px; transform: rotate(-90deg); }
+  #pin-pa9  { left: -55px; top: 280px; transform: rotate(-90deg); }
+  /* Right pins */
+  #pin-pa11 { right: -55px; top: 100px; transform: rotate(90deg); }
+  #pin-pb10 { right: -55px; top: 280px; transform: rotate(90deg); }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">引脚重配置</div>
+</div>
+
+<h1 class="slide-title">引脚冲突规避与<span class="highlight-gradient">物理重排重映射</span></h1>
+<p class="slide-subtitle">GPIO Conflict Resolution and Pin Remapping on STM32F103</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="content-box">
+    <!-- Left list: Details of changes -->
+    <div class="left-list">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">引脚资源重配与冲突避让</h2>
+      <div class="glass-card conflict-card resolved">
+        <div class="conflict-title">
+          <span>01. JTAG 复用解除与重用 (PB3/PB4)</span>
+          <span class="conflict-badge badge-green">已解决</span>
+        </div>
+        <p class="conflict-desc">
+          <strong>原因</strong>：STM32F103 的 <code>PB3/PB4</code> 在复位后默认为 JTAG 调试引脚（JTDO/JNTRST），直接写入常规 GPIO 逻辑会导致 SD 卡片选与数据发送线卡死。<br>
+          <strong>解决</strong>：在 GPIO 配置前，开启 AFIO 时钟，调用 <code>GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE)</code> 释放 JTAG 占用，恢复常规通用输出输入。
+        </p>
+      </div>
+
+      <div class="glass-card conflict-card resolved">
+        <div class="conflict-title">
+          <span>02. SD 卡 MISO 物理重排避让 (PA11)</span>
+          <span class="conflict-badge badge-green">已解决</span>
+        </div>
+        <p class="conflict-desc">
+          <strong>原因</strong>：I2C 传感器阵列（AHT20/BH1750）占用了 SCL 时钟脚 <code>PA6</code>，如果使用常规默认 SPI 的 <code>PA6</code> (MISO) 作为 SD 卡的反馈输入，总线高频脉冲会导致传感器数据读取异常及 SD 写入冲突。<br>
+          <strong>解决</strong>：将 SD 卡的 MISO 重构至空闲的 <code>PA11</code> 上，物理上隔离两套串行传输线路。
+        </p>
+      </div>
+
+      <div class="glass-card conflict-card resolved">
+        <div class="conflict-title">
+          <span>03. 红外遥控输入线路调整 (PA9)</span>
+          <span class="conflict-badge badge-green">已解决</span>
+        </div>
+        <p class="conflict-desc">
+          <strong>原因</strong>：红外模块原分配在 <code>PB6</code> 引脚。但由于 ESP8266 物联网通信对高速 USART1 的强依赖，其重映射串口 TXD 已牢牢占用 <code>PB6</code> 引脚，触发了物理冲突。<br>
+          <strong>解决</strong>：将红外接收器的 DAT 移到空闲的 <code>PA9</code> 接口，并通过 EXTI9 中断触发 TIM4 硬件微秒捕获。
+        </p>
+      </div>
+    </div>
+
+    <!-- Right diagram: Visual representation of STM32F103 Pinout -->
+    <div class="right-diagram">
+      <div class="mcu-package">
+        <span class="mcu-label">STM32F103</span>
+        <span class="mcu-sublabel">LQFP48 主控</span>
+        
+        <!-- Pins top -->
+        <div class="pin-node highlight-red" id="pin-pb6" title="USART1_TX (WiFi)">PB6 (冲突)</div>
+        <div class="pin-node highlight-green" id="pin-pb7" title="USART1_RX (WiFi)">PB7</div>
+        
+        <!-- Pins bottom -->
+        <div class="pin-node highlight-green" id="pin-pb3" title="SD_MOSI (JTAG Dis)">PB3</div>
+        <div class="pin-node highlight-green" id="pin-pb4" title="SD_CS (JTAG Dis)">PB4</div>
+        
+        <!-- Pins left -->
+        <div class="pin-node highlight-red" id="pin-pa6" title="I2C SCL (避让)">PA6 (SCL)</div>
+        <div class="pin-node highlight-green" id="pin-pa9" title="IR EXTI9">PA9 (IR)</div>
+        
+        <!-- Pins right -->
+        <div class="pin-node highlight-green" id="pin-pa11" title="SD_MISO (重排)">PA11 (MISO)</div>
+        <div class="pin-node highlight-green" id="pin-pb10" title="I2C SDA">PB10 (SDA)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">02. 物理硬件底座与引脚重构</div>
+  <div class="slide-number">Page 7 / 24</div>
+</div>
+
+<script>
+  // Simple micro-interaction: highlight correspond pin on card hover
+  const cards = document.querySelectorAll('.conflict-card');
+  const pb6 = document.getElementById('pin-pb6');
+  const pa6 = document.getElementById('pin-pa6');
+  const pa9 = document.getElementById('pin-pa9');
+  const pb3 = document.getElementById('pin-pb3');
+  const pb4 = document.getElementById('pin-pb4');
+  const pa11 = document.getElementById('pin-pa11');
+  
+  cards[0].addEventListener('mouseenter', () => {
+    pb3.style.transform = 'scale(1.2) translateY(5px)';
+    pb4.style.transform = 'scale(1.2) translateY(5px)';
+  });
+  cards[0].addEventListener('mouseleave', () => {
+    pb3.style.transform = '';
+    pb4.style.transform = '';
+  });
+
+  cards[1].addEventListener('mouseenter', () => {
+    pa6.style.transform = 'scale(1.2) rotate(-90deg) translateX(-5px)';
+    pa11.style.transform = 'scale(1.2) rotate(90deg) translateX(5px)';
+  });
+  cards[1].addEventListener('mouseleave', () => {
+    pa6.style.transform = 'rotate(-90deg)';
+    pa11.style.transform = 'rotate(90deg)';
+  });
+
+  cards[2].addEventListener('mouseenter', () => {
+    pb6.style.transform = 'scale(1.2) translateY(-5px)';
+    pa9.style.transform = 'scale(1.2) rotate(-90deg) translateX(-5px)';
+  });
+  cards[2].addEventListener('mouseleave', () => {
+    pb6.style.transform = '';
+    pa9.style.transform = 'rotate(-90deg)';
+  });
+</script>
+
+</body>
+</html>

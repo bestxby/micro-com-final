@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>14 系统设计总结 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 48px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
+  .left-intro {
+    flex: 1.15;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .right-stats {
+    flex: 0.85;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 28px;
+    padding: 10px 0;
+  }
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-shadow: var(--glass-shadow);
+    transition: all 0.3s ease;
+  }
+  .stat-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--brand-secondary);
+    box-shadow: 0 15px 30px rgba(15, 118, 110, 0.12);
+  }
+  .stat-val-container {
+    font-size: 64px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 8px;
+    font-family: var(--font-family);
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+  }
+  .stat-unit {
+    font-size: 22px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-family: var(--font-family);
+  }
+  .stat-label {
+    font-size: 18px;
+    color: var(--text-secondary);
+    font-weight: 700;
+    margin-top: 8px;
+    font-family: var(--font-family);
+  }
+  
+  .summary-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+  }
+  .summary-list li {
+    font-size: 23px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    position: relative;
+    padding-left: 44px;
+  }
+  .summary-list li::before {
+    content: "★";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    font-size: 22px;
+    color: var(--brand-secondary);
+  }
+  .summary-list li strong {
+    color: var(--text-primary);
+    font-size: 26px;
+    font-weight: 800;
+    display: inline !important;
+  }
+  .summary-list li code {
+    font-family: var(--font-family);
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 21px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">总结与展望</div>
+</div>
+
+<h1 class="slide-title">系统设计与<span class="highlight-gradient">运行状态总结</span></h1>
+<p class="slide-subtitle">Summary of System Design Parameters and Operating Statistics</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left: Bullet Summary of Innovations -->
+    <div class="left-intro">
+      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">核心系统优化点汇总</h2>
+      <ul class="summary-list">
+        <li><strong>物理引脚无冲突隔离</strong>：释放 JTAG 复用以恢复 <code>PB3/PB4</code>，将 SD MISO 物理排布到 <code>PA11</code> 避开 I2C 冲突，红外接收重映射到 <code>PA9</code>，保障了多外设稳定并存。</li>
+        <li><strong>网络断线自愈与 RTC 机制</strong>：ESP8266 发生硬件丢包或 WiFi 断开时触发 AT 握手重连。掉线期利用 STM32 定时中断驱动 10ms 软件 RTC 时钟，重连秒级对齐。</li>
+        <li><strong>脏矩形渲染屏显加速</strong>：仅对 Flappy Bird 小鸟（12x12像素）及管道边缘区域进行增量覆写，使软件模拟 SPI 总线的显示吞吐负荷降低 <strong>93%</strong>，帧率稳超 <strong>30 FPS</strong>。</li>
+        <li><strong>微秒级 NEC 红外硬件捕获</strong>：采用 <code>EXTI9</code> 外部中断双边沿捕获电平跳变，配合 <code>TIM4</code> 定时器完成 1μs 脉宽无阻塞异步解码，完美规避主循环传感器读取造成的堵塞漏码。</li>
+      </ul>
+    </div>
+
+    <!-- Right: GSAP Count-up Numbers Grid -->
+    <div class="right-stats">
+      <div class="stat-card">
+        <div class="stat-val-container">
+          <span class="count-num" data-val="30">0</span>
+          <span class="stat-unit">+ FPS</span>
+        </div>
+        <span class="stat-label">小鸟像素游戏帧率</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-val-container">
+          <span class="count-num" data-val="93">0</span>
+          <span class="stat-unit">%</span>
+        </div>
+        <span class="stat-label">单帧屏显负荷降幅</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-val-container">
+          <span class="count-num" data-val="150">0</span>
+          <span class="stat-unit">s</span>
+        </div>
+        <span class="stat-label">环境本底自学习耗时</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-val-container">
+          <span class="count-num" data-val="0">0</span>
+          <span class="stat-unit">Warnings/Errors</span>
+        </div>
+        <span class="stat-label">Keil AC6 编译诊断结果</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">07. 系统总结与创新展望</div>
+  <div class="slide-number">Page 22 / 24</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+  // GSAP Count-Up Animation for statistics
+  document.addEventListener("DOMContentLoaded", () => {
+    const nums = document.querySelectorAll(".count-num");
+    nums.forEach(num => {
+      const targetVal = parseInt(num.getAttribute("data-val"), 10);
+      let countObj = { val: 0 };
+      gsap.to(countObj, {
+        val: targetVal,
+        duration: 2.2,
+        ease: "power2.out",
+        onUpdate: () => {
+          num.textContent = Math.floor(countObj.val);
+        }
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

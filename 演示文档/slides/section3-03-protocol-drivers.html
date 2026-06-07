@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>06 底层驱动协议开发与深度寄存器优化 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .col-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+  }
+  .opt-card {
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    height: 100%;
+  }
+  .opt-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .opt-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 6px;
+    background: var(--brand-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .opt-desc {
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+  .opt-desc code {
+    font-family: var(--font-family);
+    color: var(--brand-primary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  .opt-metrics {
+    margin-top: auto;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+    border-top: 1px solid var(--card-border);
+    padding-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">驱动寄存器优化</div>
+</div>
+
+<h1 class="slide-title">底层驱动开发与<span class="highlight-gradient">寄存器级时序优化</span></h1>
+<p class="slide-subtitle">Low-Level Driver Optimization and Bit-Banding Timings</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="col-container">
+    <!-- Card 1 -->
+    <div class="glass-card opt-card">
+      <div class="opt-title">
+        <div class="opt-icon">I2C</div>
+        <span>基于位带操作 (Bit-banding) 的模拟 I2C</span>
+      </div>
+      <p class="opt-desc">
+        使用 STM32F103 的 <code>SRAM & Peripheral Bit-band</code> 区域映射，用单条汇编指令直接读写 GPIO 输出寄存器（如 ODR/IDR），避免了传统固件库中繁琐的 <code>GPIO_WriteBit()</code> 函数调用开销。
+      </p>
+      <div class="opt-metrics">性能提升：I2C 通信时延降低 42%，时序更稳定</div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="glass-card opt-card">
+      <div class="opt-title">
+        <div class="opt-icon">LCD</div>
+        <span>模拟 SPI 单向块写入与极速引脚翻转</span>
+      </div>
+      <p class="opt-desc">
+        为 ST7796S LCD 设计的模拟 SPI 写命令/数据块驱动，合并了多次 CS/SCL 引脚翻转，并在关键的批量像素刷新阶段使用直接寄存器操作（BSRR/BRR），保证最大化吞吐量。
+      </p>
+      <div class="opt-metrics">性能提升：单像素刷新速率稳步提升 2.8 倍</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="glass-card opt-card">
+      <div class="opt-title">
+        <div class="opt-icon">RX</div>
+        <span>512B 异步中断环形接收缓冲区 (Ring Buffer)</span>
+      </div>
+      <p class="opt-desc">
+        ESP8266 在接收 NTP 时间戳和心知天气字串时会引发瞬间高吞吐。本系统在 <code>USART1_IRQHandler</code> 中实现轻量环形数据队列，将字节压栈并异步轮询处理，彻底阻断了数据溢出。
+      </p>
+      <div class="opt-metrics">可靠性提升：ESP8266 大数据包帧溢出丢包率降至 0%</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="glass-card opt-card">
+      <div class="opt-title">
+        <div class="opt-icon">IR</div>
+        <span>EXTI9 中断 + TIM4 1μs 捕获的非阻塞红外解码</span>
+      </div>
+      <p class="opt-desc">
+        针对红外遥控接收，不占用 CPU 主循环等待时序。利用 PA9 外部中断双边沿触发，启动 TIM4 计数器读取微秒级脉宽。配合状态机在中断中完成 NEC 解码并做取反位校验。
+      </p>
+      <div class="opt-metrics">可靠性提升：主循环耗时传感器读取下，遥控响应率达 100%</div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">03. 底层驱动协议开发与深度寄存器优化</div>
+  <div class="slide-number">Page 10 / 24</div>
+</div>
+
+</body>
+</html>

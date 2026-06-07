@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>15 系统设计经验与感悟分享 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .col-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+  }
+  .exp-card {
+    display: flex;
+    flex-direction: column;
+    padding: 36px;
+    height: 100%;
+    justify-content: flex-start;
+  }
+  .exp-title {
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .exp-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--brand-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .exp-desc {
+    font-size: 21px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .exp-desc strong {
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+  .exp-desc code {
+    font-family: var(--font-family);
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 19px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">经验与感悟</div>
+</div>
+
+<h1 class="slide-title">系统设计经验与<span class="highlight-gradient">感悟分享</span></h1>
+<p class="slide-subtitle">Design Insights, Lessons Learned, and Engineering Sensibilities</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="col-container">
+    <!-- Card 1 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">HW</div>
+        <span>物理层前置规划与引脚排布</span>
+      </div>
+      <p class="exp-desc">
+        在复杂嵌入式系统设计中，<strong>硬件资源排布必须前置规划</strong>。本项目开发初期遇到了 LCD 模拟 SPI、传感器 I2C 以及红外 NEC 在 <code>PA6</code> 与 <code>PB6</code> 上的物理冲突。在编写代码前仔细核对管脚功能并使用寄存器解除 JTAG 占用，是规避后期飞线重构的根本途径。
+      </p>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">ASY</div>
+        <span>非阻塞异步架构的性能优势</span>
+      </div>
+      <p class="exp-desc">
+        主频 <code>72MHz</code> 的 ARM Cortex-M3 内核算力资源有限。如果使用传统的软件死等式延时读取传感器（如 DHT11 或超声波），会导致整个系统严重卡顿。通过引入 <strong>EXTI 中断触发 + Timer精密计数状态机</strong>，将耗时计算异步化，是实现前后台流畅协作的秘诀。
+      </p>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">FSM</div>
+        <span>软硬件容错与断线自愈设计</span>
+      </div>
+      <p class="exp-desc">
+        任何物理模块在恶劣现场均面临网络断连或插拔松动的考验。固件开发不能仅考虑“理想状态”，必须在 I2C 读写、WiFi 连接、SD 卡写入等所有关键模块中加入<strong>超时退出、错误状态计数与自恢复重连 FSM</strong>，自愈设计能够显著提升网关的鲁棒性。
+      </p>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">ALG</div>
+        <span>精简算法对微控制器的适配</span>
+      </div>
+      <p class="exp-desc">
+        在主控仅有 <code>20KB SRAM</code> 且 SPI 总线带宽极低的情况下，要运行 Flappy Bird 等实时游戏，必须采用精简化算法。<strong>脏矩形渲染机制</strong>将单帧负载压缩至原本的 7%，轻量化 <code>strstr</code> 代替复杂 JSON 库，均是用空间换取时间、最大化挖掘微控制器潜力的优秀实践。
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">07. 系统设计经验与感悟分享</div>
+  <div class="slide-number">Page 23 / 24</div>
+</div>
+
+</body>
+</html>

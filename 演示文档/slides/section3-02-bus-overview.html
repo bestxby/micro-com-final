@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>05 系统通信总线与传输协议规范 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .table-box {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+  table.proto-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  table.proto-table th {
+    padding: 16px 24px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid var(--card-border);
+    text-align: left;
+  }
+  table.proto-table td {
+    padding: 18px 24px;
+    background: rgba(252, 250, 247, 0.95);
+    border-top: 1px solid var(--card-border);
+    border-bottom: 1px solid var(--card-border);
+    font-size: 18px;
+    color: var(--text-secondary);
+    transition: all 0.3s ease;
+  }
+  table.proto-table tr:hover td {
+    background: #FCFAF7;
+    color: var(--text-primary);
+    border-color: var(--brand-secondary);
+  }
+  table.proto-table td:first-child {
+    border-left: 1px solid var(--card-border);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    font-weight: 700;
+    color: var(--brand-secondary);
+  }
+  table.proto-table td:last-child {
+    border-right: 1px solid var(--card-border);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+  .tech-label {
+    font-family: monospace;
+    background: rgba(15, 118, 110, 0.08);
+    color: var(--brand-primary);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(15, 118, 110, 0.25);
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">底层总线协议</div>
+</div>
+
+<h1 class="slide-title">系统通信总线与<span class="highlight-gradient">传输协议规范</span></h1>
+<p class="slide-subtitle">Communication Protocols and Bus Stack Specifications</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="table-box">
+    <table class="proto-table">
+      <thead>
+        <tr>
+          <th>协议类型</th>
+          <th>物理线数</th>
+          <th>波特率/工作频率</th>
+          <th>传输模式</th>
+          <th>涉及外设与传感器</th>
+          <th>核心设计特点</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>模拟 I²C 总线</td>
+          <td>2线 (SCL/SDA)</td>
+          <td>~100 kHz (标准模式)</td>
+          <td>半双工 / 多从机分时共享</td>
+          <td>AHT20温湿度、BH1750光强、BMP280气压</td>
+          <td>GPIO 位带操作实现，总线防死锁恢复机制</td>
+        </tr>
+        <tr>
+          <td>模拟/硬件 SPI</td>
+          <td>4线 (CS/CLK/MOSI/MISO)</td>
+          <td>~12 MHz</td>
+          <td>单向只写 / 双向全双工</td>
+          <td>ST7796S 液晶屏、Micro SD卡</td>
+          <td>JTAG引脚重用，PA11移位，局部块像素填充优化</td>
+        </tr>
+        <tr>
+          <td>USART 串口</td>
+          <td>2线 (TXD/RXD)</td>
+          <td>115200 bps</td>
+          <td>全双工异步通信</td>
+          <td>ESP8266 WiFi 模块</td>
+          <td>管脚重映射 (PB6/PB7)，512B 环形中断接收队列</td>
+        </tr>
+        <tr>
+          <td>EXTI + 定时捕获</td>
+          <td>1线 (DAT)</td>
+          <td>1 MHz (1μs 硬件时序)</td>
+          <td>单向异步输入</td>
+          <td>HX1838 红外遥控接收器</td>
+          <td>双边沿中断触发，TIM4硬件精密测宽，非阻塞状态机</td>
+        </tr>
+        <tr>
+          <td>模拟二线制</td>
+          <td>2线 (CLK/DIO)</td>
+          <td>~50 kHz</td>
+          <td>半双工单向写入</td>
+          <td>TM1637 数码管</td>
+          <td>周期性分时更新，本地室内气温显示</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">03. 系统通信总线与传输协议规范</div>
+  <div class="slide-number">Page 9 / 24</div>
+</div>
+
+</body>
+</html>

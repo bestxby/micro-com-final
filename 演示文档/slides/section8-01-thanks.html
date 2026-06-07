@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>16 谢幕致谢 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  body {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: var(--bg-gradient);
+  }
+  .thanks-card {
+    position: relative;
+    width: 1400px;
+    height: 680px;
+    padding: 80px 60px;
+    border-radius: 24px;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+  .qa-badge {
+    padding: 8px 24px;
+    background: rgba(15, 118, 110, 0.08);
+    color: var(--brand-secondary);
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    border-radius: 99px;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 44px;
+    box-shadow: 0 0 20px rgba(15, 118, 110, 0.05);
+  }
+  .main-title {
+    font-family: var(--font-title-family);
+    font-size: 80px;
+    font-weight: 900;
+    line-height: 1.25;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+  }
+  .subtitle {
+    font-size: 34px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    margin-bottom: 80px;
+  }
+  .author-info {
+    display: flex;
+    gap: 56px;
+    font-size: 22px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .author-info span strong {
+    color: var(--brand-secondary);
+  }
+  /* Drawing border lines around cover card */
+  .border-svg {
+    position: absolute;
+    top: -3px; left: -3px;
+    width: calc(100% + 6px);
+    height: calc(100% + 6px);
+    pointer-events: none;
+    overflow: visible;
+  }
+  .border-rect {
+    width: 100%;
+    height: 100%;
+    rx: 24px;
+    fill: none;
+    stroke: url(#cyanPurpleGrad);
+    stroke-width: 3px;
+    stroke-dasharray: 4500;
+    stroke-dashoffset: 4500;
+    animation: drawPath 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation-delay: 0.2s;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="thanks-card animate-fade-in-up">
+  <svg class="border-svg">
+    <defs>
+      <linearGradient id="cyanPurpleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="var(--brand-primary)" />
+        <stop offset="100%" stop-color="var(--brand-secondary)" />
+      </linearGradient>
+    </defs>
+    <rect class="border-rect" x="0" y="0" width="100%" height="100%" rx="24" />
+  </svg>
+
+  <div class="qa-badge">QUESTIONS & ANSWERS</div>
+  <h1 class="main-title">谢谢各位老师和同学</h1>
+  <p class="subtitle">敬请诸位老师、同学批评指正</p>
+  
+  <div class="author-info">
+    <span>汇报组号：<strong>01组</strong></span>
+    <span>专业：<strong>电子信息科学与技术</strong></span>
+    <span>汇报人：<strong>肖博元、周元白</strong></span>
+  </div>
+</div>
+
+<script>
+  // Add a slight tilt hover effect to the cover card
+  const card = document.querySelector('.thanks-card');
+  document.addEventListener('mousemove', (e) => {
+    const x = (window.innerWidth / 2 - e.clientX) / 50;
+    const y = (window.innerHeight / 2 - e.clientY) / 50;
+    card.style.transform = `rotateY(${x}deg) rotateX(${-y}deg)`;
+  });
+</script>
+
+</body>
+</html>
