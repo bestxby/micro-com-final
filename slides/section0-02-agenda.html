@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>汇报目录 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .agenda-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+  }
+  .agenda-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    height: 100%;
+    justify-content: center;
+    border-radius: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .agenda-card:nth-child(7) {
+    grid-column: span 3;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 30px;
+    padding: 20px 40px;
+  }
+  .agenda-num {
+    font-size: 36px;
+    font-weight: 900;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: var(--font-title-family);
+    margin-bottom: 6px;
+  }
+  .agenda-card:nth-child(7) .agenda-num {
+    margin-bottom: 0;
+    font-size: 44px;
+  }
+  .agenda-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .agenda-desc {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">汇报目录</div>
+</div>
+
+<h1 class="slide-title">汇报目录与<span class="highlight-gradient">系统设计大纲</span></h1>
+<p class="slide-subtitle">Agenda & Presentation Outline</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="agenda-grid">
+    <!-- Card 1 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">01</div>
+      <div class="agenda-title">研究背景与应用场景定位</div>
+      <div class="agenda-desc">智能居家痛点与自适应自愈系统架构</div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">02</div>
+      <div class="agenda-title">物理硬件底座与引脚重构</div>
+      <div class="agenda-desc">STM32引脚排布、冲突规避与重映射说明</div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">03</div>
+      <div class="agenda-title">底层驱动协议与时序优化</div>
+      <div class="agenda-desc">位带操作I2C、极速SPI刷新与NEC红外硬件解码</div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">04</div>
+      <div class="agenda-title">边缘数据计算与智能算法</div>
+      <div class="agenda-desc">EMA低通滤波、自学习环境温升基线机制</div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">05</div>
+      <div class="agenda-title">HUD 界面布局与增量渲染</div>
+      <div class="agenda-desc">双主题TFT-LCD布局、人机交互与脏矩形重绘</div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">06</div>
+      <div class="agenda-title">多级安全防护与物联网通信</div>
+      <div class="agenda-desc">声光防盗警戒、ESP8266自愈重连与微信推送</div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="glass-card agenda-card">
+      <div class="agenda-num">07</div>
+      <div>
+        <div class="agenda-title">系统联合测试、总结与展望</div>
+        <div class="agenda-desc">72小时长效稳定运行实测、Keil AC6编译指标与项目经验总结</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">汇报目录 / Agenda</div>
+  <div class="slide-number">Page 2 / 24</div>
+</div>
+
+</body>
+</html>

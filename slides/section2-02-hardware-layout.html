@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>03 系统硬件组成与接口类型全览 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .grid-layout {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 20px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+  }
+  .hw-card {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    justify-content: space-between;
+    height: 220px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .hw-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--brand-secondary);
+    box-shadow: 0 12px 24px rgba(15, 118, 110, 0.12);
+  }
+  .hw-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .hw-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  .hw-pin {
+    font-family: monospace;
+    font-size: 13px;
+    background: rgba(15, 118, 110, 0.08);
+    color: var(--brand-secondary);
+    border: 1px solid rgba(15, 118, 110, 0.25);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+  
+  /* Split layout inside card for Text and Image SVG */
+  .hw-body {
+    display: flex;
+    gap: 16px;
+    flex-grow: 1;
+    align-items: center;
+  }
+  .hw-text {
+    flex: 1.35;
+    font-size: 17px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  
+  /* Styled SVG Graphic Container */
+  .photo-placeholder {
+    flex: 0.65;
+    height: 100px;
+    border: 1px solid var(--card-border);
+    background: rgba(25, 24, 22, 0.02);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .photo-placeholder:hover {
+    border-color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.05);
+    box-shadow: 0 0 15px rgba(15, 118, 110, 0.1);
+  }
+
+  .hw-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--card-border);
+    padding-top: 8px;
+    margin-top: 8px;
+  }
+  .hw-interface {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--brand-primary);
+    text-transform: uppercase;
+  }
+  .hw-role {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">系统物理构件</div>
+</div>
+
+<h1 class="slide-title">系统硬件组成与<span class="highlight-gradient">接口类型全览</span></h1>
+<p class="slide-subtitle">Physical Hardware Modules, Pin Allocations, and Interface Specifications</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="grid-layout">
+    <!-- Card 1 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">ST7796S TFT LCD</span>
+        <span class="hw-pin">PA3/PA4/PA5/PA7/PA8/PB1</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">4.0寸 480×320 液晶屏，用于人机大屏交互、趋势图绘制及像素游戏刷新。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="5" y="10" width="50" height="36" rx="4" fill="none" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <rect x="8" y="13" width="44" height="30" rx="2" fill="rgba(6, 182, 212, 0.15)"/>
+            <path d="M12 35 L22 25 L32 30 L45 18" fill="none" stroke="var(--brand-primary)" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="30" cy="46" r="1.5" fill="var(--brand-secondary)"/>
+            <line x1="20" y1="52" x2="40" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">模拟 SPI 协议</span>
+        <span class="hw-role">显示输出终端</span>
+      </div>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">AHT20 温湿度</span>
+        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">获取精确的室内环境温度与湿度，采样通过一阶 EMA 滤波去噪。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="15" y="15" width="30" height="30" rx="4" fill="rgba(139, 92, 246, 0.15)" stroke="var(--brand-primary)" stroke-width="2"/>
+            <circle cx="30" cy="30" r="4" fill="none" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <line x1="8" y1="20" x2="15" y2="20" stroke="var(--brand-primary)" stroke-width="2"/>
+            <line x1="8" y1="30" x2="15" y2="30" stroke="var(--brand-primary)" stroke-width="2"/>
+            <line x1="8" y1="40" x2="15" y2="40" stroke="var(--brand-primary)" stroke-width="2"/>
+            <line x1="45" y1="20" x2="52" y2="20" stroke="var(--brand-primary)" stroke-width="2"/>
+            <line x1="45" y1="30" x2="52" y2="30" stroke="var(--brand-primary)" stroke-width="2"/>
+            <line x1="45" y1="40" x2="52" y2="40" stroke="var(--brand-primary)" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">模拟 I²C 总线 (从机1)</span>
+        <span class="hw-role">环境温湿度测量</span>
+      </div>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">BMP280 大气压</span>
+        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">高精度环境大气压强与内部辅助温度测量，共享 I2C 物理通道。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="18" y="18" width="24" height="24" rx="2" fill="none" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <rect x="23" y="23" width="14" height="14" rx="1" fill="rgba(6, 182, 212, 0.15)" stroke="var(--brand-primary)"/>
+            <circle cx="30" cy="30" r="3" fill="var(--brand-secondary)"/>
+            <line x1="30" y1="5" x2="30" y2="18" stroke="var(--text-muted)" stroke-width="1.5"/>
+            <line x1="5" y1="30" x2="18" y2="30" stroke="var(--text-muted)" stroke-width="1.5"/>
+            <line x1="30" y1="42" x2="30" y2="55" stroke="var(--text-muted)" stroke-width="1.5"/>
+            <line x1="42" y1="30" x2="55" y2="30" stroke="var(--text-muted)" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">模拟 I²C 总线 (从机2)</span>
+        <span class="hw-role">环境大气压测量</span>
+      </div>
+    </div>
+
+    <!-- Card 4 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">BH1750 光强传感器</span>
+        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">数字式环境照度传感器，测定室内光强（Lx）以作为光照决策本底。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="10" fill="rgba(253, 224, 71, 0.15)" stroke="#fde047" stroke-width="2"/>
+            <circle cx="30" cy="30" r="5" fill="#fde047"/>
+            <path d="M30 10 L30 15 M30 45 L30 50 M10 30 L15 30 M45 30 L50 30 M16 16 L20 20 M40 40 L44 44 M16 44 L20 40 M40 16 L44 20" stroke="#fde047" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">模拟 I²C 总线 (从机3)</span>
+        <span class="hw-role">室内环境照度测量</span>
+      </div>
+    </div>
+
+    <!-- Card 5 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">HC-SR04 超声波</span>
+        <span class="hw-pin">Trig:PB11 / Echo:PB12</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">测距防盗模块。通过 GPIO 10us 触发并发射超声波，捕获 Echo 脉宽折算距离。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="5" y="18" width="50" height="24" rx="3" fill="rgba(25, 24, 22, 0.05)" stroke="var(--brand-primary)" stroke-width="2"/>
+            <circle cx="18" cy="30" r="10" fill="none" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <circle cx="18" cy="30" r="5" fill="var(--brand-secondary)"/>
+            <circle cx="42" cy="30" r="10" fill="none" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <circle cx="42" cy="30" r="5" fill="var(--brand-secondary)"/>
+            <line x1="25" y1="42" x2="25" y2="50" stroke="var(--text-muted)" stroke-width="1.5"/>
+            <line x1="35" y1="42" x2="35" y2="50" stroke="var(--text-muted)" stroke-width="1.5"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">GPIO + EXTI 定时测量</span>
+        <span class="hw-role">多级超声探距警戒</span>
+      </div>
+    </div>
+
+    <!-- Card 6 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">HX1838 红外接收器</span>
+        <span class="hw-pin">DAT: PA9</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">红外接收 DAT 引脚，响应外部中断触发 TIM4 硬件精密微秒级 NEC 解码。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="20" y="10" width="20" height="20" rx="2" fill="rgba(25, 24, 22, 0.05)" stroke="var(--brand-primary)" stroke-width="2"/>
+            <rect x="23" y="13" width="14" height="14" rx="1" fill="var(--brand-secondary)"/>
+            <circle cx="30" cy="20" r="4" fill="var(--brand-primary)"/>
+            <line x1="24" y1="30" x2="24" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+            <line x1="30" y1="30" x2="30" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+            <line x1="36" y1="30" x2="36" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">EXTI9 + TIM4 捕获</span>
+        <span class="hw-role">无线红外交互输入</span>
+      </div>
+    </div>
+
+    <!-- Card 7 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">TM1637 4位数码管</span>
+        <span class="hw-pin">CLK:PB13 / DIO:PB14</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">模拟二线制协议，高对比度数字数码显示，用于实时显示本地环境温度。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="5" y="15" width="50" height="30" rx="3" fill="rgba(239, 68, 68, 0.1)" stroke="var(--alert-red)" stroke-width="2"/>
+            <text x="10" y="36" font-family="monospace" font-size="16" fill="var(--alert-red)" font-weight="bold">26.4</text>
+            <circle cx="48" cy="22" r="1.5" fill="var(--alert-red)"/>
+            <text x="44" y="36" font-family="monospace" font-size="12" fill="var(--alert-red)">C</text>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">二线制串行协议</span>
+        <span class="hw-role">本地气温数值展示</span>
+      </div>
+    </div>
+
+    <!-- Card 8 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">ESP8266 WiFi 模块</span>
+        <span class="hw-pin">TXD:PB6 / RXD:PB7</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">串口 AT 指令握手联网，拉取网络 NTP 时间戳、气象数据及推送微信报警。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <rect x="12" y="8" width="36" height="44" rx="3" fill="rgba(25, 24, 22, 0.05)" stroke="var(--brand-primary)" stroke-width="2"/>
+            <path d="M18 12 L42 12 L42 18 L18 18 Z" fill="none" stroke="var(--brand-secondary)" stroke-width="1.5" stroke-dasharray="2 2"/>
+            <rect x="22" y="24" width="16" height="16" fill="var(--brand-primary)"/>
+            <circle cx="30" cy="32" r="3" fill="var(--brand-secondary)"/>
+            <line x1="20" y1="46" x2="20" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+            <line x1="30" y1="46" x2="30" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+            <line x1="40" y1="46" x2="40" y2="52" stroke="var(--text-muted)" stroke-width="2"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">USART1 异步串口</span>
+        <span class="hw-role">云边物联网链路</span>
+      </div>
+    </div>
+
+    <!-- Card 9 -->
+    <div class="hw-card">
+      <div class="hw-header">
+        <span class="hw-title">执行器与人机输入组</span>
+        <span class="hw-pin">PB15(BEEP) / PA0/1/2(LED)</span>
+      </div>
+      <div class="hw-body">
+        <p class="hw-text">包含有源蜂鸣器、三色 LED 指示灯及独立输入按键（KEY1-3、KEY_L/R）。</p>
+        <div class="photo-placeholder">
+          <svg width="70" height="70" viewBox="0 0 60 60">
+            <circle cx="15" cy="20" r="5" fill="var(--alert-red)" filter="drop-shadow(0 0 4px var(--alert-red))"/>
+            <circle cx="30" cy="20" r="5" fill="var(--brand-secondary)" filter="drop-shadow(0 0 4px var(--brand-secondary))"/>
+            <circle cx="45" cy="20" r="5" fill="var(--brand-primary)" filter="drop-shadow(0 0 4px var(--brand-primary))"/>
+            <rect x="20" y="38" width="20" height="12" rx="1" fill="none" stroke="var(--text-muted)" stroke-width="2"/>
+            <circle cx="30" cy="44" r="3" fill="var(--text-muted)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="hw-footer">
+        <span class="hw-interface">GPIO / 独立按键</span>
+        <span class="hw-role">声光告警与人机输入</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">02. 物理硬件底座与引脚重构</div>
+  <div class="slide-number">Page 6 / 24</div>
+</div>
+
+</body>
+</html>

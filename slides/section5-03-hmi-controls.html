@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>09 多通道人机交互控制方式设计 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .sandbox-container {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+  
+  /* Virtual IR Remote Styling */
+  .remote-control {
+    width: 260px;
+    background: linear-gradient(135deg, #2D2A26 0%, #1A1816 100%);
+    border: 3px solid rgba(25, 24, 22, 0.2);
+    border-radius: 36px;
+    padding: 24px 18px;
+    box-shadow: 0 25px 50px rgba(25, 24, 22, 0.25), inset 0 2px 5px rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    user-select: none;
+  }
+  .remote-header {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .remote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+  .btn-ir {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #4A453E;
+    border: 1px solid rgba(25, 24, 22, 0.1);
+    color: #ECE8E1;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  .btn-ir:hover { background: #5C564E; color: #f8fafc; }
+  .btn-ir:active { transform: scale(0.92); background: var(--brand-primary); }
+  .btn-power { background: #DC2626; color: #fff; }
+  .btn-power:hover { background: #EF4444; }
+  .btn-menu {
+    background: var(--brand-secondary);
+    color: #fff;
+    border-radius: 8px;
+    aspect-ratio: 2.2 / 1;
+    grid-column: span 2;
+    font-size: 12px;
+  }
+  .btn-menu:hover { background: #138E84; }
+  
+  .nav-pad {
+    grid-column: span 3;
+    aspect-ratio: 1;
+    position: relative;
+    background: #191816;
+    border-radius: 50%;
+    border: 2px solid rgba(25, 24, 22, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-nav {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    background: #2D2A26;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 900;
+    color: #ECE8E1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .btn-nav:hover { background: #4A453E; color: #fff; }
+  .btn-nav:active { background: var(--brand-secondary); color: #fff; transform: scale(0.9); }
+  .nav-up    { top: 8px; }
+  .nav-down  { bottom: 8px; }
+  .nav-left  { left: 8px; }
+  .nav-right { right: 8px; }
+  .btn-ok {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    color: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    z-index: 2;
+    font-size: 12px;
+  }
+  .btn-ok:hover { background: #E0690F; }
+  
+  /* LCD Screen Emulator Enclosure */
+  .lcd-enclosure {
+    position: relative;
+    width: 600px;
+    height: 440px;
+    background: #0c0f17;
+    border: 14px solid #191816;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .lcd-pins-top, .lcd-pins-bottom {
+    display: flex;
+    justify-content: space-around;
+    padding: 2px 0;
+    background: #1f2937;
+    height: 12px;
+  }
+  .pin-dot {
+    width: 5px;
+    height: 5px;
+    background: #fbbf24;
+    border-radius: 50%;
+    box-shadow: 0 0 3px #fbbf24;
+  }
+  
+  /* 480x320 Internal scaled to fit the 572x396 screen area */
+  .lcd-screen-body {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 16px;
+    transform: scale(1.19);
+    transform-origin: top left;
+    width: 480px;
+    height: 320px;
+  }
+  
+  /* Theme variables mapping to actual C variables */
+  /* Theme 0: Dark Neon */
+  .lcd-theme-t0 {
+    background: #000000;
+    color: #ffffff;
+    --lcd-border: #808080;
+    --lcd-accent: #00ffff;
+    --lcd-card: #1c1c1c;
+    --lcd-green: #00ff00;
+    --lcd-blue: #0000ff;
+    --lcd-red: #ff0000;
+    --lcd-yellow: #ffff00;
+    --lcd-muted: #808080;
+  }
+  /* Theme 1: Deep Space Blue */
+  .lcd-theme-t1 {
+    background: #0A1128;
+    color: #FFFFFF;
+    --lcd-border: #3A506B;
+    --lcd-accent: #00FFCC;
+    --lcd-card: #1C2541;
+    --lcd-green: #00FF00;
+    --lcd-blue: #3399FF;
+    --lcd-red: #FF3366;
+    --lcd-yellow: #FFCC00;
+    --lcd-muted: #758EBF;
+  }
+
+  /* Coordinate placements */
+  .lcd-topbar-line { position: absolute; left: 0; top: 24px; width: 480px; height: 1px; background: var(--lcd-accent); }
+  .lcd-sep-line1   { position: absolute; left: 0; top: 25px; width: 480px; height: 1px; background: var(--lcd-border); }
+  .lcd-sep-line2   { position: absolute; left: 0; top: 46px; width: 480px; height: 1px; background: var(--lcd-border); }
+  .lcd-bottom-line { position: absolute; left: 0; top: 295px; width: 480px; height: 1px; background: var(--lcd-border); }
+  
+  .lcd-header-decor { position: absolute; left: 8px; top: 28px; width: 3px; height: 16px; background: var(--lcd-accent); }
+  .lcd-header-title { position: absolute; left: 16px; top: 28px; color: var(--lcd-accent); }
+  
+  .lcd-topbar-pill {
+    position: absolute;
+    left: 142px; top: 4px; width: 196px; height: 16px;
+    border: 1px solid var(--lcd-green);
+    color: var(--lcd-green);
+    text-align: center;
+    line-height: 14px;
+    font-size: 13px;
+  }
+  .lcd-topbar-theme-indicator {
+    position: absolute;
+    left: 420px; top: 4px; width: 24px; height: 16px;
+    border: 1px solid var(--lcd-border);
+    box-sizing: border-box;
+  }
+  .lcd-theme-indicator-fill {
+    position: absolute;
+    left: 6px; top: 4px; width: 12px; height: 8px;
+    background: var(--lcd-accent);
+  }
+  .lcd-theme-t1 .lcd-theme-indicator-fill {
+    background: transparent;
+    border: 1px solid var(--lcd-accent);
+  }
+  
+  .lcd-page-container {
+    position: absolute;
+    left: 0; top: 47px; width: 480px; height: 248px;
+  }
+  
+  /* Card layouts */
+  .lcd-card-box {
+    position: absolute;
+    background: var(--lcd-card);
+    border: 1px solid var(--lcd-border);
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  .lcd-card-title { color: var(--lcd-accent); font-size: 13px; display: block; margin-bottom: 4px; }
+  .lcd-card-val { font-size: 19px; display: block; margin-bottom: 6px; }
+  
+  /* Segmented Bar */
+  .seg-bar { display: flex; gap: 3px; }
+  .seg-block { width: 11px; height: 6px; background: var(--lcd-theme-t0); }
+  .seg-block.active { background: var(--lcd-accent); }
+  .seg-block.inactive { background: #111; }
+  .lcd-theme-t1 .seg-block.inactive { background: #070c18; }
+  
+  /* Pages */
+  .p-tab { display: none; width: 100%; height: 100%; position: relative; }
+  .p-tab.active { display: block; }
+  
+  /* Status indicators in list */
+  .status-row { display: flex; align-items: center; gap: 4px; line-height: 15px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lcd-green); display: inline-block; }
+  
+  /* Page 1 Left details */
+  .p1-left { position: absolute; left: 16px; top: 9px; width: 184px; height: 220px; }
+  .p1-right { position: absolute; left: 216px; top: 9px; width: 248px; height: 220px; }
+  
+  /* Timeline */
+  .timeline-vert { position: absolute; left: 24px; top: 9px; bottom: 9px; border-left: 2px dashed var(--lcd-border); }
+  .timeline-node { position: absolute; left: 19px; width: 12px; height: 12px; border-radius: 50%; background: var(--lcd-red); border: 2px solid var(--lcd-red); box-shadow: 0 0 6px var(--lcd-red); }
+  .timeline-card { position: absolute; left: 42px; width: 422px; height: 48px; }
+  
+  /* Page 3: Game Frame */
+  .game-frame {
+    position: absolute;
+    left: 20px; top: 9px; width: 441px; height: 231px;
+    background: #000;
+    border: 2px solid var(--lcd-border);
+  }
+  .game-frame::before {
+    content: "";
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border: 1px solid var(--lcd-border);
+    pointer-events: none;
+  }
+  .game-corner {
+    position: absolute;
+    width: 10px; height: 10px;
+    border: 2px solid var(--lcd-accent);
+    z-index: 10;
+  }
+  .gc-tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .gc-tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+  .gc-bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+  .gc-br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+  
+  .game-bird {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--lcd-yellow);
+    left: 120px;
+    z-index: 8;
+  }
+  .game-pipe-top, .game-pipe-bot {
+    position: absolute;
+    width: 32px;
+    background: var(--lcd-green);
+    z-index: 6;
+  }
+  
+  /* Bottom Dots and text */
+  .page-dots-container {
+    position: absolute;
+    left: 0; top: 308px; width: 480px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+  .p-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lcd-border); }
+  .p-dot.active { background: var(--lcd-accent); }
+  
+  .lcd-bottom-left { position: absolute; left: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+  .lcd-bottom-right { position: absolute; right: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+
+  /* Times New Roman formula class on LCD */
+  .lcd-formula {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">人机交互沙盒</div>
+</div>
+
+<h1 class="slide-title">多通道人机交互与<span class="highlight-gradient">网页虚拟仿真大屏</span></h1>
+<p class="slide-subtitle">Multi-Channel Human-Machine Interface and Real-Time Sandbox Simulation</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="sandbox-container">
+    <!-- Left: Virtual Remote Control -->
+    <div class="remote-control">
+      <div class="remote-header">NEC IR REMOTE</div>
+      <div class="remote-grid">
+        <div class="btn-ir btn-power" id="btn-ir-power" title="Power Key: Arm/Disarm">⚡</div>
+        <div class="btn-ir btn-menu" id="btn-ir-menu" title="Menu Key: Toggle Theme">MENU</div>
+        
+        <div class="nav-pad">
+          <div class="btn-nav nav-up" id="btn-ir-up">▲</div>
+          <div class="btn-nav nav-down" id="btn-ir-down">▼</div>
+          <div class="btn-nav nav-left" id="btn-ir-left">◀</div>
+          <div class="btn-nav nav-right" id="btn-ir-right">▶</div>
+          <div class="btn-ok" id="btn-ir-ok">OK</div>
+        </div>
+        
+        <div class="btn-ir" id="btn-ir-1">1</div>
+        <div class="btn-ir" id="btn-ir-2">2</div>
+        <div class="btn-ir" id="btn-ir-3">3</div>
+        <div class="btn-ir" id="btn-ir-4">4</div>
+        <div class="btn-ir" id="btn-ir-5">5</div>
+        <div class="btn-ir" id="btn-ir-6">6</div>
+      </div>
+      <div style="font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.4; font-weight: 600;">
+        用鼠标点击遥控按键操纵右屏：<br>
+        <strong>◀ / ▶</strong>：翻页 &nbsp;&nbsp;<strong>MENU</strong>：换主题<br>
+        <strong>OK / ⚡</strong>：布撤防 &nbsp;&nbsp;<strong>▲ / 2</strong>：玩游戏
+      </div>
+    </div>
+
+    <!-- Right: Simulated LCD display -->
+    <div class="lcd-enclosure">
+      <div class="lcd-pins-top">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      
+      <div class="lcd-screen-body lcd-theme-t0" id="lcdScreen">
+        <!-- Top Bar -->
+        <div class="lcd-topbar-line"></div>
+        <div class="lcd-topbar-pill" id="lcdPill">SYSTEM SAFE</div>
+        <span style="position: absolute; left: 16px; top: 4px; color: var(--lcd-muted); font-size: 12px;" id="lcdPageName">PAGE 0</span>
+        <span style="position: absolute; right: 16px; top: 4px; color: var(--lcd-green);" id="lcdBeacon">|</span>
+        <div class="lcd-topbar-theme-indicator">
+          <div class="lcd-theme-indicator-fill"></div>
+        </div>
+        
+        <!-- Header -->
+        <div class="lcd-sep-line1"></div>
+        <div class="lcd-sep-line2"></div>
+        <div class="lcd-header-decor"></div>
+        <span class="lcd-header-title" id="lcdTitle">[1] REAL-TIME MONITORING</span>
+        
+        <!-- Content Container -->
+        <div class="lcd-page-container">
+          <!-- Page 0: Monitors -->
+          <div class="p-tab active" id="lcd-p0">
+            <div class="lcd-card-box" style="position:absolute; left:16px; top:9px; width:216px; height:100px;">
+              <span class="lcd-card-title">TEMP RAW:</span>
+              <span class="lcd-card-val" id="p0-temp">26.40 C</span>
+              <div class="seg-bar" id="p0-temp-bar"></div>
+            </div>
+            <div class="lcd-card-box" style="position:absolute; left:16px; top:129px; width:216px; height:100px;">
+              <span class="lcd-card-title">HUMIDITY:</span>
+              <span class="lcd-card-val" id="p0-humi">52.30 %</span>
+              <div class="seg-bar" id="p0-humi-bar"></div>
+            </div>
+            <div class="lcd-card-box" style="position:absolute; left:248px; top:9px; width:216px; height:100px;">
+              <span class="lcd-card-title">AI FILTERED:</span>
+              <span class="lcd-card-val" id="p0-filtered">26.40 C</span>
+              <span style="color:var(--lcd-green); font-size:14px; display:block; margin-top:4px;" id="p0-ai-state">STATE: SAFE</span>
+              <span style="color:var(--lcd-muted); font-size:12px; display:block; margin-top:4px;">(EMA alpha=0.2)</span>
+            </div>
+            <div class="lcd-card-box" style="position:absolute; left:248px; top:129px; width:216px; height:110px;">
+              <span class="lcd-card-title" style="margin-bottom:4px;">HARDWARE STATUS:</span>
+              <div style="font-size:12px; line-height:14px;">
+                <div class="status-row">AHT20 : <span style="color:var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+                <div class="status-row">BH175 : <span style="color:var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+                <div class="status-row">SD LOG: <span style="color:var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+                <div class="status-row">WIFI  : <span style="color:var(--lcd-green);" id="p0-wifi-status"><span class="status-dot"></span>ONLINE</span></div>
+                <div style="color:var(--lcd-yellow); margin-top:4px;" id="p0-lux">LIGHT : 140.0 lx</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Page 1: AI Learn -->
+          <div class="p-tab" id="lcd-p1">
+            <div class="lcd-card-box p1-left">
+              <span class="lcd-card-title">Baseline Temp:</span>
+              <span class="lcd-card-val" style="color:var(--lcd-green)">25.50 C</span>
+              <span class="lcd-card-title" style="margin-top:8px;">Filtered Temp:</span>
+              <span class="lcd-card-val" style="color:var(--lcd-yellow)">26.40 C</span>
+              <span class="lcd-card-title" style="margin-top:8px;">Deviation:</span>
+              <span class="lcd-card-val" style="color:var(--lcd-green)">+0.90 C</span>
+              <span class="lcd-card-title" style="margin-top:8px;">AI Progress:</span>
+              <div class="seg-bar" id="p1-progress-bar"></div>
+            </div>
+            <div class="lcd-card-box p1-right">
+              <span class="lcd-card-title" style="margin-bottom:4px;">Deviation Trend (+/-5 C)</span>
+              <!-- Dotted line chart grid inside card -->
+              <svg width="100%" height="180px" viewBox="0 0 228 180" style="background:#000; border:1px solid var(--lcd-border);">
+                <!-- Dotted grids -->
+                <line x1="6" y1="45" x2="222" y2="45" stroke="var(--lcd-border)" stroke-dasharray="2,2" />
+                <line x1="6" y1="90" x2="222" y2="90" stroke="var(--lcd-muted)" />
+                <line x1="6" y1="135" x2="222" y2="135" stroke="var(--lcd-border)" stroke-dasharray="2,2" />
+                <!-- deviation line -->
+                <path d="M 10,90 L 30,85 L 50,92 L 70,82 L 90,88 L 110,65 L 130,55 L 150,48 L 170,52 L 190,40 L 210,42" fill="none" stroke="var(--lcd-accent)" stroke-width="2" />
+                <text x="12" y="104" fill="var(--lcd-muted)" font-size="10">25.0C</text>
+              </svg>
+            </div>
+          </div>
+          
+          <!-- Page 2: Logs -->
+          <div class="p-tab" id="lcd-p2">
+            <div class="timeline-vert"></div>
+            
+            <div class="timeline-node" style="top:20px;"></div>
+            <div class="lcd-card-box timeline-card" style="top:2px;">
+              <span style="color:var(--lcd-yellow); font-size:12px;">#1 [TIME: 18 s]</span>
+              <span style="color:var(--lcd-red); font-size:12px; display:block; margin-top:2px;">Base: 25.50 C -> Curr: 31.20 C</span>
+            </div>
+            
+            <div class="timeline-node" style="top:74px;"></div>
+            <div class="lcd-card-box timeline-card" style="top:56px;">
+              <span style="color:var(--lcd-yellow); font-size:12px;">#2 [TIME: 92 s]</span>
+              <span style="color:var(--lcd-red); font-size:12px; display:block; margin-top:2px;">Base: 25.50 C -> Curr: 30.80 C</span>
+            </div>
+          </div>
+          
+          <!-- Page 3: Flappy Bird Game -->
+          <div class="p-tab" id="lcd-p3">
+            <!-- Score Title in Header of Game (drawn manually inside Game_Draw at x=376 y=28) -->
+            <span style="position: absolute; right: 28px; top: -19px; color: var(--lcd-accent); font-size: 13px;" id="game-score-display">SCORE: 00</span>
+            
+            <div class="game-frame">
+              <div class="game-corner gc-tl"></div><div class="game-corner gc-tr"></div>
+              <div class="game-corner gc-bl"></div><div class="game-corner gc-br"></div>
+              
+              <div class="game-bird" id="gb-bird"></div>
+              <div class="game-pipe-top" id="gb-pipe-top"></div>
+              <div class="game-pipe-bot" id="gb-pipe-bot"></div>
+              
+              <!-- Start text -->
+              <div id="game-start-screen" style="position:absolute; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+                <span style="color:var(--lcd-yellow); font-size:16px;">FLAPPY BIRD</span>
+                <span style="color:var(--lcd-text); font-size:13px;">Press UP to FLAP</span>
+                <span style="color:var(--lcd-muted); font-size:12px;">Press L/R to EXIT</span>
+              </div>
+              <!-- GameOver text -->
+              <div id="game-over-screen" style="position:absolute; width:100%; height:100%; display:none; flex-direction:column; align-items:center; justify-content:center; gap:8px; background:rgba(0,0,0,0.6);">
+                <span style="color:var(--lcd-red); font-size:16px;">GAME OVER</span>
+                <span style="color:var(--lcd-yellow); font-size:14px;" id="game-final-score">Final Score: 0</span>
+                <span style="color:#fff; font-size:13px;">Press UP to Restart</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Page 4: Security -->
+          <div class="p-tab" id="lcd-p4">
+            <div class="lcd-card-box p1-left">
+              <span class="lcd-card-title">Security Mode:</span>
+              <span class="lcd-card-val" id="p4-sec-mode" style="color:var(--lcd-muted)">DISARMED</span>
+              
+              <span class="lcd-card-title" style="margin-top:8px;">Current Dist:</span>
+              <span class="lcd-card-val" id="p4-dist" style="color:var(--lcd-yellow)">25.3 cm</span>
+              <div class="seg-bar" id="p4-dist-bar"></div>
+              
+              <span class="lcd-card-title" style="margin-top:8px;">Alarm Status:</span>
+              <span class="lcd-card-val" id="p4-alarm-state" style="color:var(--lcd-muted)">INACTIVE</span>
+            </div>
+            
+            <div class="lcd-card-box p1-right">
+              <span class="lcd-card-title" style="margin-bottom:4px;">Distance Trend (0-150cm)</span>
+              <!-- Grid chart -->
+              <svg width="100%" height="180px" viewBox="0 0 228 180" style="background:#000; border:1px solid var(--lcd-border);">
+                <line x1="6" y1="45" x2="222" y2="45" stroke="var(--lcd-border)" stroke-dasharray="2,2" />
+                <line x1="6" y1="90" x2="222" y2="90" stroke="var(--lcd-border)" stroke-dasharray="2,2" />
+                <line x1="6" y1="135" x2="222" y2="135" stroke="var(--lcd-border)" stroke-dasharray="2,2" />
+                <!-- path -->
+                <path d="M 10,140 L 30,130 L 50,145 L 70,120 L 90,135 L 110,80 L 130,55 L 150,42 L 170,58 L 190,30 L 210,35" fill="none" stroke="var(--lcd-accent)" stroke-width="2" />
+                <text x="12" y="170" fill="var(--lcd-muted)" font-size="10">0cm</text>
+                <text x="12" y="24" fill="var(--lcd-muted)" font-size="10">150cm</text>
+              </svg>
+            </div>
+            <!-- Distance Slider Simulation overlay -->
+            <button id="simDistBtn" style="position:absolute; bottom:10px; right:15px; background:#1e293b; border:1px solid var(--lcd-border); color:#fff; font-size:11px; padding:3px 6px; cursor:pointer; font-family:monospace;">触发 &lt; 15cm</button>
+          </div>
+          
+          <!-- Page 5: Clock & Weather -->
+          <div class="p-tab" id="lcd-p5">
+            <div class="lcd-card-box" style="position:absolute; left:16px; top:9px; width:448px; height:220px;">
+              <span class="lcd-card-title" style="text-align:center;">NETWORK CLOCK & IoT WEATHER</span>
+              <div style="position:absolute; left:16px; top:30px; right:16px; height:1px; background:var(--lcd-border)"></div>
+              
+              <!-- Left Col -->
+              <div style="position:absolute; left:16px; top:42px; width:190px;">
+                <span class="lcd-card-title">Indoor (AHT20):</span>
+                <div style="font-size:14px; margin-top:4px;">Temp: <span style="color:var(--lcd-accent)">26.40 C</span></div>
+                <div style="font-size:14px; margin-top:6px;">Humi: <span style="color:var(--lcd-accent)">52.30 %</span></div>
+                <div style="font-size:14px; margin-top:36px; color:var(--lcd-green);" id="p5-clock">TIME: 18:30:00</div>
+              </div>
+              
+              <!-- Right Col -->
+              <div style="position:absolute; left:224px; top:42px; width:190px;">
+                <span class="lcd-card-title">Outdoor (Seniverse):</span>
+                <div style="font-size:14px; margin-top:4px;">Temp: <span style="color:var(--lcd-accent)">31.00 C</span></div>
+                <div style="font-size:14px; margin-top:6px;">Weat: <span style="color:var(--lcd-yellow)">Sunny ☀️</span></div>
+                <div style="font-size:14px; margin-top:8px; color:var(--lcd-muted)">Loc : Guangzhou</div>
+              </div>
+              
+              <!-- Wifi & Debug -->
+              <div style="position:absolute; left:16px; top:164px; font-size:13px; color:var(--lcd-green);" id="p5-wifi-desc">WiFi: Connected (小小小波)</div>
+              <div style="position:absolute; left:16px; top:186px; font-size:12px; color:var(--lcd-muted);" id="p5-wifi-debug">DBG : AT+CIPSTART="TCP",...</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Bottom Info -->
+        <div class="lcd-bottom-line"></div>
+        <div class="lcd-bottom-left" id="lcdUptime">SYS-UP:     0s</div>
+        <div class="page-dots-container">
+          <div class="p-dot active" id="dot-0"></div>
+          <div class="p-dot" id="dot-1"></div>
+          <div class="p-dot" id="dot-2"></div>
+          <div class="p-dot" id="dot-3"></div>
+          <div class="p-dot" id="dot-4"></div>
+          <div class="p-dot" id="dot-5"></div>
+        </div>
+        <div class="lcd-bottom-right">G-05 HUD</div>
+      </div>
+      
+      <div class="lcd-pins-bottom">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">05. HUD UI 设计与高保真仿真展示</div>
+  <div class="slide-number">Page 15 / 24</div>
+</div>
+
+<script>
+  // Page Titles
+  const pageTitles = [
+    "[1] REAL-TIME MONITORING",
+    "[2] AI BASELINE LEARNING",
+    "[3] ANOMALY HISTORY LOGS",
+    "[4] FLAPPY BIRD MINI-GAME",
+    "[5] SECURITY GUARD MODE",
+    "[6] IOT WEATHER & CLOCK"
+  ];
+  
+  let curPage = 0;
+  const totalPages = 6;
+  const screen = document.getElementById("lcdScreen");
+  const headerTitle = document.getElementById("lcdTitle");
+  const pageLabel = document.getElementById("lcdPageName");
+  
+  function updatePage(idx) {
+    curPage = idx;
+    document.querySelectorAll(".p-tab").forEach((p, i) => {
+      p.classList.toggle("active", i === idx);
+    });
+    headerTitle.textContent = pageTitles[idx];
+    pageLabel.textContent = `PAGE ${idx}`;
+    
+    // Highlight page dots
+    for (let i = 0; i < totalPages; i++) {
+      document.getElementById(`dot-${i}`).classList.toggle("active", i === idx);
+    }
+    
+    // Stop game loop if leaving page 3
+    if (idx !== 3) {
+      stopGame();
+    } else {
+      initGame();
+    }
+  }
+  
+  // Navigation Buttons
+  document.getElementById("btn-ir-left").addEventListener("click", () => {
+    updatePage((curPage - 1 + totalPages) % totalPages);
+  });
+  document.getElementById("btn-ir-right").addEventListener("click", () => {
+    updatePage((curPage + 1) % totalPages);
+  });
+  
+  // Theme toggle
+  let themeId = 0; // 0 = Dark, 1 = Deep Space Blue
+  const indicator = document.querySelector(".lcd-topbar-theme-indicator");
+  function toggleTheme() {
+    themeId = 1 - themeId;
+    if (themeId === 0) {
+      screen.className = "lcd-screen-body lcd-theme-t0";
+    } else {
+      screen.className = "lcd-screen-body lcd-theme-t1";
+    }
+  }
+  document.getElementById("btn-ir-menu").addEventListener("click", toggleTheme);
+  
+  // Armed / Disarmed State Machine
+  let isArmed = false;
+  let hasAlarm = false;
+  const pill = document.getElementById("lcdPill");
+  
+  const p4Mode = document.getElementById("p4-sec-mode");
+  const p4Alarm = document.getElementById("p4-alarm-state");
+  const p4Dist = document.getElementById("p4-dist");
+  const p4DistBar = document.getElementById("p4-dist-bar");
+  
+  function updateAlarmState() {
+    if (!isArmed) {
+      pill.textContent = "SYSTEM SAFE";
+      pill.style.color = "var(--lcd-green)";
+      pill.style.borderColor = "var(--lcd-green)";
+      p4Mode.textContent = "DISARMED";
+      p4Mode.style.color = "var(--lcd-muted)";
+      p4Alarm.textContent = "INACTIVE";
+      p4Alarm.style.color = "var(--lcd-muted)";
+      p4Dist.textContent = "25.3 cm";
+      p4Dist.style.color = "var(--lcd-yellow)";
+      hasAlarm = false;
+      renderSegmentedBar(p4DistBar, 2, "var(--lcd-yellow)");
+    } else {
+      p4Mode.textContent = "ARMED";
+      p4Mode.style.color = "var(--lcd-red)";
+      
+      if (hasAlarm) {
+        pill.textContent = "ANOMALY ALARM";
+        pill.style.color = "var(--lcd-red)";
+        pill.style.borderColor = "var(--lcd-red)";
+        p4Alarm.textContent = "ALARM!!!";
+        p4Alarm.style.color = "var(--lcd-red)";
+        p4Dist.textContent = "12.8 cm";
+        p4Dist.style.color = "var(--lcd-red)";
+        renderSegmentedBar(p4DistBar, 1, "var(--lcd-red)");
+      } else {
+        pill.textContent = "SYSTEM SAFE";
+        pill.style.color = "var(--lcd-green)";
+        pill.style.borderColor = "var(--lcd-green)";
+        p4Alarm.textContent = "SAFE";
+        p4Alarm.style.color = "var(--lcd-green)";
+        p4Dist.textContent = "62.4 cm";
+        p4Dist.style.color = "var(--lcd-green)";
+        renderSegmentedBar(p4DistBar, 5, "var(--lcd-green)");
+      }
+    }
+  }
+  
+  function toggleSecurity() {
+    isArmed = !isArmed;
+    if (!isArmed) hasAlarm = false;
+    updateAlarmState();
+  }
+  document.getElementById("btn-ir-ok").addEventListener("click", toggleSecurity);
+  document.getElementById("btn-ir-power").addEventListener("click", toggleSecurity);
+  
+  document.getElementById("simDistBtn").addEventListener("click", () => {
+    if (isArmed) {
+      hasAlarm = true;
+      updateAlarmState();
+    } else {
+      alert("系统当前处于撤防状态，请先按 OK 或 ⚡ 键布防！");
+    }
+  });
+  
+  // Segmented Bars drawing
+  function renderSegmentedBar(container, activeCount, color) {
+    container.innerHTML = "";
+    for (let i = 0; i < 12; i++) {
+      const b = document.createElement("div");
+      b.className = `seg-block ${i < activeCount ? "active" : "inactive"}`;
+      if (i < activeCount) {
+        b.style.background = color;
+      }
+      container.appendChild(b);
+    }
+  }
+  
+  // Initialize Page 0 bars
+  renderSegmentedBar(document.getElementById("p0-temp-bar"), 6, "var(--lcd-accent)");
+  renderSegmentedBar(document.getElementById("p0-humi-bar"), 6, "var(--lcd-accent)");
+  renderSegmentedBar(document.getElementById("p1-progress-bar"), 10, "var(--lcd-green)");
+  renderSegmentedBar(p4DistBar, 2, "var(--lcd-yellow)");
+  
+  // Uptime and Clock ticking
+  let uptime = 0;
+  const uptimeEl = document.getElementById("lcdUptime");
+  const clockEl = document.getElementById("p5-clock");
+  const beaconEl = document.getElementById("lcdBeacon");
+  const beaconChars = ['|', '/', '-', '\\'];
+  let beaconIdx = 0;
+  
+  setInterval(() => {
+    uptime++;
+    uptimeEl.textContent = `SYS-UP: ${String(uptime).padStart(5, ' ')}s`;
+    
+    // beacon
+    beaconEl.textContent = beaconChars[beaconIdx];
+    beaconIdx = (beaconIdx + 1) % 4;
+    
+    // clock
+    const d = new Date();
+    let h = String(d.getHours()).padStart(2, '0');
+    let m = String(d.getMinutes()).padStart(2, '0');
+    let s = String(d.getSeconds()).padStart(2, '0');
+    clockEl.textContent = `TIME: ${h}:${m}:${s}`;
+  }, 1000);
+  
+  // Game variables
+  let gameInterval = null;
+  let birdY = 160;
+  let birdVy = 0;
+  const birdX = 120;
+  let gameScore = 0;
+  let pipes = [];
+  let gState = 0; // 0 = START, 1 = PLAY, 2 = GAMEOVER
+  
+  const startScr = document.getElementById("game-start-screen");
+  const overScr = document.getElementById("game-over-screen");
+  const birdEl = document.getElementById("gb-bird");
+  const scoreText = document.getElementById("game-score-display");
+  const finalScoreEl = document.getElementById("game-final-score");
+  const pipeTop = document.getElementById("gb-pipe-top");
+  const pipeBot = document.getElementById("gb-pipe-bot");
+  
+  function initGame() {
+    gState = 0;
+    birdY = 160;
+    birdVy = 0;
+    gameScore = 0;
+    scoreText.textContent = "SCORE: 00";
+    birdEl.style.top = birdY + "px";
+    birdEl.style.display = "block";
+    startScr.style.display = "flex";
+    overScr.style.display = "none";
+    pipeTop.style.display = "none";
+    pipeBot.style.display = "none";
+    pipes = [];
+  }
+  
+  function startGame() {
+    gState = 1;
+    startScr.style.display = "none";
+    pipeTop.style.display = "block";
+    pipeBot.style.display = "block";
+    
+    // Setup pipe
+    resetPipe();
+    
+    gameInterval = setInterval(gameLoop, 30);
+  }
+  
+  function resetPipe() {
+    let gapY = 110 + Math.floor(Math.random() * 80); // 110..190
+    let pipeX = 400;
+    let gapH = 75;
+    let pipeW = 32;
+    pipes = [{
+      x: pipeX,
+      w: pipeW,
+      topH: gapY - gapH / 2 - 57, // Y: 57..
+      botH: 285 - (gapY + gapH / 2),
+      passed: false
+    }];
+  }
+  
+  function flap() {
+    if (curPage !== 3) return;
+    if (gState === 0) {
+      startGame();
+    } else if (gState === 1) {
+      birdVy = -4.5;
+    } else if (gState === 2) {
+      initGame();
+    }
+  }
+  
+  document.getElementById("btn-ir-up").addEventListener("click", flap);
+  document.getElementById("btn-ir-2").addEventListener("click", flap);
+  
+  function gameLoop() {
+    // gravity
+    birdVy += 0.4;
+    if (birdVy > 8.0) birdVy = 8.0;
+    birdY += birdVy;
+    
+    // Bounds check
+    if (birdY < 57) {
+      birdY = 57;
+      gameOver();
+    }
+    if (birdY + 12 > 285) {
+      birdY = 285 - 12;
+      gameOver();
+    }
+    
+    birdEl.style.top = birdY + "px";
+    
+    // move pipe
+    if (pipes.length > 0) {
+      let p = pipes[0];
+      p.x -= 4; // 4px per frame
+      
+      pipeTop.style.left = p.x + "px";
+      pipeTop.style.top = "57px";
+      pipeTop.style.height = p.topH + "px";
+      
+      pipeBot.style.left = p.x + "px";
+      pipeBot.style.bottom = "35px"; // bottom of game border y=285 -> height from bottom: 320 - 285 = 35px
+      pipeBot.style.height = p.botH + "px";
+      
+      // Collision
+      let bx1 = birdX;
+      let bx2 = birdX + 12;
+      let by1 = birdY;
+      let by2 = birdY + 12;
+      
+      let px1 = p.x;
+      let px2 = p.x + p.w;
+      
+      if (bx2 >= px1 && bx1 <= px2) {
+        let topLimit = 57 + p.topH;
+        let botLimit = 320 - 35 - p.botH;
+        if (by1 < topLimit || by2 > botLimit) {
+          gameOver();
+          return;
+        }
+      }
+      
+      // Score
+      if (p.x + p.w < birdX && !p.passed) {
+        p.passed = true;
+        gameScore++;
+        scoreText.textContent = `SCORE: ${String(gameScore).padStart(2, '0')}`;
+      }
+      
+      // Reset offscreen
+      if (p.x < -32) {
+        resetPipe();
+      }
+    }
+  }
+  
+  function gameOver() {
+    clearInterval(gameInterval);
+    gState = 2;
+    overScr.style.display = "flex";
+    finalScoreEl.textContent = `Final Score: ${gameScore}`;
+    birdEl.style.display = "none";
+    pipeTop.style.display = "none";
+    pipeBot.style.display = "none";
+  }
+  
+  function stopGame() {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+</script>
+
+</body>
+</html>

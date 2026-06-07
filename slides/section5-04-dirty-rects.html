@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>10 LCD 图形渲染优化与增量更新算法 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
+  .left-intro {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .right-visual {
+    flex: 1.2;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 30px 20px;
+    height: 90%;
+  }
+  
+  /* Mock LCD refresh visuals */
+  .monitor-box {
+    width: 360px;
+    height: 270px;
+    background: #020617;
+    border: 4px solid #252422;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 30px rgba(25, 24, 22, 0.15);
+  }
+  .label-tag {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-top: 16px;
+  }
+  
+  /* Full screen redraw animation red glow sweep */
+  .full-sweep {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(220, 38, 38, 0.15);
+    border: 2px solid var(--alert-red);
+    top: 0; left: 0;
+    animation: fullSweepAnim 1.8s infinite linear;
+  }
+  @keyframes fullSweepAnim {
+    0% { transform: translateY(-100%); }
+    60% { transform: translateY(0); }
+    100% { transform: translateY(100%); }
+  }
+  
+  /* Dirty Rect redraw animation cyan boxes */
+  .dirty-box {
+    position: absolute;
+    border: 2px solid var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.15);
+    box-shadow: 0 0 8px rgba(15, 118, 110, 0.4);
+    animation: dirtyPulse 0.9s infinite alternate;
+  }
+  #db-bird {
+    width: 50px; height: 50px;
+    top: 100px; left: 80px;
+  }
+  #db-pipe {
+    width: 66px; height: 160px;
+    bottom: 0; right: 90px;
+  }
+  @keyframes dirtyPulse {
+    from { opacity: 0.3; }
+    to { opacity: 1; }
+  }
+  
+  .mock-item {
+    font-size: 14px;
+    color: #cbd5e1;
+    position: absolute;
+    font-weight: bold;
+  }
+  
+  .stats-box {
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .stat-card {
+    background: rgba(25, 24, 22, 0.03);
+    border: 1px solid var(--card-border);
+    padding: 16px;
+    border-radius: 8px;
+    text-align: center;
+  }
+  .stat-num {
+    font-size: 28px;
+    font-weight: 800;
+  }
+  .text-red { color: var(--alert-red); }
+  .text-cyan { color: var(--brand-secondary); }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">液晶渲染优化</div>
+</div>
+
+<h1 class="slide-title">LCD 图形渲染优化与<span class="highlight-gradient">增量更新算法</span></h1>
+<p class="slide-subtitle">TFT-LCD Bandwidth Reduction via Localized Incremental Dirty Rects</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left introduction -->
+    <div class="left-intro">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">串行总线带宽限制与脏矩形重绘</h2>
+      <p style="font-size: 18px; color: var(--text-secondary); line-height: 1.6;">
+        STM32F103 通过软件模拟 SPI 驱动 480×320 LCD 屏。由于串行传输速率存在物理瓶颈，若采用传统的全屏覆写刷新（一帧数据高达 307.2 KB），会导致严重的白屏撕裂和局部频闪，无法支撑流畅的动作类游戏或高频 UI 数据跳动。
+      </p>
+      
+      <div class="stats-box">
+        <div class="stat-card">
+          <span class="card-label">全屏刷新负荷</span>
+          <div class="stat-num text-red">307.2 KB / 帧</div>
+          <span style="font-size: 12px; color: var(--text-muted);">传输时延 &gt; 150 ms</span>
+        </div>
+        <div class="stat-card">
+          <span class="card-label">增量更新负荷</span>
+          <div class="stat-num text-cyan">21.5 KB / 帧</div>
+          <span style="font-size: 12px; color: var(--text-muted);">传输时延 &lt; 8 ms</span>
+        </div>
+      </div>
+
+      <p style="font-size: 17px; color: var(--text-secondary); line-height: 1.6; margin-top: 20px;">
+        <strong>脏矩形重绘算法（Dirty Rects）</strong>：在内存中追踪物体的坐标变化（如小鸟移动、数值跳变），每次仅对包含变化轨迹的矩形区域（如 24x24 的飞鸟，及管线增量区域）进行像素覆写。将单帧负荷降低 <strong>93%</strong>，促使 Flappy Bird 在软件 SPI 驱动下帧率稳超 <strong>30+ FPS</strong>。
+      </p>
+    </div>
+
+    <!-- Right visual demo -->
+    <div class="right-visual">
+      <!-- Full screen redraw -->
+      <div style="text-align: center;">
+        <div class="monitor-box">
+          <div class="full-sweep"></div>
+          <div class="mock-item" style="top:75px;">小鸟</div>
+          <div class="mock-item" style="top:110px;">管线</div>
+          <div style="font-size:11px; color:rgba(239, 68, 68, 0.8); position:absolute; bottom:10px; font-weight:bold;">整屏像素重写 (频繁撕裂)</div>
+        </div>
+        <div class="label-tag">全屏重绘 (2 FPS)</div>
+      </div>
+
+      <!-- Dirty Rect redraw -->
+      <div style="text-align: center;">
+        <div class="monitor-box">
+          <div class="dirty-box" id="db-bird"></div>
+          <div class="dirty-box" id="db-pipe"></div>
+          <div class="mock-item" style="top:75px; left:50px;">小鸟</div>
+          <div class="mock-item" style="top:110px; right:60px;">管线</div>
+          <div style="font-size:11px; color:rgba(6, 182, 212, 0.8); position:absolute; bottom:10px; font-weight:bold;">仅填充框内变动像素</div>
+        </div>
+        <div class="label-tag">脏矩形增量刷新 (30+ FPS)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">05. HUD UI 设计与高保真仿真展示</div>
+  <div class="slide-number">Page 16 / 24</div>
+</div>
+
+</body>
+</html>

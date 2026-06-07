@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>12 云边端物联网通信与 SD 日志归档 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+  }
+  .left-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  
+  .desc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .desc-list li {
+    font-size: 19px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .desc-list li strong {
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+  .desc-list code {
+    font-family: var(--font-family);
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  
+  /* Floating Video Button at Bottom Right */
+  .view-video-btn {
+    position: absolute;
+    right: 80px;
+    bottom: 110px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: var(--brand-primary);
+    border: 1px solid rgba(25, 24, 22, 0.1);
+    border-radius: 12px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+  }
+  .view-video-btn:hover {
+    transform: scale(1.05);
+    background: var(--brand-secondary);
+    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+  }
+  .play-icon {
+    font-size: 20px;
+  }
+
+  /* Fullscreen Video Modal */
+  .video-modal {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(25, 24, 22, 0.96);
+    backdrop-filter: blur(16px);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .video-modal-content {
+    position: relative;
+    width: 85%;
+    max-width: 1400px;
+    aspect-ratio: 16 / 9;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
+  }
+  .video-modal-content video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+  }
+  .close-modal-btn {
+    position: absolute;
+    top: 32px;
+    right: 32px;
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: rgba(252, 250, 247, 0.1);
+    border: 1px solid rgba(252, 250, 247, 0.15);
+    color: #FCFAF7;
+    font-size: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10000;
+  }
+  .close-modal-btn:hover {
+    background: var(--alert-red);
+    border-color: var(--alert-red);
+    transform: scale(1.1);
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">物联网通信</div>
+</div>
+
+<h1 class="slide-title">云边端物联网通信与<span class="highlight-gradient">本地数据归档</span></h1>
+<p class="slide-subtitle">ESP8266 WiFi, NTP Clock Sync, ServerChan WeChat Alerts, and SD Logging</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left: Specifications -->
+    <div class="left-col">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">物联网通信与存储设计</h2>
+      <ul class="desc-list">
+        <li>
+          <strong>ESP8266 自动断网自愈与 NTP 同步</strong>：
+          通过 AT 指令进行底层握手，断线后自动保存配置重连。上电后拉取中国 NTP 服务器时间。在掉线期间，系统无缝切入本地 10ms 软件 RTC 累加，恢复网络后自动对齐秒级误差。
+        </li>
+        <li>
+          <strong>心知天气 API 轻量解析</strong>：
+          直接使用 <code>strstr</code> 从 TCP 接收环形缓存中匹配特定键值对，舍弃开销巨大的 JSON 库，极大节约了 RAM 空间。
+        </li>
+        <li>
+          <strong>微信警报推送与 180s 冷却保护</strong>：
+          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 HTTP 连接拥塞 and 警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
+        </li>
+        <li>
+          <strong>512B 扇区对齐的 SD 卡日志存盘</strong>：
+          设计了 SD 日志扇区对齐算法。读取或覆写时按照物理 512 字节进行对齐擦写，将含有北京时间戳的事件及环境参数实时持久化归档。
+        </li>
+      </ul>
+    </div>
+
+  </div>
+  
+  <!-- "查看视频演示" Button at Bottom Right -->
+  <button class="view-video-btn" id="openModalBtn">
+    <span class="play-icon">▶</span> 查看视频演示
+  </button>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">06. 云边端物联网通信与 SD 日志归档</div>
+  <div class="slide-number">Page 19 / 24</div>
+</div>
+
+<!-- Video Modal -->
+<div class="video-modal" id="videoModal">
+  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
+  <div class="video-modal-content">
+    <video id="modalVideo" src="../shared/videos/iot_demo.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+<script>
+  const openModalBtn = document.getElementById("openModalBtn");
+  const videoModal = document.getElementById("videoModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalVideo = document.getElementById("modalVideo");
+
+  openModalBtn.addEventListener("click", () => {
+    videoModal.style.display = "flex";
+    modalVideo.play().catch(err => {
+      console.log("Modal video autoplay failed or file not found:", err);
+    });
+  });
+
+  function closeModal() {
+    videoModal.style.display = "none";
+    modalVideo.pause();
+  }
+
+  closeModalBtn.addEventListener("click", closeModal);
+  videoModal.addEventListener("click", (e) => {
+    if (e.target === videoModal) closeModal();
+  });
+</script>
+
+</body>
+</html>

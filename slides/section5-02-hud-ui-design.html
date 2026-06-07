@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>08 TFT-LCD 界面布局设计与仿真展示 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
+  .left-intro {
+    flex: 0.6;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .right-screens {
+    flex: 1.4;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 20px 15px;
+    height: 90%;
+  }
+  
+  /* Pixel-Perfect 480x320 LCD Emulator Style */
+  .lcd-preview {
+    width: 480px;
+    height: 320px;
+    border-radius: 4px;
+    border: 3px solid #252422;
+    box-shadow: 0 15px 35px rgba(25, 24, 22, 0.2);
+    position: relative;
+    overflow: hidden;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 16px;
+  }
+  
+  /* Theme 0: Dark (Neon style) */
+  .lcd-t0 {
+    background: #000000;
+    color: #ffffff;
+    --lcd-border: #808080;
+    --lcd-accent: #00ffff;
+    --lcd-card: #202020;
+    --lcd-green: #00ff00;
+    --lcd-red: #ff0000;
+    --lcd-yellow: #ffff00;
+    --lcd-muted: #808080;
+  }
+  
+  /* Theme 1: Deep Space Blue (Cyberpunk Style) */
+  .lcd-t1 {
+    background: #0A1128;
+    color: #FFFFFF;
+    --lcd-border: #3A506B;
+    --lcd-accent: #00FFCC;
+    --lcd-card: #1C2541;
+    --lcd-green: #00FF00;
+    --lcd-red: #FF3366;
+    --lcd-yellow: #FFCC00;
+    --lcd-muted: #758EBF;
+  }
+ 
+  /* Coordinate-Based Elements */
+  .lcd-topbar-line {
+    position: absolute;
+    left: 0; top: 24px; width: 480px; height: 1px;
+    background: var(--lcd-accent);
+  }
+  .lcd-sep-line1 {
+    position: absolute;
+    left: 0; top: 25px; width: 480px; height: 1px;
+    background: var(--lcd-border);
+  }
+  .lcd-sep-line2 {
+    position: absolute;
+    left: 0; top: 46px; width: 480px; height: 1px;
+    background: var(--lcd-border);
+  }
+  .lcd-bottom-line {
+    position: absolute;
+    left: 0; top: 295px; width: 480px; height: 1px;
+    background: var(--lcd-border);
+  }
+  
+  /* Header Title */
+  .lcd-header-title {
+    position: absolute;
+    left: 16px; top: 28px;
+    color: var(--lcd-accent);
+  }
+  .lcd-header-decor {
+    position: absolute;
+    left: 8px; top: 28px; width: 3px; height: 16px;
+    background: var(--lcd-accent);
+  }
+  
+  /* Topbar Pill */
+  .lcd-topbar-pill {
+    position: absolute;
+    left: 162px; top: 4px; width: 156px; height: 16px;
+    border: 1px solid var(--lcd-green);
+    color: var(--lcd-green);
+    text-align: center;
+    line-height: 14px;
+    font-size: 14px;
+  }
+  
+  /* Cards */
+  .lcd-c1 { position: absolute; left: 16px; top: 56px; width: 216px; height: 100px; }
+  .lcd-c2 { position: absolute; left: 16px; top: 176px; width: 216px; height: 100px; }
+  .lcd-c3 { position: absolute; left: 248px; top: 56px; width: 216px; height: 100px; }
+  .lcd-c4 { position: absolute; left: 248px; top: 176px; width: 216px; height: 110px; }
+  
+  .lcd-card-box {
+    background: var(--lcd-card);
+    border: 1px solid var(--lcd-border);
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  /* Text placements inside cards */
+  .lcd-card-title {
+    color: var(--lcd-accent);
+    margin-bottom: 8px;
+    display: block;
+    font-size: 14px;
+  }
+  .lcd-card-val {
+    font-size: 20px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  /* Segmented Bar */
+  .seg-bar {
+    display: flex;
+    gap: 3px;
+  }
+  .seg-block {
+    width: 12px;
+    height: 6px;
+    background: var(--lcd-card);
+  }
+  .lcd-t0 .seg-block.active { background: var(--lcd-accent); }
+  .lcd-t1 .seg-block.active { background: var(--lcd-accent); }
+  .seg-block.inactive { background: #111; }
+  .lcd-t1 .seg-block.inactive { background: #0c0f17; }
+  
+  /* Status dot indicator */
+  .status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lcd-green);
+    margin-right: 4px;
+  }
+  
+  /* Page Dots */
+  .page-dots-container {
+    position: absolute;
+    left: 0; top: 308px; width: 480px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+  .p-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--lcd-border);
+  }
+  .p-dot.active {
+    background: var(--lcd-accent);
+    box-shadow: 0 0 4px var(--lcd-accent);
+  }
+  
+  .lcd-bottom-left { position: absolute; left: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+  .lcd-bottom-right { position: absolute; right: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+
+  .design-points {
+    list-style: none;
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .design-points li {
+    font-size: 18px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    position: relative;
+    padding-left: 28px;
+  }
+  .design-points li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--brand-secondary);
+    font-weight: 900;
+  }
+  .theme-tag {
+    font-size: 14px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    margin-top: 12px;
+    display: inline-block;
+    font-weight: bold;
+  }
+  .tag-dark { background: rgba(204, 90, 1, 0.08); color: #CC5A01; border: 1px solid rgba(204, 90, 1, 0.2); }
+  .tag-light { background: rgba(15, 118, 110, 0.08); color: #0F766E; border: 1px solid rgba(15, 118, 110, 0.2); }
+  .design-points li code {
+    font-family: var(--font-family);
+    color: var(--brand-secondary);
+    background: rgba(15, 118, 110, 0.08);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">界面交互设计</div>
+</div>
+
+<h1 class="slide-title">TFT-LCD 界面设计与<span class="highlight-gradient">双主题对比</span></h1>
+<p class="slide-subtitle">TFT-LCD UI HUD Layout and Dark/Light Dual Theme Display</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left panel: Introduction -->
+    <div class="left-intro">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">界面视觉设计规范</h2>
+      <p style="font-size: 18px; color: var(--text-secondary); line-height: 1.6;">
+        仿真界面根据 STM32 主控中 480×320 TFT 液晶屏的真实排版和坐标编写。系统提供两套主题风格（默认的 Dark 黑色霓虹模式，和 Deep Space Blue 深海暗蓝高对比度模式），用以适应不同光照环境并降低背光漏光。
+      </p>
+      
+      <ul class="design-points">
+        <li><strong>科技卡片布局 (HUD Cards)</strong>：四角折边设计，区分温度、湿度、状态、以及光强外设数据。</li>
+        <li><strong>高对比度色彩定义</strong>：完全映射 STM32 固件中 <code>theme_bg</code>, <code>theme_card_bg</code> 和 <code>theme_accent</code> 等变量。</li>
+        <li><strong>动态刷新指示</strong>：顶部包含 SYSTEM SAFE 状态指示框及底部翻页棱形点。</li>
+      </ul>
+    </div>
+
+    <!-- Right panel: Side by Side Screen Mockups -->
+    <div class="right-screens">
+      <!-- Dark Theme Mockup -->
+      <div style="text-align: center;">
+        <div class="lcd-preview lcd-t0">
+          <!-- Top Bar -->
+          <div class="lcd-topbar-line"></div>
+          <div class="lcd-topbar-pill">SYSTEM SAFE</div>
+          <span style="position: absolute; right: 16px; top: 4px; color: var(--lcd-green);">|</span>
+          <span style="position: absolute; left: 16px; top: 4px; color: var(--lcd-muted); font-size: 12px;">PAGE 0</span>
+          
+          <!-- Header -->
+          <div class="lcd-sep-line1"></div>
+          <div class="lcd-sep-line2"></div>
+          <div class="lcd-header-decor"></div>
+          <span class="lcd-header-title">[1] REAL-TIME MONITORING</span>
+          
+          <!-- Page 0 Content -->
+          <!-- Card 1 -->
+          <div class="lcd-card-box lcd-c1">
+            <span class="lcd-card-title">TEMP RAW:</span>
+            <span class="lcd-card-val">26.40 C</span>
+            <div class="seg-bar">
+              <div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="lcd-card-box lcd-c2">
+            <span class="lcd-card-title">HUMIDITY:</span>
+            <span class="lcd-card-val">52.30 %</span>
+            <div class="seg-bar">
+              <div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="lcd-card-box lcd-c3">
+            <span class="lcd-card-title">AI FILTERED:</span>
+            <span class="lcd-card-val">26.40 C</span>
+            <span style="color: var(--lcd-green); font-size: 14px; display: block; margin-top: 4px;">STATE: SAFE</span>
+            <span style="color: var(--lcd-muted); font-size: 12px; display: block; margin-top: 4px;">(EMA alpha=0.2)</span>
+          </div>
+          <!-- Card 4 -->
+          <div class="lcd-card-box lcd-c4">
+            <span class="lcd-card-title" style="margin-bottom: 4px;">HARDWARE STATUS:</span>
+            <div style="font-size: 12px; line-height: 14px;">
+              <div>AHT20 : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>BH175 : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>SD LOG: <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>WIFI  : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div style="color: var(--lcd-yellow); margin-top: 4px;">LIGHT : 140.0 lx</div>
+            </div>
+          </div>
+          
+          <!-- Bottom Info -->
+          <div class="lcd-bottom-line"></div>
+          <div class="lcd-bottom-left">SYS-UP:    52s</div>
+          <div class="page-dots-container">
+            <div class="p-dot active"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div>
+          </div>
+          <div class="lcd-bottom-right">G-05 HUD</div>
+        </div>
+        <span class="theme-tag tag-dark">主题 0：Dark 黑色霓虹模式</span>
+      </div>
+
+      <!-- Theme 1 Mockup -->
+      <div style="text-align: center;">
+        <div class="lcd-preview lcd-t1">
+          <!-- Top Bar -->
+          <div class="lcd-topbar-line"></div>
+          <div class="lcd-topbar-pill" style="border-color: var(--lcd-green); color: var(--lcd-green);">SYSTEM SAFE</div>
+          <span style="position: absolute; right: 16px; top: 4px; color: var(--lcd-green);">/</span>
+          <span style="position: absolute; left: 16px; top: 4px; color: var(--lcd-muted); font-size: 12px;">PAGE 0</span>
+          
+          <!-- Header -->
+          <div class="lcd-sep-line1"></div>
+          <div class="lcd-sep-line2"></div>
+          <div class="lcd-header-decor"></div>
+          <span class="lcd-header-title">[1] REAL-TIME MONITORING</span>
+          
+          <!-- Page 0 Content -->
+          <!-- Card 1 -->
+          <div class="lcd-card-box lcd-c1">
+            <span class="lcd-card-title">TEMP RAW:</span>
+            <span class="lcd-card-val">26.40 C</span>
+            <div class="seg-bar">
+              <div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="lcd-card-box lcd-c2">
+            <span class="lcd-card-title">HUMIDITY:</span>
+            <span class="lcd-card-val">52.30 %</span>
+            <div class="seg-bar">
+              <div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block active"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div><div class="seg-block inactive"></div>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="lcd-card-box lcd-c3">
+            <span class="lcd-card-title">AI FILTERED:</span>
+            <span class="lcd-card-val">26.40 C</span>
+            <span style="color: var(--lcd-green); font-size: 14px; display: block; margin-top: 4px;">STATE: SAFE</span>
+            <span style="color: var(--lcd-muted); font-size: 12px; display: block; margin-top: 4px;">(EMA alpha=0.2)</span>
+          </div>
+          <!-- Card 4 -->
+          <div class="lcd-card-box lcd-c4">
+            <span class="lcd-card-title" style="margin-bottom: 4px;">HARDWARE STATUS:</span>
+            <div style="font-size: 12px; line-height: 14px;">
+              <div>AHT20 : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>BH175 : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>SD LOG: <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div>WIFI  : <span style="color: var(--lcd-green);"><span class="status-dot"></span>ONLINE</span></div>
+              <div style="color: var(--lcd-yellow); margin-top: 4px;">LIGHT : 140.0 lx</div>
+            </div>
+          </div>
+          
+          <!-- Bottom Info -->
+          <div class="lcd-bottom-line"></div>
+          <div class="lcd-bottom-left">SYS-UP:    52s</div>
+          <div class="page-dots-container">
+            <div class="p-dot active"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div>
+          </div>
+          <div class="lcd-bottom-right">G-05 HUD</div>
+        </div>
+        <span class="theme-tag tag-light">主题 1：Deep Space Blue 深海暗蓝</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">05. HUD UI 设计与高保真仿真展示</div>
+  <div class="slide-number">Page 14 / 24</div>
+</div>
+
+</body>
+</html>
