@@ -388,17 +388,17 @@
       case 'PARALLAX':
         const targetX = currentX - (direction * 80 * currentScale);
         gsap.to(stage, {
-          duration: 0.2,
+          duration: 0.1,
           opacity: 0,
           x: targetX,
-          scale: 0.98 * currentScale,
+          scale: 0.99 * currentScale,
           ease: "power2.inOut",
           onComplete: onDone
         });
         break;
       case 'FLIP':
         gsap.to(stage, {
-          duration: 0.25,
+          duration: 0.15,
           opacity: 0,
           rotationY: direction * 90,
           z: -300 * currentScale,
@@ -408,15 +408,15 @@
         break;
       case 'GLITCH':
         gsap.timeline({ onComplete: onDone })
-          .to(stage, { duration: 0.08, opacity: 0.6, scale: 1.02 * currentScale, filter: "blur(5px) brightness(1.2)", ease: "power1.inOut" })
-          .to(stage, { duration: 0.08, opacity: 0.2, scale: 1.04 * currentScale, filter: "blur(12px) brightness(1.5)", ease: "power1.inOut" })
-          .to(stage, { duration: 0.06, opacity: 0, scale: 1.05 * currentScale, filter: "blur(18px) brightness(2.0)", ease: "power1.inOut" });
+          .to(stage, { duration: 0.04, opacity: 0.7, scale: 1.01 * currentScale, filter: "blur(2px) brightness(1.1)", ease: "power1.inOut" })
+          .to(stage, { duration: 0.04, opacity: 0.3, scale: 1.02 * currentScale, filter: "blur(4px) brightness(1.2)", ease: "power1.inOut" })
+          .to(stage, { duration: 0.03, opacity: 0, scale: 1.03 * currentScale, filter: "blur(6px) brightness(1.3)", ease: "power1.inOut" });
         break;
       case 'SWIPE':
         const swipeCurtain = document.getElementById('swipeCurtain');
         gsap.set(swipeCurtain, { left: 0, right: 'auto', width: '0%' });
         gsap.to(swipeCurtain, {
-          duration: 0.25,
+          duration: 0.15,
           width: '100%',
           ease: "power2.inOut",
           onComplete: onDone
@@ -425,7 +425,7 @@
       case 'FADE':
       default:
         gsap.to(stage, {
-          duration: 0.12,
+          duration: 0.08,
           opacity: 0,
           ease: "power1.inOut",
           onComplete: onDone
@@ -456,32 +456,32 @@
           const startX = currentX + (direction * 80 * currentScale);
           gsap.set(stage, { rotationY: 0, z: 0, filter: "none" });
           gsap.fromTo(stage,
-            { opacity: 0, x: startX, scale: 0.98 * currentScale },
-            { duration: 0.25, opacity: 1, x: currentX, scale: currentScale, ease: "power2.out", onComplete }
+            { opacity: 0, x: startX, scale: 0.99 * currentScale },
+            { duration: 0.15, opacity: 1, x: currentX, scale: currentScale, ease: "power2.out", onComplete }
           );
           break;
         case 'FLIP':
           gsap.set(stage, { filter: "none" });
           gsap.fromTo(stage,
             { opacity: 0, rotationY: -direction * 90, z: -300 * currentScale, x: currentX, y: currentY, scale: currentScale },
-            { duration: 0.35, opacity: 1, rotationY: 0, z: 0, ease: "power2.out", onComplete }
+            { duration: 0.2, opacity: 1, rotationY: 0, z: 0, ease: "power2.out", onComplete }
           );
           break;
         case 'GLITCH':
-          gsap.set(stage, { x: currentX, y: currentY, scale: 1.04 * currentScale, rotationY: 0, z: 0 });
+          gsap.set(stage, { x: currentX, y: currentY, scale: 1.02 * currentScale, rotationY: 0, z: 0 });
           gsap.timeline({ onComplete })
             .fromTo(stage, 
-              { opacity: 0, filter: "blur(15px) brightness(1.5)" },
-              { duration: 0.22, opacity: 1, filter: "blur(5px) brightness(1.1)", scale: 1.01 * currentScale, ease: "power1.out" }
+              { opacity: 0, filter: "blur(6px) brightness(1.3)" },
+              { duration: 0.1, opacity: 1, filter: "blur(2px) brightness(1.05)", scale: 1.005 * currentScale, ease: "power1.out" }
             )
-            .to(stage, { duration: 0.1, scale: currentScale, filter: "none", ease: "power1.out" });
+            .to(stage, { duration: 0.05, scale: currentScale, filter: "none", ease: "power1.out" });
           break;
         case 'SWIPE':
           gsap.set(stage, { opacity: 1, x: currentX, y: currentY, scale: currentScale, rotationY: 0, z: 0, filter: "none" });
           const swipeCurtain = document.getElementById('swipeCurtain');
           gsap.set(swipeCurtain, { left: 'auto', right: 0, width: '100%' });
           gsap.to(swipeCurtain, {
-            duration: 0.25,
+            duration: 0.15,
             width: '0%',
             ease: "power2.inOut",
             onComplete: () => {
@@ -493,7 +493,7 @@
         case 'FADE':
         default:
           gsap.set(stage, { x: currentX, y: currentY, scale: currentScale, rotationY: 0, z: 0, filter: "none" });
-          gsap.fromTo(stage, { opacity: 0 }, { duration: 0.18, opacity: 1, ease: "power1.out", onComplete });
+          gsap.fromTo(stage, { opacity: 0 }, { duration: 0.1, opacity: 1, ease: "power1.out", onComplete });
           break;
       }
     }
