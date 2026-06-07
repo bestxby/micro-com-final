@@ -23,25 +23,32 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 32px;
   }
   .desc-list li {
-    font-size: 19px;
+    font-size: 23px;
     color: var(--text-secondary);
-    line-height: 1.7;
+    line-height: 1.8;
+    position: relative;
+    padding-left: 44px;
+  }
+  .desc-list li::before {
+    content: "★";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    font-size: 22px;
+    color: var(--brand-secondary);
+    font-weight: 800;
   }
   .desc-list li strong {
     color: var(--text-primary);
+    font-size: 26px;
     font-weight: 800;
+    display: inline !important;
   }
   .desc-list code {
-    font-family: var(--font-family);
-    color: var(--brand-secondary);
-    background: rgba(15, 118, 110, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 18px;
-    font-weight: 700;
+    /* fallback to global tokens.css styles */
   }
   
   /* Floating Video Button at Bottom Right */
@@ -144,23 +151,23 @@
   <div class="layout-box">
     <!-- Left: Specifications -->
     <div class="left-col">
-      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">物联网通信与存储设计</h2>
+      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">物联网通信与存储设计</h2>
       <ul class="desc-list">
         <li>
-          <strong>ESP8266 自动断网自愈与 NTP 同步</strong>：
-          通过 AT 指令进行底层握手，断线后自动保存配置重连。上电后拉取中国 NTP 服务器时间。在掉线期间，系统无缝切入本地 10ms 软件 RTC 累加，恢复网络后自动对齐秒级误差。
+          <strong><code class="proto-tag">ESP8266</code> 自动断网自愈与 <code class="proto-tag">NTP</code> 同步</strong>：
+          通过 <code class="proto-tag">AT</code> 指令进行底层握手，断线后自动保存配置重连。上电后拉取中国 <code class="proto-tag">NTP</code> 服务器时间。在掉线期间，系统无缝切入本地 10ms 软件 <code class="proto-tag">RTC</code> 累加，恢复网络后自动对齐秒级误差。
         </li>
         <li>
-          <strong>心知天气 API 轻量解析</strong>：
-          直接使用 <code>strstr</code> 从 TCP 接收环形缓存中匹配特定键值对，舍弃开销巨大的 JSON 库，极大节约了 RAM 空间。
+          <strong>心知天气 <code class="proto-tag">API</code> 轻量解析</strong>：
+          直接使用 <code>strstr</code> 从 <code class="proto-tag">TCP</code> 接收环形缓存中匹配特定键值对，舍弃开销巨大的 <code>JSON</code> 库，极大节约了 RAM 空间。
         </li>
         <li>
           <strong>微信警报推送与 180s 冷却保护</strong>：
-          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 HTTP 连接拥塞 and 警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
+          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 <code class="proto-tag">HTTP</code> 连接拥塞 and 警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
         </li>
         <li>
-          <strong>512B 扇区对齐的 SD 卡日志存盘</strong>：
-          设计了 SD 日志扇区对齐算法。读取或覆写时按照物理 512 字节进行对齐擦写，将含有北京时间戳的事件及环境参数实时持久化归档。
+          <strong>512B 扇区对齐的 <code class="proto-tag">SD</code> 卡日志存盘</strong>：
+          设计了 <code class="proto-tag">SD</code> 日志扇区对齐算法。读取或覆写时按照物理 512 字节进行对齐擦写，将含有北京时间戳的事件及环境参数实时持久化归档。
         </li>
       </ul>
     </div>

@@ -42,16 +42,6 @@
     font-weight: 800;
     color: var(--text-primary);
   }
-  .hw-pin {
-    font-family: monospace;
-    font-size: 13px;
-    background: rgba(15, 118, 110, 0.08);
-    color: var(--brand-secondary);
-    border: 1px solid rgba(15, 118, 110, 0.25);
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-  }
   
   /* Split layout inside card for Text and Image SVG */
   .hw-body {
@@ -93,12 +83,6 @@
     padding-top: 8px;
     margin-top: 8px;
   }
-  .hw-interface {
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--brand-primary);
-    text-transform: uppercase;
-  }
   .hw-role {
     font-size: 13px;
     color: var(--text-muted);
@@ -127,7 +111,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">ST7796S TFT LCD</span>
-        <span class="hw-pin">PA3/PA4/PA5/PA7/PA8/PB1</span>
+        <span class="pin-tag">PA3/PA4/PA5/PA7/PA8/PB1</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">4.0寸 480×320 液晶屏，用于人机大屏交互、趋势图绘制及像素游戏刷新。</p>
@@ -142,7 +126,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">模拟 SPI 协议</span>
+        <span class="proto-tag">模拟 SPI 协议</span>
         <span class="hw-role">显示输出终端</span>
       </div>
     </div>
@@ -151,7 +135,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">AHT20 温湿度</span>
-        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+        <span class="pin-tag">SCL:PA6 / SDA:PB10</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">获取精确的室内环境温度与湿度，采样通过一阶 EMA 滤波去噪。</p>
@@ -169,7 +153,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">模拟 I²C 总线 (从机1)</span>
+        <span class="proto-tag">模拟 I²C 总线 (从机1)</span>
         <span class="hw-role">环境温湿度测量</span>
       </div>
     </div>
@@ -178,7 +162,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">BMP280 大气压</span>
-        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+        <span class="pin-tag">SCL:PA6 / SDA:PB10</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">高精度环境大气压强与内部辅助温度测量，共享 I2C 物理通道。</p>
@@ -195,7 +179,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">模拟 I²C 总线 (从机2)</span>
+        <span class="proto-tag">模拟 I²C 总线 (从机2)</span>
         <span class="hw-role">环境大气压测量</span>
       </div>
     </div>
@@ -204,7 +188,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">BH1750 光强传感器</span>
-        <span class="hw-pin">SCL:PA6 / SDA:PB10</span>
+        <span class="pin-tag">SCL:PA6 / SDA:PB10</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">数字式环境照度传感器，测定室内光强（Lx）以作为光照决策本底。</p>
@@ -217,7 +201,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">模拟 I²C 总线 (从机3)</span>
+        <span class="proto-tag">模拟 I²C 总线 (从机3)</span>
         <span class="hw-role">室内环境照度测量</span>
       </div>
     </div>
@@ -226,7 +210,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">HC-SR04 超声波</span>
-        <span class="hw-pin">Trig:PB11 / Echo:PB12</span>
+        <span class="pin-tag">Trig:PB11 / Echo:PB12</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">测距防盗模块。通过 GPIO 10us 触发并发射超声波，捕获 Echo 脉宽折算距离。</p>
@@ -243,7 +227,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">GPIO + EXTI 定时测量</span>
+        <span class="proto-tag">GPIO + EXTI 定时测量</span>
         <span class="hw-role">多级超声探距警戒</span>
       </div>
     </div>
@@ -252,7 +236,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">HX1838 红外接收器</span>
-        <span class="hw-pin">DAT: PA9</span>
+        <span class="pin-tag">DAT: PA9</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">红外接收 DAT 引脚，响应外部中断触发 TIM4 硬件精密微秒级 NEC 解码。</p>
@@ -268,7 +252,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">EXTI9 + TIM4 捕获</span>
+        <span class="proto-tag">EXTI9 + TIM4 捕获</span>
         <span class="hw-role">无线红外交互输入</span>
       </div>
     </div>
@@ -277,7 +261,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">TM1637 4位数码管</span>
-        <span class="hw-pin">CLK:PB13 / DIO:PB14</span>
+        <span class="pin-tag">CLK:PB13 / DIO:PB14</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">模拟二线制协议，高对比度数字数码显示，用于实时显示本地环境温度。</p>
@@ -291,7 +275,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">二线制串行协议</span>
+        <span class="proto-tag">二线制串行协议</span>
         <span class="hw-role">本地气温数值展示</span>
       </div>
     </div>
@@ -300,7 +284,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">ESP8266 WiFi 模块</span>
-        <span class="hw-pin">TXD:PB6 / RXD:PB7</span>
+        <span class="pin-tag">TXD:PB6 / RXD:PB7</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">串口 AT 指令握手联网，拉取网络 NTP 时间戳、气象数据及推送微信报警。</p>
@@ -317,7 +301,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">USART1 异步串口</span>
+        <span class="proto-tag">USART1 异步串口</span>
         <span class="hw-role">云边物联网链路</span>
       </div>
     </div>
@@ -326,7 +310,7 @@
     <div class="hw-card">
       <div class="hw-header">
         <span class="hw-title">执行器与人机输入组</span>
-        <span class="hw-pin">PB15(BEEP) / PA0/1/2(LED)</span>
+        <span class="pin-tag">PB15(BEEP) / PA0/1/2(LED)</span>
       </div>
       <div class="hw-body">
         <p class="hw-text">包含有源蜂鸣器、三色 LED 指示灯及独立输入按键（KEY1-3、KEY_L/R）。</p>
@@ -341,7 +325,7 @@
         </div>
       </div>
       <div class="hw-footer">
-        <span class="hw-interface">GPIO / 独立按键</span>
+        <span class="proto-tag">GPIO / 独立按键</span>
         <span class="hw-role">声光告警与人机输入</span>
       </div>
     </div>

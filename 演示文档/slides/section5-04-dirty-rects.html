@@ -140,7 +140,7 @@
     <div class="left-intro">
       <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">串行总线带宽限制与脏矩形重绘</h2>
       <p style="font-size: 18px; color: var(--text-secondary); line-height: 1.6;">
-        STM32F103 通过软件模拟 SPI 驱动 480×320 LCD 屏。由于串行传输速率存在物理瓶颈，若采用传统的全屏覆写刷新（一帧数据高达 307.2 KB），会导致严重的白屏撕裂和局部频闪，无法支撑流畅的动作类游戏或高频 UI 数据跳动。
+        STM32F103 通过软件模拟 <code class="proto-tag">SPI</code> 驱动 480×320 LCD 屏。由于串行传输速率存在物理瓶颈，若采用传统的全屏覆写刷新（一帧数据高达 307.2 KB），会导致严重的白屏撕裂和局部频闪，无法支撑流畅的动作类游戏或高频 UI 数据跳动。
       </p>
       
       <div class="stats-box">
@@ -157,7 +157,7 @@
       </div>
 
       <p style="font-size: 17px; color: var(--text-secondary); line-height: 1.6; margin-top: 20px;">
-        <strong>脏矩形重绘算法（Dirty Rects）</strong>：在内存中追踪物体的坐标变化（如小鸟移动、数值跳变），每次仅对包含变化轨迹的矩形区域（如 24x24 的飞鸟，及管线增量区域）进行像素覆写。将单帧负荷降低 <strong>93%</strong>，促使 Flappy Bird 在软件 SPI 驱动下帧率稳超 <strong>30+ FPS</strong>。
+        <strong>脏矩形重绘算法（Dirty Rects）</strong>：在内存中追踪物体的坐标变化（如小鸟移动、数值跳变），每次仅对包含变化轨迹的矩形区域（如 24x24 的飞鸟，及管线增量区域）进行像素覆写。将单帧负荷降低 <strong>93%</strong>，促使 Flappy Bird 在软件 <code class="proto-tag">SPI</code> 驱动下帧率稳超 <strong>30+ FPS</strong>。
       </p>
     </div>
 

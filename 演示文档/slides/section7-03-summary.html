@@ -99,13 +99,7 @@
     display: inline !important;
   }
   .summary-list li code {
-    font-family: var(--font-family);
-    color: var(--brand-secondary);
-    background: rgba(15, 118, 110, 0.08);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 21px;
-    font-weight: 700;
+    /* fallback to global tokens.css styles */
   }
 </style>
 </head>
@@ -130,10 +124,10 @@
     <div class="left-intro">
       <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">核心系统优化点汇总</h2>
       <ul class="summary-list">
-        <li><strong>物理引脚无冲突隔离</strong>：释放 JTAG 复用以恢复 <code>PB3/PB4</code>，将 SD MISO 物理排布到 <code>PA11</code> 避开 I2C 冲突，红外接收重映射到 <code>PA9</code>，保障了多外设稳定并存。</li>
-        <li><strong>网络断线自愈与 RTC 机制</strong>：ESP8266 发生硬件丢包或 WiFi 断开时触发 AT 握手重连。掉线期利用 STM32 定时中断驱动 10ms 软件 RTC 时钟，重连秒级对齐。</li>
-        <li><strong>脏矩形渲染屏显加速</strong>：仅对 Flappy Bird 小鸟（12x12像素）及管道边缘区域进行增量覆写，使软件模拟 SPI 总线的显示吞吐负荷降低 <strong>93%</strong>，帧率稳超 <strong>30 FPS</strong>。</li>
-        <li><strong>微秒级 NEC 红外硬件捕获</strong>：采用 <code>EXTI9</code> 外部中断双边沿捕获电平跳变，配合 <code>TIM4</code> 定时器完成 1μs 脉宽无阻塞异步解码，完美规避主循环传感器读取造成的堵塞漏码。</li>
+        <li><strong>物理引脚无冲突隔离</strong>：释放 <code class="proto-tag">JTAG</code> 复用以恢复 <code class="pin-tag">PB3/PB4</code>，将 <code class="pin-tag">SD MISO</code> 物理排布到 <code class="pin-tag">PA11</code> 避开 <code class="proto-tag">I2C</code> 冲突，红外接收重映射到 <code class="pin-tag">PA9</code>，保障了多外设稳定并存。</li>
+        <li><strong>网络断线自愈与 RTC 机制</strong>：<code class="proto-tag">ESP8266</code> 发生硬件丢包或 <code class="proto-tag">WiFi</code> 断开时触发 <code class="proto-tag">AT</code> 握手重连。掉线期利用 STM32 定时中断驱动 10ms 软件 <code class="proto-tag">RTC</code> 时钟，重连秒级对齐。</li>
+        <li><strong>脏矩形渲染屏显加速</strong>：仅对 Flappy Bird 小鸟（12x12像素）及管道边缘区域进行增量覆写，使软件模拟 <code class="proto-tag">SPI</code> 总线的显示吞吐负荷降低 <strong>93%</strong>，帧率稳超 <strong>30 FPS</strong>。</li>
+        <li><strong>微秒级 NEC 红外硬件捕获</strong>：采用 <code class="proto-tag">EXTI9</code> 外部中断双边沿捕获电平跳变，配合 <code class="proto-tag">TIM4</code> 定时器完成 1μs 脉宽无阻塞异步解码，配合 <code class="proto-tag">NEC</code> 协议校验，完美规避主循环传感器读取造成的堵塞漏码。</li>
       </ul>
     </div>
 
