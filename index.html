@@ -317,43 +317,6 @@
   let currentScale = 1;
   let currentX = 0;
   let currentY = 0;
-  let isNavigating = false;
-  let direction = 1; // 1 = forward, -1 = backward
-
-  // GSAP Slide transitions configuration
-  const Transitions = {
-    FADE: '极简淡入淡出 (Classic Fade)',
-    PARALLAX: '视差平滑推进 (Parallax Slide)',
-    FLIP: '三维卡片翻转 (3D Card Flip)',
-    GLITCH: '赛博故障模糊 (HUD Glitch & Blur)',
-    SWIPE: '科技遮罩清扫 (Tech Curtain Sweep)'
-  };
-  const transitionKeys = Object.keys(Transitions);
-  let activeTransition = localStorage.getItem('deck-transition') || 'FADE';
-  if (!Transitions[activeTransition]) activeTransition = 'FADE';
-
-  // HUD Toast notifier
-  const toast = document.getElementById('transitionToast');
-  let toastTimeout = null;
-  function showToast(text) {
-    if (toastTimeout) clearTimeout(toastTimeout);
-    toast.textContent = text;
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
-    toastTimeout = setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-50%) translateY(-20px)';
-    }, 1500);
-  }
-
-  function cycleTransition() {
-    const idx = transitionKeys.indexOf(activeTransition);
-    const nextIdx = (idx + 1) % transitionKeys.length;
-    activeTransition = transitionKeys[nextIdx];
-    localStorage.setItem('deck-transition', activeTransition);
-    showToast(`切换转场：${Transitions[activeTransition]}`);
-  }
-
   stage.style.width  = W + 'px';
   stage.style.height = H + 'px';
 
@@ -361,77 +324,26 @@
     currentScale = Math.min(window.innerWidth / W, window.innerHeight / H);
     currentX = (window.innerWidth  - W * currentScale) / 2;
     currentY = (window.innerHeight - H * currentScale) / 2;
-    if (!isNavigating) {
-      stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
-    }
+    stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
     stage.style.top = '0';
     stage.style.left = '0';
   }
 
   function show(idx) {
     if (idx < 0 || idx >= deck.length) return;
-    isNavigating = true;
-    direction = idx > current ? 1 : -1;
     current = idx;
     
-    const onDone = () => {
-      frame.src = deck[idx].file + '?v=' + Date.now();
-      counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
-      try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
-      if (location.hash !== '#' + (idx + 1)) {
-        history.replaceState(null, '', '#' + (idx + 1));
-      }
-      updateMenuHighlight(idx);
-    };
-
-    switch (activeTransition) {
-      case 'PARALLAX':
-        const targetX = currentX - (direction * 80 * currentScale);
-        gsap.to(stage, {
-          duration: 0.1,
-          opacity: 0,
-          x: targetX,
-          scale: 0.99 * currentScale,
-          ease: "power2.inOut",
-          onComplete: onDone
-        });
-        break;
-      case 'FLIP':
-        gsap.to(stage, {
-          duration: 0.15,
-          opacity: 0,
-          rotationY: direction * 90,
-          z: -300 * currentScale,
-          ease: "power2.in",
-          onComplete: onDone
-        });
-        break;
-      case 'GLITCH':
-        gsap.timeline({ onComplete: onDone })
-          .to(stage, { duration: 0.04, opacity: 0.7, scale: 1.01 * currentScale, filter: "blur(2px) brightness(1.1)", ease: "power1.inOut" })
-          .to(stage, { duration: 0.04, opacity: 0.3, scale: 1.02 * currentScale, filter: "blur(4px) brightness(1.2)", ease: "power1.inOut" })
-          .to(stage, { duration: 0.03, opacity: 0, scale: 1.03 * currentScale, filter: "blur(6px) brightness(1.3)", ease: "power1.inOut" });
-        break;
-      case 'SWIPE':
-        const swipeCurtain = document.getElementById('swipeCurtain');
-        gsap.set(swipeCurtain, { left: 0, right: 'auto', width: '0%' });
-        gsap.to(swipeCurtain, {
-          duration: 0.15,
-          width: '100%',
-          ease: "power2.inOut",
-          onComplete: onDone
-        });
-        break;
-      case 'FADE':
-      default:
-        gsap.to(stage, {
-          duration: 0.08,
-          opacity: 0,
-          ease: "power1.inOut",
-          onComplete: onDone
-        });
-        break;
+    frame.src = deck[idx].file + '?v=' + Date.now();
+    counter.innerHTML = `${idx + 1} / ${deck.length} <span class="label">${deck[idx].label || ''}</span>`;
+    try { localStorage.setItem(storageKey, String(idx)); } catch (_) {}
+    if (location.hash !== '#' + (idx + 1)) {
+      history.replaceState(null, '', '#' + (idx + 1));
     }
+    updateMenuHighlight(idx);
+    
+    // Set styles instantly with no transitions or fades
+    stage.style.opacity = '1';
+    stage.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
   }
 
   frame.addEventListener('load', () => {
@@ -442,60 +354,25 @@
         style.textContent = '.slide-footer .slide-number { display: none !important; }';
         doc.head.appendChild(style);
       }
-    } catch (e) {
-      console.warn("Could not inject style to hide page numbers inside iframe:", e);
-    }
-
-    if (isNavigating) {
-      const onComplete = () => {
-        isNavigating = false;
-      };
-
-      switch (activeTransition) {
-        case 'PARALLAX':
-          const startX = currentX + (direction * 80 * currentScale);
-          gsap.set(stage, { rotationY: 0, z: 0, filter: "none" });
-          gsap.fromTo(stage,
-            { opacity: 0, x: startX, scale: 0.99 * currentScale },
-            { duration: 0.15, opacity: 1, x: currentX, scale: currentScale, ease: "power2.out", onComplete }
-          );
-          break;
-        case 'FLIP':
-          gsap.set(stage, { filter: "none" });
-          gsap.fromTo(stage,
-            { opacity: 0, rotationY: -direction * 90, z: -300 * currentScale, x: currentX, y: currentY, scale: currentScale },
-            { duration: 0.2, opacity: 1, rotationY: 0, z: 0, ease: "power2.out", onComplete }
-          );
-          break;
-        case 'GLITCH':
-          gsap.set(stage, { x: currentX, y: currentY, scale: 1.02 * currentScale, rotationY: 0, z: 0 });
-          gsap.timeline({ onComplete })
-            .fromTo(stage, 
-              { opacity: 0, filter: "blur(6px) brightness(1.3)" },
-              { duration: 0.1, opacity: 1, filter: "blur(2px) brightness(1.05)", scale: 1.005 * currentScale, ease: "power1.out" }
-            )
-            .to(stage, { duration: 0.05, scale: currentScale, filter: "none", ease: "power1.out" });
-          break;
-        case 'SWIPE':
-          gsap.set(stage, { opacity: 1, x: currentX, y: currentY, scale: currentScale, rotationY: 0, z: 0, filter: "none" });
-          const swipeCurtain = document.getElementById('swipeCurtain');
-          gsap.set(swipeCurtain, { left: 'auto', right: 0, width: '100%' });
-          gsap.to(swipeCurtain, {
-            duration: 0.15,
-            width: '0%',
-            ease: "power2.inOut",
-            onComplete: () => {
-              gsap.set(swipeCurtain, { width: '0%', left: 0, right: 'auto' });
-              onComplete();
-            }
-          });
-          break;
-        case 'FADE':
-        default:
-          gsap.set(stage, { x: currentX, y: currentY, scale: currentScale, rotationY: 0, z: 0, filter: "none" });
-          gsap.fromTo(stage, { opacity: 0 }, { duration: 0.1, opacity: 1, ease: "power1.out", onComplete });
-          break;
+      
+      // Forward keydown events from the iframe to the parent window to support keyboard navigation when focused inside the iframe
+      if (frame.contentWindow) {
+        frame.contentWindow.addEventListener('keydown', (e) => {
+          document.dispatchEvent(new KeyboardEvent('keydown', {
+            key: e.key,
+            code: e.code,
+            keyCode: e.keyCode,
+            which: e.which,
+            bubbles: true,
+            ctrlKey: e.ctrlKey,
+            shiftKey: e.shiftKey,
+            altKey: e.altKey,
+            metaKey: e.metaKey
+          }));
+        });
       }
+    } catch (e) {
+      console.warn("Could not inject style or add event forwarding inside iframe:", e);
     }
   });
 
@@ -511,10 +388,6 @@
       case 'Home':                                    e.preventDefault(); show(0); break;
       case 'End':                                     e.preventDefault(); show(deck.length - 1); break;
       case 'p': case 'P':                             window.print(); break;
-      case 't': case 'T':
-        e.preventDefault();
-        cycleTransition();
-        break;
       default:
         // Key 1-9 jumper
         if (e.key >= '1' && e.key <= '9') {
