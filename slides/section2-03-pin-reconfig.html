@@ -75,15 +75,6 @@
     color: var(--text-secondary);
     line-height: 1.6;
   }
-  .conflict-desc code {
-    font-family: var(--font-family);
-    font-size: 15px;
-    color: var(--brand-secondary);
-    background: rgba(15, 118, 110, 0.08);
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-weight: 700;
-  }
   
   /* STM32 Chip Drawing */
   .mcu-package {
@@ -177,34 +168,34 @@
       <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">引脚资源重配与冲突避让</h2>
       <div class="glass-card conflict-card resolved">
         <div class="conflict-title">
-          <span>01. JTAG 复用解除与重用 (PB3/PB4)</span>
+          <span>01. <code class="proto-tag">JTAG</code> 复用解除与重用 (<code class="pin-tag">PB3</code>/<code class="pin-tag">PB4</code>)</span>
           <span class="conflict-badge badge-green">已解决</span>
         </div>
         <p class="conflict-desc">
-          <strong>原因</strong>：STM32F103 的 <code>PB3/PB4</code> 在复位后默认为 JTAG 调试引脚（JTDO/JNTRST），直接写入常规 GPIO 逻辑会导致 SD 卡片选与数据发送线卡死。<br>
-          <strong>解决</strong>：在 GPIO 配置前，开启 AFIO 时钟，调用 <code>GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE)</code> 释放 JTAG 占用，恢复常规通用输出输入。
+          <strong>原因</strong>：STM32F103 的 <code class="pin-tag">PB3</code>/<code class="pin-tag">PB4</code> 在复位后默认为 <code class="proto-tag">JTAG</code> 调试引脚，直接写入常规 <code class="proto-tag">GPIO</code> 逻辑会导致 SD 卡片选与数据发送线卡死。<br>
+          <strong>解决</strong>：在配置前开启 AFIO 时钟，调用 <code>GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE)</code> 释放 <code class="proto-tag">JTAG</code> 占用。
         </p>
       </div>
 
       <div class="glass-card conflict-card resolved">
         <div class="conflict-title">
-          <span>02. SD 卡 MISO 物理重排避让 (PA11)</span>
+          <span>02. SD 卡 <code class="proto-tag">SPI_MISO</code> 物理重排避让 (<code class="pin-tag">PA11</code>)</span>
           <span class="conflict-badge badge-green">已解决</span>
         </div>
         <p class="conflict-desc">
-          <strong>原因</strong>：I2C 传感器阵列（AHT20/BH1750）占用了 SCL 时钟脚 <code>PA6</code>，如果使用常规默认 SPI 的 <code>PA6</code> (MISO) 作为 SD 卡的反馈输入，总线高频脉冲会导致传感器数据读取异常及 SD 写入冲突。<br>
-          <strong>解决</strong>：将 SD 卡的 MISO 重构至空闲的 <code>PA11</code> 上，物理上隔离两套串行传输线路。
+          <strong>原因</strong>：<code class="proto-tag">I2C</code> 传感器阵列占用了时钟脚 <code class="pin-tag">PA6</code>，如果使用默认 <code class="proto-tag">SPI</code> 的 <code class="pin-tag">PA6</code> (<code class="pin-tag">MISO</code>) 作为 SD 卡的反馈输入，总线脉冲会导致冲突。<br>
+          <strong>解决</strong>：将 SD 卡的 <code class="pin-tag">MISO</code> 重配至空闲的 <code class="pin-tag">PA11</code> 上，物理上隔离 <code class="proto-tag">I2C</code> 与 <code class="proto-tag">SPI</code> 传输线路。
         </p>
       </div>
 
       <div class="glass-card conflict-card resolved">
         <div class="conflict-title">
-          <span>03. 红外遥控输入线路调整 (PA9)</span>
+          <span>03. 红外遥控输入线路调整 (<code class="pin-tag">PA9</code>)</span>
           <span class="conflict-badge badge-green">已解决</span>
         </div>
         <p class="conflict-desc">
-          <strong>原因</strong>：红外模块原分配在 <code>PB6</code> 引脚。但由于 ESP8266 物联网通信对高速 USART1 的强依赖，其重映射串口 TXD 已牢牢占用 <code>PB6</code> 引脚，触发了物理冲突。<br>
-          <strong>解决</strong>：将红外接收器的 DAT 移到空闲的 <code>PA9</code> 接口，并通过 EXTI9 中断触发 TIM4 硬件微秒捕获。
+          <strong>原因</strong>：红外模块原分配在 <code class="pin-tag">PB6</code>。但由于物联网对高速 <code class="proto-tag">USART1</code> 的强依赖，其重映射串口 <code class="pin-tag">TXD</code> 已占用 <code class="pin-tag">PB6</code>，触发冲突。<br>
+          <strong>解决</strong>：将红外接收器的 <code class="pin-tag">DAT</code> 移到空闲的 <code class="pin-tag">PA9</code> 接口，并采用 <code class="proto-tag">EXTI9</code> 中断触发定时器硬件捕获。
         </p>
       </div>
     </div>

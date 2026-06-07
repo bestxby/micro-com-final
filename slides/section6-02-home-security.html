@@ -27,9 +27,9 @@
     margin-top: 32px;
   }
   .state-badge {
-    padding: 4px 10px;
+    padding: 6px 12px;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 18px;
     font-weight: bold;
     display: inline-block;
   }
@@ -41,15 +41,16 @@
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 32px;
   }
   .desc-list li {
-    font-size: 19px;
+    font-size: 23px;
     color: var(--text-secondary);
-    line-height: 1.7;
+    line-height: 1.8;
   }
   .desc-list li strong {
     color: var(--text-primary);
+    font-size: 25px;
     font-weight: 800;
   }
   
@@ -153,7 +154,7 @@
   <div class="layout-box">
     <!-- Left: FSM and Logic Descriptions -->
     <div class="left-col">
-      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">声光防盗多级警戒逻辑</h2>
+      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">声光防盗多级警戒逻辑</h2>
       <ul class="desc-list">
         <li>
           <span class="state-badge badge-safe">SAFE 状态</span> &nbsp;&nbsp;(超声波测距 &ge; 30cm 或撤防模式)<br>
@@ -170,8 +171,8 @@
       </ul>
       
       <div class="fsm-box">
-        <h3 style="font-size: 19px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (FSM)</h3>
-        <p style="font-size: 17px; color: var(--text-muted); line-height: 1.6;">
+        <h3 style="font-size: 22px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (<code class="proto-tag">FSM</code>)</h3>
+        <p style="font-size: 19px; color: var(--text-muted); line-height: 1.6;">
           • 撤防模式 (Disarmed) &rarr; 按 KEY3 / 红外OK &rarr; 布防监测 (Armed)<br>
           • Armed 状态下，系统持续轮询测距：当超声波距离突变触发特定边界时，直接进行 <strong>Safe &harr; Warning &harr; Alarm</strong> 物理映射。撤防操作将强制重置为 Safe 状态。
         </p>
