@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>11 智能居家多级安全防护功能设计 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/tokens.css?v=4">
 <style>
   .layout-box {
     display: flex;
@@ -29,7 +29,7 @@
   .state-badge {
     padding: 6px 12px;
     border-radius: 4px;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     display: inline-block;
   }
@@ -171,8 +171,8 @@
       </ul>
       
       <div class="fsm-box">
-        <h3 style="font-size: 22px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (<code class="proto-tag">FSM</code>)</h3>
-        <p style="font-size: 19px; color: var(--text-muted); line-height: 1.6;">
+        <h3 style="font-size: 25px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (<code class="proto-tag">FSM</code>)</h3>
+        <p style="font-size: 21px; color: var(--text-muted); line-height: 1.8;">
           • 撤防模式 (Disarmed) &rarr; 按 KEY3 / 红外OK &rarr; 布防监测 (Armed)<br>
           • Armed 状态下，系统持续轮询测距：当超声波距离突变触发特定边界时，直接进行 <strong>Safe &harr; Warning &harr; Alarm</strong> 物理映射。撤防操作将强制重置为 Safe 状态。
         </p>

@@ -42,3 +42,5 @@ build.log
 # Node dependencies
 node_modules/
 
+# Generated slide presentations
+*.pptx
