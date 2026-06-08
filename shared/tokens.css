@@ -501,18 +501,18 @@ p.slide-subtitle {
   margin-left: 21px;
 }
 
-/* Global neutral fallback style for code elements */
+/* Global clean style for code elements (no boxes or background fills) */
 code {
-  font-family: 'Outfit', monospace;
+  font-family: var(--font-family);
   color: var(--text-primary);
-  background: rgba(25, 24, 22, 0.05);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 0.95em;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  font-weight: inherit;
+  font-size: inherit;
 }
 
-/* Pins styling (Neutralized to match standard styling) */
+/* Pins styling (Reverted to normal inline regular sans-serif) */
 .pin-tag {
   color: inherit !important;
   background: transparent !important;
@@ -525,20 +525,20 @@ code {
 }
 
 code.pin-tag {
-  font-family: 'Outfit', monospace;
+  font-family: var(--font-family);
   color: var(--text-primary) !important;
-  background: rgba(25, 24, 22, 0.05) !important;
+  background: transparent !important;
   border: none !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
-  font-size: 0.95em !important;
-  font-weight: 600 !important;
-  display: inline-block !important;
-  line-height: 1.25 !important;
-  vertical-align: middle !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  display: inline !important;
+  line-height: inherit !important;
+  vertical-align: baseline !important;
 }
 
-/* Protocols styling (Neutralized to prevent visual clutter) */
+/* Protocols styling (Reverted to normal inline regular sans-serif) */
 .proto-tag {
   color: inherit !important;
   background: transparent !important;
@@ -551,16 +551,18 @@ code.pin-tag {
 }
 
 code.proto-tag {
-  font-family: 'Outfit', monospace;
+  font-family: var(--font-family);
   color: var(--text-primary) !important;
-  background: rgba(25, 24, 22, 0.05) !important;
+  background: transparent !important;
   border: none !important;
-  padding: 2px 6px !important;
-  border-radius: 4px !important;
-  font-size: 0.95em !important;
-  font-weight: 600 !important;
-  display: inline-block !important;
-  line-height: 1.25 !important;
-  vertical-align: middle !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  display: inline !important;
+  line-height: inherit !important;
+  vertical-align: baseline !important;
 }
+
+
 

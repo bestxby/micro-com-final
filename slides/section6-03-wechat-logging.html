@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>12 云边端物联网通信与 SD 日志归档 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css">
+<link rel="stylesheet" href="../shared/tokens.css?v=4">
 <style>
   .layout-box {
     display: flex;
@@ -163,7 +163,7 @@
         </li>
         <li>
           <strong>微信警报推送与 180s 冷却保护</strong>：
-          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 <code class="proto-tag">HTTP</code> 连接拥塞 and 警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
+          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 <code class="proto-tag">HTTP</code> 连接拥塞和警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
         </li>
         <li>
           <strong>512B 扇区对齐的 <code class="proto-tag">SD</code> 卡日志存盘</strong>：
