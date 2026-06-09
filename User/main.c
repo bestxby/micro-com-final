@@ -799,20 +799,32 @@ static void Draw_Beacon(void) {
     }
 }
 
-/* ---- KEY3 Scan for security mode toggle ---- */
+/* ---- KEY3 Scan for security mode toggle ----
+ * Fix: Replaced blocking busy-wait debounce (~20ms) with a non-blocking
+ * counter-based state machine. The debounce now counts consecutive stable
+ * samples across main loop ticks (~10ms each), so it never blocks the loop.
+ * ---- */
 static uint8_t KEY3_Scan(void) {
-    static uint8_t key3_up = 1;
-    uint8_t key3_low = (GPIOB->IDR & GPIO_Pin_9) ? 0 : 1;
-    if (key3_up && key3_low) {
-        // Simple software delay debounce
-        for (volatile uint32_t i = 0; i < 7200 * 20; i++);
-        key3_low = (GPIOB->IDR & GPIO_Pin_9) ? 0 : 1;
+    static uint8_t key3_up      = 1;  /* 1 = released, 0 = pressed */
+    static uint8_t debounce_cnt = 0;  /* stable-sample counter       */
+    uint8_t key3_low = (GPIOB->IDR & GPIO_Pin_9) ? 0 : 1; /* active-low: low=pressed */
+
+    if (key3_up) {
         if (key3_low) {
-            key3_up = 0;
-            return 1;
+            debounce_cnt++;
+            if (debounce_cnt >= 2) {  /* 2 * ~10ms = ~20ms stable confirmation */
+                debounce_cnt = 0;
+                key3_up = 0;
+                return 1;             /* confirmed press event */
+            }
+        } else {
+            debounce_cnt = 0;         /* glitch: reset counter */
         }
-    } else if (!key3_low) {
-        key3_up = 1;
+    } else {
+        if (!key3_low) {
+            key3_up = 1;              /* key released */
+            debounce_cnt = 0;
+        }
     }
     return 0;
 }
@@ -903,10 +915,14 @@ int main(void) {
     GPIOB->BRR = GPIO_Pin_15;  // 初始静音
 
     if (sd_healthy) {
-        /* 自动扫描 SD 卡空闲扇区以恢复数据记录 */
+        /* 自动扫描 SD 卡空闲扇区以恢复数据记录
+         * Fix: 限制扫描范围至 1000~4000 扇区（最多 3000 个），避免最坏情况
+         * 下扫描 19000 扇区导致开机阻塞长达约 1.5 分钟。
+         * 3000 个扇区 × 每扇区约 1ms（高速SPI约 100us，低速约 5ms）
+         * 低速时序最坏情况约 15 秒，实际高速切换后约 0.3 秒，完全可接受。 */
         uint8_t temp_sector[512];
         log_sector_cursor = 1000;
-        while (log_sector_cursor < 20000) {
+        while (log_sector_cursor < 4000) {
             if (SD_ReadBlock(temp_sector, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
                 if ((temp_sector[0] == 'U' && temp_sector[1] == 'P' && temp_sector[2] == ':') ||
                     (temp_sector[0] == '2' && temp_sector[1] == '0' && temp_sector[2] == '2')) {

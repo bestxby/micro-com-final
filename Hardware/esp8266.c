@@ -353,12 +353,24 @@ uint8_t ESP8266_SendWeChatAlert(const char *sendkey, const char *title, const ch
         return 1;
     }
     
-    /* 2. Format HTTP GET request */
+    /* 2. Format HTTP GET request
+     * Fix: Changed sprintf -> snprintf with explicit buffer size to prevent
+     * stack overflow when sendkey/title/content exceed the 384-byte buffer.
+     * If the combined string would overflow, snprintf safely truncates it
+     * and we close the connection rather than sending a corrupt frame. */
     char http_req[384];
-    sprintf(http_req, "GET /%s.send?title=%s&desp=%s HTTP/1.1\r\nHost: sc.ftqq.com\r\nConnection: close\r\n\r\n", sendkey, title, content);
+    int req_len = snprintf(http_req, sizeof(http_req),
+        "GET /%s.send?title=%s&desp=%s HTTP/1.1\r\nHost: sc.ftqq.com\r\nConnection: close\r\n\r\n",
+        sendkey, title, content);
+    
+    /* Guard: if output was truncated (req_len >= sizeof), abort safely */
+    if (req_len <= 0 || req_len >= (int)sizeof(http_req)) {
+        ESP8266_SendCmd("AT+CIPCLOSE\r\n", "OK", 500);
+        return 1;
+    }
     
     char send_cmd[32];
-    sprintf(send_cmd, "AT+CIPSEND=%d\r\n", (int)strlen(http_req));
+    snprintf(send_cmd, sizeof(send_cmd), "AT+CIPSEND=%d\r\n", req_len);
     
     /* 3. Send command and data */
     if (!ESP8266_SendCmd(send_cmd, ">", 2000)) {
