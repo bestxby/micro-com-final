@@ -38,6 +38,7 @@ Desktop.ini
 ~$*
 *.tmp
 build.log
+build_log.txt
 
 # Node dependencies
 node_modules/
