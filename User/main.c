@@ -18,8 +18,20 @@
 #include <string.h>
 
 
+
+/* ============================================================
+ * 【期末视频录制 - 功能切换开关】
+ * 说明：每次只能将下方的【其中一个】宏设置为 1，其他的必须设为 0！
+ * ============================================================ */
+#define RUN_MODE_ALL       0   // 1: 运行原版所有功能
+#define RUN_MODE_ENV_AI    1   // 1: 录制环境监测与AI功能 (默认测试)
+#define RUN_MODE_GAME      0   // 1: 录制 Flappy Bird 游戏
+#define RUN_MODE_SECURITY  0   // 1: 录制超声波防盗报警功能
+#define RUN_MODE_IOT       0   // 1: 录制 ESP8266 网络天气功能
+
 /* ============================================================
  * 全局变量 (传感器 / AI / 系统状态)
+
  * ============================================================ */
 volatile float test_aht20_temp   = 0.0f;
 volatile float test_aht20_humi   = 0.0f;
@@ -892,15 +904,19 @@ int main(void) {
 
     LCD_Clear(theme_bg);
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
     /* 初始化 BH1750 (软件 I2C) */
     bh1750_healthy = (BH1750_Init() == 0);
-    
     /* 重新配置并启用 SD 卡 (MISO已移至PA11) */
     sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
-    
-    /* 初始化 TM1637 数码管及 HC-SR04 超声波测距 */
+#endif
+
     TM1637_Init();
+
+#if RUN_MODE_ALL || RUN_MODE_SECURITY
+    /* 初始化 HC-SR04 超声波测距 */
     SR04_Init();
+#endif
     
     /* 配置面包板 KEY3 按键 (PB9 上拉输入) 和蜂鸣器 (PB15 推挽输出) */
     RCC->APB2ENR |= RCC_APB2ENR_IOPBEN;
@@ -914,6 +930,7 @@ int main(void) {
     GPIOB->CRH |=  0x30000000;
     GPIOB->BRR = GPIO_Pin_15;  // 初始静音
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
     if (sd_healthy) {
         /* 自动扫描 SD 卡空闲扇区以恢复数据记录
          * Fix: 限制扫描范围至 1000~4000 扇区（最多 3000 个），避免最坏情况
@@ -935,11 +952,15 @@ int main(void) {
             }
         }
     }
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
     /* 传感器初始化 */
     test_aht20_init_status  = AHT20_Init();
     aht20_healthy           = (test_aht20_init_status  == 0);
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_IOT
     /* ESP8266 IoT 初始化与联网 (SSID: xiaobo, PWD: 11111111) */
     if (ESP8266_Init() == 0) {
         wifi_hw_online = 1;
@@ -973,13 +994,27 @@ int main(void) {
     } else {
         wifi_hw_online = 0;
     }
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
     /* AI & 日志初始化 (适配 MAX_ANOMALY_LOGS 为 7) */
     AI_Init(&my_detector, 0.2f, 100);
     Log_Init(&my_log_buffer);
+#endif
 
     LED_Off(0);
     LED_Off(1);
+
+#if RUN_MODE_ENV_AI
+    current_page = 0;
+#elif RUN_MODE_GAME
+    current_page = 3;
+    Game_Init();
+#elif RUN_MODE_SECURITY
+    current_page = 4;
+#elif RUN_MODE_IOT
+    current_page = 5;
+#endif
 
     Display_Refresh(1);
 
@@ -993,6 +1028,7 @@ int main(void) {
             Increment_LocalClock();
             
             /* 每秒数据向 SD 卡缓存写入一次 */
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
             if (sd_healthy) {
                 char log_entry[65];
                 int len = sprintf(log_entry, "%s T:%5.2fC H:%5.2f%% L:%5.1flx A:%d M:%d",
@@ -1027,6 +1063,7 @@ int main(void) {
                     }
                 }
             }
+#endif
         }
 
         /* 按键扫描与缓存机制 (以防止 30ms 游戏循环漏按) */
@@ -1120,6 +1157,7 @@ int main(void) {
         /* 1.5 秒传感器采样轮询 */
         loop_cnt++;
         if (loop_cnt == 130) {
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
             /* 提前 200ms 触发 AHT20 温湿度测量以防阻塞 */
             if (aht20_healthy) {
                 AHT20_StartMeasure();
@@ -1128,6 +1166,7 @@ int main(void) {
         if (loop_cnt >= 150) {
             loop_cnt = 0;
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
             /* AHT20 */
             if (!aht20_healthy) {
                 if (AHT20_Init() == 0) { aht20_healthy = 1; test_aht20_init_status = 0; aht20_fail_cnt = 0; }
@@ -1164,7 +1203,9 @@ int main(void) {
                     sd_healthy = 1;
                 }
             }
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_IOT
             /* WiFi 周期性校准时钟与获取天气 / 自动检测重连 (仅在非游戏页面时执行以防游戏卡顿) */
             if (current_page != 3) {
                 if (wifi_connected) {
@@ -1280,7 +1321,9 @@ int main(void) {
                     }
                 }
             }
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_SECURITY
             /* 轮询超声波测距传感器并滚动历史记录 */
             {
                 float new_dist = 0.0f;
@@ -1303,7 +1346,9 @@ int main(void) {
                 sprintf(details, "Dist_%.1fcm", test_ultrasonic_dist);
                 Check_And_SendWeChatAlert("Intruder_Alarm", details);
             }
+#endif
 
+#if RUN_MODE_ALL || RUN_MODE_ENV_AI
             /* TM1637 显示当前温度 */
             if (aht20_healthy) {
                 TM1637_DisplayTemp(test_aht20_temp);
@@ -1334,6 +1379,7 @@ int main(void) {
             }
 
             system_mode = (current_ai_state == AI_STATE_ANOMALY || !aht20_healthy);
+#endif
             ui_dirty = 1;
         }
 
@@ -1344,6 +1390,7 @@ int main(void) {
         }
 
         /* 游戏更新与刷新 (30ms 运行) */
+#if RUN_MODE_ALL || RUN_MODE_GAME
         static uint8_t game_div = 0;
         if (current_page == 3) {
             game_div++;
@@ -1356,6 +1403,7 @@ int main(void) {
         } else {
             game_key = KEY_NONE;
         }
+#endif
 
         /* Beacon 心跳 */
         Draw_Beacon();
