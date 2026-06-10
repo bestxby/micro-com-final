@@ -505,11 +505,6 @@
               <FilePath>.\Hardware\my_i2c.h</FilePath>
             </File>
             <File>
-              <FileName>stm32f10x_conf.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\stm32f10x_conf.h</FilePath>
-            </File>
-            <File>
               <FileName>bh1750.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\bh1750.c</FilePath>
@@ -530,34 +525,14 @@
               <FilePath>.\Hardware\sd.h</FilePath>
             </File>
             <File>
-              <FileName>tm1637.c</FileName>
+              <FileName>touch.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\Hardware\tm1637.c</FilePath>
+              <FilePath>.\Hardware\touch.c</FilePath>
             </File>
             <File>
-              <FileName>tm1637.h</FileName>
+              <FileName>touch.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\Hardware\tm1637.h</FilePath>
-            </File>
-            <File>
-              <FileName>sr04.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\sr04.c</FilePath>
-            </File>
-            <File>
-              <FileName>sr04.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\sr04.h</FilePath>
-            </File>
-            <File>
-              <FileName>usart1.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\usart1.c</FilePath>
-            </File>
-            <File>
-              <FileName>usart1.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\usart1.h</FilePath>
+              <FilePath>.\Hardware\touch.h</FilePath>
             </File>
             <File>
               <FileName>esp8266.c</FileName>
@@ -570,21 +545,6 @@
               <FilePath>.\Hardware\esp8266.h</FilePath>
             </File>
             <File>
-              <FileName>stm32f10x.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\stm32f10x.h</FilePath>
-            </File>
-            <File>
-              <FileName>touch.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\Hardware\touch.c</FilePath>
-            </File>
-            <File>
-              <FileName>touch.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\Hardware\touch.h</FilePath>
-            </File>
-            <File>
               <FileName>ir.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\Hardware\ir.c</FilePath>
@@ -594,7 +554,46 @@
               <FileType>5</FileType>
               <FilePath>.\Hardware\ir.h</FilePath>
             </File>
-
+            <File>
+              <FileName>sr04.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\sr04.c</FilePath>
+            </File>
+            <File>
+              <FileName>sr04.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\sr04.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\stm32f10x.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32f10x_conf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\stm32f10x_conf.h</FilePath>
+            </File>
+            <File>
+              <FileName>tm1637.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\tm1637.c</FilePath>
+            </File>
+            <File>
+              <FileName>tm1637.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\tm1637.h</FilePath>
+            </File>
+            <File>
+              <FileName>usart1.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\Hardware\usart1.c</FilePath>
+            </File>
+            <File>
+              <FileName>usart1.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\Hardware\usart1.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -128,3 +128,66 @@ uint8_t AHT20_ReadData(float *temperature, float *humidity)
 
     return 0;
 }
+
+/**
+  * @brief  发送触发测量命令给 AHT20 (非阻塞式第一步)。
+  * @retval 0 = 成功, 1 = 失败。
+  */
+uint8_t AHT20_StartMeasure(void)
+{
+    I2C_Start();
+    I2C_SendByte(AHT20_ADDR_WRITE);
+    if (I2C_WaitAck() != 0) {
+        I2C_Stop();
+        return 1;
+    }
+    I2C_SendByte(0xAC);
+    I2C_WaitAck();
+    I2C_SendByte(0x33);
+    I2C_WaitAck();
+    I2C_SendByte(0x00);
+    I2C_WaitAck();
+    I2C_Stop();
+    return 0;
+}
+
+/**
+  * @brief  从 AHT20 读取温湿度测量数据 (非阻塞式第二步，需在触发后延时至少 80ms 调用)。
+  * @param  temperature: 保存摄氏度温度值的浮点型指针。
+  * @param  humidity: 保存相对湿度百分比值的浮点型指针。
+  * @retval 0 = 成功, 1 = 失败, 2 = 传感器仍在忙。
+  */
+uint8_t AHT20_RetrieveData(float *temperature, float *humidity)
+{
+    uint8_t data[6] = {0};
+    uint8_t status = AHT20_ReadStatus();
+    
+    /* 检查 Busy 标志位 (bit 7) */
+    if ((status & 0x80) != 0) {
+        return 2; /* 传感器仍在忙，未转换完成 */
+    }
+
+    I2C_Start();
+    I2C_SendByte(AHT20_ADDR_READ);
+    if (I2C_WaitAck() != 0) {
+        I2C_Stop();
+        return 1;
+    }
+    
+    data[0] = I2C_ReceiveByte(1); /* 状态字节 */
+    data[1] = I2C_ReceiveByte(1); /* 湿度高8位 [19:12] */
+    data[2] = I2C_ReceiveByte(1); /* 湿度中8位 [11:4] */
+    data[3] = I2C_ReceiveByte(1); /* 湿度低4位 [3:0] 兼 温度高4位 [19:16] */
+    data[4] = I2C_ReceiveByte(1); /* 温度中8位 [15:8] */
+    data[5] = I2C_ReceiveByte(0); /* 温度低8位 [7:0]，发送 NACK 结束数据传输 */
+    I2C_Stop();
+
+    /* 解析原始数据值 */
+    uint32_t raw_humidity = ((uint32_t)data[1] << 12) | ((uint32_t)data[2] << 4) | ((data[3] >> 4) & 0x0F);
+    uint32_t raw_temp = (((uint32_t)data[3] & 0x0F) << 16) | ((uint32_t)data[4] << 8) | data[5];
+
+    *humidity = (float)raw_humidity * 100.0f / 1048576.0f;
+    *temperature = (float)raw_temp * 200.0f / 1048576.0f - 50.0f;
+
+    return 0;
+}

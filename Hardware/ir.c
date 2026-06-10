@@ -16,24 +16,26 @@ static volatile uint8_t  ir_repeat_flag = 0;
 
 void IR_Init(void)
 {
-    // 1. Enable GPIOA, AFIO and TIM4 clocks
-    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN;
+    // 1. Enable GPIOC, AFIO and TIM4 clocks
+    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN | RCC_APB2ENR_AFIOEN;
     RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
     (void)RCC->APB2ENR; // Refresh pipeline
 
-    // 2. Configure PA9 as Input Pull-Up (CNF=10, MODE=00 -> 0x8)
-    GPIOA->CRH &= ~0x000000F0;
-    GPIOA->CRH |=  0x00000080;
-    GPIOA->ODR |= (1 << 9); // Enable internal pull-up
+    // 2. Configure PC13 as Input Pull-Up (CNF=10, MODE=00 -> 0x8)
+    // PC13 resides in CRH register, bits 20..23
+    GPIOC->CRH &= ~0x00F00000;
+    GPIOC->CRH |=  0x00800000;
+    GPIOC->ODR |= (1 << 13); // Enable internal pull-up
 
-    // 3. Map PA9 to EXTI9 (AFIO->EXTICR[2], bits 4..7 to 0x0 for GPIOA)
-    AFIO->EXTICR[2] &= ~0x000000F0;
+    // 3. Map PC13 to EXTI13 (AFIO->EXTICR[3], bits 4..7 to 0x2 for GPIOC)
+    AFIO->EXTICR[3] &= ~0x000000F0;
+    AFIO->EXTICR[3] |=  0x00000020;
 
-    // 4. Configure EXTI Line 9 for dual-edge trigger
-    EXTI->IMR |= (1 << 9);  // Interrupt Mask Register (Enable)
-    EXTI->RTSR |= (1 << 9); // Rising Trigger Selection Register
-    EXTI->FTSR |= (1 << 9); // Falling Trigger Selection Register
-    EXTI->PR = (1 << 9);    // Clear pending flag
+    // 4. Configure EXTI Line 13 for dual-edge trigger
+    EXTI->IMR |= (1 << 13);  // Interrupt Mask Register (Enable)
+    EXTI->RTSR |= (1 << 13); // Rising Trigger Selection Register
+    EXTI->FTSR |= (1 << 13); // Falling Trigger Selection Register
+    EXTI->PR = (1 << 13);    // Clear pending flag
 
     // 5. Configure TIM4 to count at 1MHz (1us per tick)
     TIM4->PSC = 71;       // 72MHz / 72 = 1MHz
@@ -41,9 +43,9 @@ void IR_Init(void)
     TIM4->CNT = 0;
     TIM4->CR1 |= TIM_CR1_CEN; // Enable counter
 
-    // 6. Enable NVIC for EXTI9_5 Interrupt (Priority 2, 2)
-    NVIC_SetPriority(EXTI9_5_IRQn, NVIC_EncodePriority(4, 2, 2));
-    NVIC_EnableIRQ(EXTI9_5_IRQn);
+    // 6. Enable NVIC for EXTI15_10 Interrupt (Priority 2, 2)
+    NVIC_SetPriority(EXTI15_10_IRQn, NVIC_EncodePriority(4, 2, 2));
+    NVIC_EnableIRQ(EXTI15_10_IRQn);
 }
 
 uint8_t IR_GetData(uint8_t *code)
@@ -56,17 +58,17 @@ uint8_t IR_GetData(uint8_t *code)
     return 0;
 }
 
-// EXTI Line 9..5 Interrupt Handler
-void EXTI9_5_IRQHandler(void)
+// EXTI Line 15..10 Interrupt Handler (PC13 uses this vector)
+void EXTI15_10_IRQHandler(void)
 {
-    // Check if interrupt is from Line 9
-    if (EXTI->PR & (1 << 9)) {
-        EXTI->PR = (1 << 9); // Clear EXTI Line 9 pending flag
+    // Check if interrupt is from Line 13
+    if (EXTI->PR & (1 << 13)) {
+        EXTI->PR = (1 << 13); // Clear EXTI Line 13 pending flag
 
         uint32_t duration = TIM4->CNT;
         TIM4->CNT = 0; // Reset counter for the next interval
 
-        uint8_t pin_state = (GPIOA->IDR & (1 << 9)) ? 1 : 0;
+        uint8_t pin_state = (GPIOC->IDR & (1 << 13)) ? 1 : 0;
 
         if (pin_state) {
             // Rising edge: preceding pulse was LOW. Measure LOW pulse duration.

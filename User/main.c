@@ -1044,34 +1044,34 @@ int main(void) {
             sprintf(dbg_buf, "IR Received CMD: 0x%02X\r\n", ir_cmd);
             USART1_SendString(dbg_buf);
 
-            // 1. 左右键翻页
-            if (ir_cmd == IR_KEY_LEFT) {
+            // 1. 左右键翻页 (支持物理导航左/右键与数字键 7/9)
+            if (ir_cmd == IR_NAV_LEFT || ir_cmd == IR_NUM_7) {
                 current_page = (current_page + 5) % 6;
                 if (current_page == 3) {
                     Game_Init();
                 }
                 Display_Refresh(1);
-            } else if (ir_cmd == IR_KEY_RIGHT) {
+            } else if (ir_cmd == IR_NAV_RIGHT || ir_cmd == IR_NUM_9) {
                 current_page = (current_page + 1) % 6;
                 if (current_page == 3) {
                     Game_Init();
                 }
                 Display_Refresh(1);
             }
-            // 2. OK键/POWER键切换防盗布防模式
-            else if (ir_cmd == IR_KEY_OK || ir_cmd == IR_KEY_POWER) {
+            // 2. OK键/1键/8键切换防盗布防模式 (支持物理导航OK键与数字键 1/8)
+            else if (ir_cmd == IR_NAV_OK || ir_cmd == IR_NUM_1 || ir_cmd == IR_NUM_8) {
                 security_alert_mode = !security_alert_mode;
                 ui_dirty = 1;
                 flash_cnt = 10; // 强制声光指示立即刷新
             }
-            // 3. MENU键/RETURN键切换 LCD 主题
-            else if (ir_cmd == IR_KEY_MENU || ir_cmd == IR_KEY_RETURN) {
+            // 3. 3键/6键切换 LCD 主题 (数字键 3/6)
+            else if (ir_cmd == IR_NUM_3 || ir_cmd == IR_NUM_6) {
                 current_theme = !current_theme;
                 Theme_Apply();
                 Display_Refresh(1);
             }
-            // 4. UP键/2键映射至 Flappy Bird 游戏跳跃 (KEY2_PRESS)
-            else if (ir_cmd == IR_KEY_UP || ir_cmd == IR_KEY_2) {
+            // 4. 向上键/5键映射至 Flappy Bird 游戏跳跃 (支持物理导航上键与数字键 5)
+            else if (ir_cmd == IR_NAV_UP || ir_cmd == IR_NUM_5) {
                 if (current_page == 3) {
                     game_key = KEY2_PRESS;
                 }
@@ -1119,6 +1119,12 @@ int main(void) {
 
         /* 1.5 秒传感器采样轮询 */
         loop_cnt++;
+        if (loop_cnt == 130) {
+            /* 提前 200ms 触发 AHT20 温湿度测量以防阻塞 */
+            if (aht20_healthy) {
+                AHT20_StartMeasure();
+            }
+        }
         if (loop_cnt >= 150) {
             loop_cnt = 0;
 
@@ -1128,8 +1134,11 @@ int main(void) {
             }
             if (aht20_healthy) {
                 float t, h;
-                if (AHT20_ReadData(&t, &h) == 0) {
+                uint8_t res = AHT20_RetrieveData(&t, &h);
+                if (res == 0) {
                     test_aht20_temp = t; test_aht20_humi = h; aht20_fail_cnt = 0;
+                } else if (res == 2) {
+                    /* 仍在忙，等待下次读取 */
                 } else {
                     aht20_fail_cnt++;
                     if (aht20_fail_cnt >= 3) aht20_healthy = 0;
@@ -1156,89 +1165,91 @@ int main(void) {
                 }
             }
 
-            /* WiFi 周期性校准时钟与获取天气 (每10分钟=600秒) / 自动检测重连 (每15秒=10个周期) */
-            if (wifi_connected) {
-                wifi_hw_online = 1;
-                static uint8_t initial_sync_retry_cnt = 0;
-                uint8_t need_sync = 0;
-                
-                if (last_time_sync_sec == 0) {
-                    initial_sync_retry_cnt++;
-                    if (initial_sync_retry_cnt >= 3) { /* ~5 秒 */
-                        initial_sync_retry_cnt = 0;
+            /* WiFi 周期性校准时钟与获取天气 / 自动检测重连 (仅在非游戏页面时执行以防游戏卡顿) */
+            if (current_page != 3) {
+                if (wifi_connected) {
+                    wifi_hw_online = 1;
+                    static uint8_t initial_sync_retry_cnt = 0;
+                    uint8_t need_sync = 0;
+                    
+                    if (last_time_sync_sec == 0) {
+                        initial_sync_retry_cnt++;
+                        if (initial_sync_retry_cnt >= 3) { /* ~5 秒 */
+                            initial_sync_retry_cnt = 0;
+                            need_sync = 1;
+                        }
+                    } else if (system_uptime_s - last_time_sync_sec >= 600) {
                         need_sync = 1;
                     }
-                } else if (system_uptime_s - last_time_sync_sec >= 600) {
-                    need_sync = 1;
-                }
-                
-                if (need_sync) {
-                    char temp_time[24];
-                    uint8_t ntp_ok = 0;
-                    uint8_t weather_ok = 0;
                     
-                    /* 尝试同步 NTP 时钟 */
-                    (void)ESP8266_SyncNTP();
-                    for (volatile int d = 0; d < 720000; d++);
-                    
-                    if (ESP8266_GetNTPTime(temp_time) == 0) {
-                        strcpy(current_net_time, temp_time);
-                        int y, m, d_val, hh, mm, ss;
-                        if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d_val, &hh, &mm, &ss) == 6) {
-                            net_year = y;
-                            net_month = m;
-                            net_day = d_val;
-                            net_hour = hh;
-                            net_minute = mm;
-                            net_second = ss;
-                            ntp_ok = 1;
+                    if (need_sync) {
+                        char temp_time[24];
+                        uint8_t ntp_ok = 0;
+                        uint8_t weather_ok = 0;
+                        
+                        /* 尝试同步 NTP 时钟 */
+                        (void)ESP8266_SyncNTP();
+                        for (volatile int d = 0; d < 720000; d++);
+                        
+                        if (ESP8266_GetNTPTime(temp_time) == 0) {
+                            strcpy(current_net_time, temp_time);
+                            int y, m, d_val, hh, mm, ss;
+                            if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d_val, &hh, &mm, &ss) == 6) {
+                                net_year = y;
+                                net_month = m;
+                                net_day = d_val;
+                                net_hour = hh;
+                                net_minute = mm;
+                                net_second = ss;
+                                ntp_ok = 1;
+                            }
+                        }
+                        
+                        /* 尝试拉取天气 (天气获取成功时会自动解析 HTTP 头部 Date 并同步时钟作为备用) */
+                        float w_temp = 0.0f;
+                        char w_txt[16] = {0};
+                        if (ESP8266_GetWeather(&w_temp, w_txt) == 0) {
+                            outdoor_temp = w_temp;
+                            strcpy(outdoor_weather, w_txt);
+                            weather_ok = 1;
+                        }
+                        
+                        if (ntp_ok || weather_ok) {
+                            last_time_sync_sec = system_uptime_s; /* 任意一个成功即认为本次校准完成 */
+                        } else {
+                            last_time_sync_sec = 0; /* 全部失败，下次循环继续尝试 */
+                            /* 检查是否 WiFi 硬件断开或网络断开 */
+                            if (ESP8266_IsHardwareOnline() == 0) {
+                                wifi_hw_online = 0;
+                                wifi_connected = 0;
+                            } else if (ESP8266_IsConnected() == 0) {
+                                wifi_connected = 0;
+                            }
                         }
                     }
-                    
-                    /* 尝试拉取天气 (天气获取成功时会自动解析 HTTP 头部 Date 并同步时钟作为备用) */
-                    float w_temp = 0.0f;
-                    char w_txt[16] = {0};
-                    if (ESP8266_GetWeather(&w_temp, w_txt) == 0) {
-                        outdoor_temp = w_temp;
-                        strcpy(outdoor_weather, w_txt);
-                        weather_ok = 1;
-                    }
-                    
-                    if (ntp_ok || weather_ok) {
-                        last_time_sync_sec = system_uptime_s; /* 任意一个成功即认为本次校准完成 */
-                    } else {
-                        last_time_sync_sec = 0; /* 全部失败，下次循环继续尝试 */
-                        /* 检查是否 WiFi 硬件断开或网络断开 */
-                        if (ESP8266_IsHardwareOnline() == 0) {
-                            wifi_hw_online = 0;
-                            wifi_connected = 0;
-                        } else if (ESP8266_IsConnected() == 0) {
-                            wifi_connected = 0;
-                        }
-                    }
-                }
-            } else {
-                static uint8_t wifi_check_cnt = 0;
-                static uint8_t wifi_reconnect_timer = 0;
-                wifi_check_cnt++;
-                if (wifi_check_cnt >= 3) { /* ~5 秒 */
-                    wifi_check_cnt = 0;
-                    if (ESP8266_IsHardwareOnline() == 1) {
-                        wifi_hw_online = 1;
-                        if (ESP8266_IsConnected() == 1) {
-                            wifi_connected = 1;
-                            wifi_reconnect_timer = 0;
-                            last_time_sync_sec = system_uptime_s;
-                            /* 同步 NTP 时间 */
-                            if (ESP8266_SyncNTP() == 0) {
-                                for (volatile int d = 0; d < 720000; d++);
-                                char temp_time[24];
-                                if (ESP8266_GetNTPTime(temp_time) == 0) {
-                                    strcpy(current_net_time, temp_time);
-                                    int y, m, d, hh, mm, ss;
-                                    if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hh, &mm, &ss) == 6) {
-                                        net_year = y; net_month = m; net_day = d;
-                                        net_hour = hh; net_minute = mm; net_second = ss;
+                } else {
+                    static uint8_t wifi_check_cnt = 0;
+                    static uint8_t wifi_reconnect_timer = 0;
+                    wifi_check_cnt++;
+                    if (wifi_check_cnt >= 3) { /* ~5 秒 */
+                        wifi_check_cnt = 0;
+                        if (ESP8266_IsHardwareOnline() == 1) {
+                            wifi_hw_online = 1;
+                            if (ESP8266_IsConnected() == 1) {
+                                wifi_connected = 1;
+                                wifi_reconnect_timer = 0;
+                                last_time_sync_sec = system_uptime_s;
+                                /* 同步 NTP 时间 */
+                                if (ESP8266_SyncNTP() == 0) {
+                                    for (volatile int d = 0; d < 720000; d++);
+                                    char temp_time[24];
+                                    if (ESP8266_GetNTPTime(temp_time) == 0) {
+                                        strcpy(current_net_time, temp_time);
+                                        int y, m, d, hh, mm, ss;
+                                        if (sscanf(current_net_time, "%d-%d-%d %d:%d:%d", &y, &m, &d, &hh, &mm, &ss) == 6) {
+                                            net_year = y; net_month = m; net_day = d;
+                                            net_hour = hh; net_minute = mm; net_second = ss;
+                                        }
                                     }
                                 }
                             }

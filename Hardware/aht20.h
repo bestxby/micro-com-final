@@ -10,5 +10,7 @@
 /* 外部公开接口 */
 uint8_t AHT20_Init(void);
 uint8_t AHT20_ReadData(float *temperature, float *humidity);
+uint8_t AHT20_StartMeasure(void);
+uint8_t AHT20_RetrieveData(float *temperature, float *humidity);
 
 #endif /* __AHT20_H */

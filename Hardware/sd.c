@@ -111,7 +111,10 @@ static void SD_SendCmd(uint8_t Cmd, uint32_t Arg, uint8_t Crc)
   */
 static SD_Error SD_GetResponse(uint8_t Response)
 {
-    uint32_t count = 0x1FFF; /* 降低超时等待上限，防止拔卡后死循环死机 */
+    /* If fast SPI speed is active, wait up to 0x1FFF times.
+     * If slow SPI speed is active (during initialization), wait only 512 times
+     * to prevent CPU lockups when the SD card is physically absent. */
+    uint32_t count = sd_spi_speed_fast ? 0x1FFF : 512;
     while (count--)
     {
         if (SD_ReadByte() == Response)
@@ -120,6 +123,26 @@ static SD_Error SD_GetResponse(uint8_t Response)
         }
     }
     return SD_RESPONSE_FAILURE;
+}
+
+/**
+  * @brief  等待 SD 卡命令的非 0xFF 响应字节。
+  * @param  无
+  * @retval 响应字节，超时则返回 0xFF。
+  */
+static uint8_t SD_WaitCmdResp(void)
+{
+    uint32_t count = 128; /* 最多等待 128 字节 */
+    uint8_t r = 0xFF;
+    while (count--)
+    {
+        r = SD_ReadByte();
+        if (r != 0xFF)
+        {
+            return r;
+        }
+    }
+    return 0xFF;
 }
 
 /**
@@ -188,7 +211,7 @@ SD_Error SD_Init(void)
     while (SD_GoIdleState() != SD_IN_IDLE_STATE)
     {
         retry++;
-        if (retry > 10) /* 原为 100，现降低为 10 次重试，防止拔卡后长时间宕机 */
+        if (retry > 3) /* 限制为 3 次重试，结合 512 字节超时，使得拔卡时的总阻断时间在 180ms 内，兼顾兼容性与流畅性 */
         {
             return SD_RESPONSE_FAILURE; /* 复位失败 */
         }
@@ -216,7 +239,7 @@ SD_Error SD_Init(void)
         /* ACMD41 需要先发送 CMD55 作为前导 */
         SD_CS_LOW();
         SD_SendCmd(55, 0, 0xFF);
-        r1 = SD_ReadByte();
+        r1 = SD_WaitCmdResp();
         SD_CS_HIGH();
         SD_ReadByte();
         
@@ -225,7 +248,7 @@ SD_Error SD_Init(void)
             /* 发送 ACMD41，参数设为支持高容量卡 (HCS = bit 30 = 0x40000000) */
             SD_CS_LOW();
             SD_SendCmd(41, 0x40000000, 0xFF);
-            r1 = SD_ReadByte();
+            r1 = SD_WaitCmdResp();
             SD_CS_HIGH();
             SD_ReadByte();
             
@@ -239,7 +262,7 @@ SD_Error SD_Init(void)
             /* CMD55 握手失败，降级尝试 CMD1 */
             SD_CS_LOW();
             SD_SendCmd(1, 0, 0xFF);
-            r1 = SD_ReadByte();
+            r1 = SD_WaitCmdResp();
             SD_CS_HIGH();
             SD_ReadByte();
             if (r1 == 0x00)

@@ -54,10 +54,10 @@ static void gpio_config_output(const LED_Desc *led)
  * ============================================================ */
 void LED_Init(void)
 {
-    /* 1. 初始化 PC13 (LED1, 核心板载 LED) 为标准 GPIO 输出 */
-    rcc_enable(led_table[0].rcc_enr);
-    gpio_config_output(&led_table[0]);
-    LED_Off(0);
+    /* 1. 初始化 PC13 (LED1, 核心板载 LED) 为标准 GPIO 输出 - 已禁用以支持红外接收输入 */
+    // rcc_enable(led_table[0].rcc_enr);
+    // gpio_config_output(&led_table[0]);
+    // LED_Off(0);
 
     /* 2. 开启 TIM2 和 GPIOA 时钟 */
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
@@ -96,11 +96,7 @@ void LED_On(uint8_t index)
     if (index == 1) {
         TIM2->CCR1 = 99; // PA0 (LED2)
     } else if (index == 0) {
-        if (led_table[0].active_level) {
-            led_table[0].port->BSRR = led_table[0].pin;
-        } else {
-            led_table[0].port->BRR  = led_table[0].pin;
-        }
+        // 已禁用：防止写入 ODR 寄存器改变 PC13 输入上拉极性
     }
 }
 
@@ -112,11 +108,7 @@ void LED_Off(uint8_t index)
     if (index == 1) {
         TIM2->CCR1 = 0; // PA0 (LED2)
     } else if (index == 0) {
-        if (led_table[0].active_level) {
-            led_table[0].port->BRR  = led_table[0].pin;
-        } else {
-            led_table[0].port->BSRR = led_table[0].pin;
-        }
+        // 已禁用：防止写入 ODR 寄存器改变 PC13 输入上拉极性
     }
 }
 
@@ -128,12 +120,7 @@ void LED_Toggle(uint8_t index)
     if (index == 1) {
         TIM2->CCR1 = (TIM2->CCR1 > 0) ? 0 : 99; // PA0 (LED2)
     } else if (index == 0) {
-        const LED_Desc *led = &led_table[0];
-        if (led->port->ODR & led->pin) {
-            led->port->BRR = led->pin;
-        } else {
-            led->port->BSRR = led->pin;
-        }
+        // 已禁用：防止写入 ODR 寄存器改变 PC13 输入上拉极性
     }
 }
 

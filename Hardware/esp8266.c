@@ -28,6 +28,12 @@ static uint8_t ESP8266_WaitReply(const char *expected, uint32_t timeout_ms)
                 if (strstr(esp_rx_buf, expected) != NULL) {
                     return 1; /* Found expected string */
                 }
+                /* Early termination check to prevent unnecessary timeout delay */
+                if (strstr(esp_rx_buf, "\r\nOK\r\n") != NULL || 
+                    strstr(esp_rx_buf, "\r\nERROR\r\n") != NULL ||
+                    strstr(esp_rx_buf, "\r\nFAIL\r\n") != NULL) {
+                    return 0; /* Expected string not found, but command execution finished */
+                }
             } else {
                 /* Flush buffer on overflow to avoid crash */
                 idx = 0;
@@ -393,7 +399,7 @@ uint8_t ESP8266_SendWeChatAlert(const char *sendkey, const char *title, const ch
   */
 uint8_t ESP8266_IsConnected(void)
 {
-    if (ESP8266_SendCmd("AT+CWJAP?\r\n", "+CWJAP:\"", 800)) {
+    if (ESP8266_SendCmd("AT+CWJAP?\r\n", "+CWJAP:\"", 150)) {
         return 1;
     }
     return 0;
@@ -405,6 +411,6 @@ uint8_t ESP8266_IsConnected(void)
   */
 uint8_t ESP8266_IsHardwareOnline(void)
 {
-    return ESP8266_SendCmd("AT\r\n", "OK", 500);
+    return ESP8266_SendCmd("AT\r\n", "OK", 100);
 }
 
