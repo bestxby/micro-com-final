@@ -13,6 +13,7 @@
 #include "usart1.h"
 #include "esp8266.h"
 #include "ir.h"
+#include "touch.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,6 +29,7 @@
 #define RUN_MODE_GAME      0   // 1: 录制 Flappy Bird 游戏
 #define RUN_MODE_SECURITY  0   // 1: 录制超声波防盗报警功能
 #define RUN_MODE_IOT       0   // 1: 录制 ESP8266 网络天气功能
+#define RUN_MODE_TOUCH     0   // 1: 录制触屏交互固件 (与SD卡冲突，单独录制)
 
 /* ============================================================
  * 全局变量 (传感器 / AI / 系统状态)
@@ -887,6 +889,64 @@ void Check_And_SendWeChatAlert(const char* event_type, const char* details) {
 }
 
 /* ============================================================
+ * 触屏事件处理 (Touch Screen Event Handler)
+ * ============================================================ */
+float alarm_threshold_dist = 15.0f;
+float warn_threshold_dist  = 50.0f;
+
+void Process_Touch_Input(void) {
+    if (tp_dev.sta & TP_CATH_PRES) {
+        tp_dev.sta &= ~TP_CATH_PRES; // 清除点击标记
+        uint16_t tx = tp_dev.x[0];
+        uint16_t ty = tp_dev.y[0];
+        
+        // 全局：右上角主题切换框 (X: 420..444, Y: 4..20)
+        if (tx >= 415 && tx <= 450 && ty >= 0 && ty <= 25) {
+            current_theme = !current_theme;
+            Theme_Apply();
+            Display_Refresh(1);
+            return;
+        }
+        
+        if (current_page == 1) {
+            // AI 学习重置 [RST] 按钮
+            if (tx >= 20 && tx <= 60 && ty >= 56 && ty <= 90) {
+                AI_Init(&my_detector, 0.2f, 100);
+                current_ai_state = AI_STATE_LEARNING;
+                system_mode      = 0;
+                aht20_fail_cnt   = 0;
+                test_aht20_init_status  = AHT20_Init();
+                aht20_healthy           = (test_aht20_init_status  == 0);
+                LED_Off(0);
+                Display_Refresh(1);
+                return;
+            }
+        }
+        else if (current_page == 4) {
+            // 防盗警戒页面: 调整阈值 [-] 和 [+]
+            // [-] 按钮 X: 24..84, Y: 236..268
+            if (tx >= 24 && tx <= 84 && ty >= 236 && ty <= 268) {
+                if (alarm_threshold_dist > 5.0f) {
+                    alarm_threshold_dist -= 5.0f;
+                    warn_threshold_dist = alarm_threshold_dist + 35.0f;
+                    Display_Refresh(1);
+                }
+                return;
+            }
+            // [+] 按钮 X: 116..176, Y: 236..268
+            if (tx >= 116 && tx <= 176 && ty >= 236 && ty <= 268) {
+                if (alarm_threshold_dist < 80.0f) {
+                    alarm_threshold_dist += 5.0f;
+                    warn_threshold_dist = alarm_threshold_dist + 35.0f;
+                    Display_Refresh(1);
+                }
+                return;
+            }
+        }
+    }
+}
+
+/* ============================================================
  * main
  * ============================================================ */
 int main(void) {
@@ -916,6 +976,11 @@ int main(void) {
 #if RUN_MODE_ALL || RUN_MODE_SECURITY
     /* 初始化 HC-SR04 超声波测距 */
     SR04_Init();
+#endif
+
+#if RUN_MODE_ALL || RUN_MODE_TOUCH || RUN_MODE_GAME
+    /* 初始化 XPT2046 触摸屏 */
+    TP_Init();
 #endif
     
     /* 配置面包板 KEY3 按键 (PB9 上拉输入) 和蜂鸣器 (PB15 推挽输出) */
@@ -1014,6 +1079,8 @@ int main(void) {
     current_page = 4;
 #elif RUN_MODE_IOT
     current_page = 5;
+#elif RUN_MODE_TOUCH
+    current_page = 0; // 触控界面展示通常需要从0开始
 #endif
 
     Display_Refresh(1);
@@ -1341,7 +1408,7 @@ int main(void) {
             }
 
             /* 防盗入侵微信推送报警 */
-            if (security_alert_mode && ultrasonic_healthy && test_ultrasonic_dist < 15.0f) {
+            if (security_alert_mode && ultrasonic_healthy && test_ultrasonic_dist < alarm_threshold_dist) {
                 char details[32];
                 sprintf(details, "Dist_%.1fcm", test_ultrasonic_dist);
                 Check_And_SendWeChatAlert("Intruder_Alarm", details);
@@ -1427,11 +1494,11 @@ int main(void) {
                     GPIOB->BRR = GPIO_Pin_15;
                 } else {
                     float dist = test_ultrasonic_dist;
-                    if (dist < 15.0f) {
+                    if (dist < alarm_threshold_dist) {
                         // 报警级（<15cm）：LED2 闪烁，蜂鸣器常鸣
                         LED_Toggle(1);
                         GPIOB->BSRR = GPIO_Pin_15;
-                    } else if (dist < 50.0f) {
+                    } else if (dist < warn_threshold_dist) {
                         // 警告级（15~50cm）：LED2 常亮，蜂鸣器关闭
                         LED_On(1);
                         GPIOB->BRR = GPIO_Pin_15;
@@ -1464,6 +1531,29 @@ int main(void) {
         if (!security_alert_mode && aht20_healthy && bh1750_healthy && sd_healthy && current_ai_state == AI_STATE_NORMAL) {
             LED_ProcessBreathing();
         }
+
+#if RUN_MODE_ALL || RUN_MODE_TOUCH || RUN_MODE_GAME
+        /* 触摸屏扫描与事件处理 */
+        if (current_page != 3) {
+            // 常规页面以 50ms 频率扫描触屏 (5 * 10ms)
+            static uint8_t touch_div = 0;
+            touch_div++;
+            if (touch_div >= 5) {
+                touch_div = 0;
+                TP_Scan(0);
+                Process_Touch_Input();
+            }
+        } else {
+            // 游戏页面以更快的频率扫描以实现灵敏交互
+            TP_Scan(0);
+            if (tp_dev.sta & TP_CATH_PRES) {
+                tp_dev.sta &= ~TP_CATH_PRES; // 清除点击标记
+                if (tp_dev.x >= 20 && tp_dev.x <= 460 && tp_dev.y >= 56 && tp_dev.y <= 286) {
+                    game_key = 2; // 触碰游戏区，触发飞跃/开始/重新开始
+                }
+            }
+        }
+#endif
 
         Delay(72000);   /* ~10ms 循环节 */
     }
