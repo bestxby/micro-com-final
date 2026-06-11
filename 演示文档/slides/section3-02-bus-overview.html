@@ -62,6 +62,12 @@
     border-radius: 4px;
     border: 1px solid rgba(15, 118, 110, 0.25);
   }
+
+  .stagger-row {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: slideListFadeIn 0.5s cubic-bezier(0.25, 1, 0.35, 1) forwards;
+  }
 </style>
 </head>
 <body>
@@ -93,7 +99,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
+        <tr class="stagger-row delay-1">
           <td><span class="proto-tag">模拟 I²C 总线</span></td>
           <td>2线 (<code class="pin-tag">SCL</code>/<code class="pin-tag">SDA</code>)</td>
           <td>~100 kHz (标准模式)</td>
@@ -101,7 +107,7 @@
           <td>AHT20温湿度、BH1750光强、BMP280气压</td>
           <td><code class="proto-tag">GPIO</code> 位带操作实现，总线防死锁恢复机制</td>
         </tr>
-        <tr>
+        <tr class="stagger-row delay-2">
           <td><span class="proto-tag">模拟/硬件 SPI</span></td>
           <td>4线 (<code class="pin-tag">CS</code>/<code class="pin-tag">CLK</code>/<code class="pin-tag">MOSI</code>/<code class="pin-tag">MISO</code>)</td>
           <td>~12 MHz</td>
@@ -109,7 +115,7 @@
           <td>ST7796S 液晶屏、Micro SD卡</td>
           <td><code class="proto-tag">JTAG</code>引脚重用，<code class="pin-tag">PA11</code>移位，局部块像素填充优化</td>
         </tr>
-        <tr>
+        <tr class="stagger-row delay-3">
           <td><span class="proto-tag">USART 串口</span></td>
           <td>2线 (<code class="pin-tag">TXD</code>/<code class="pin-tag">RXD</code>)</td>
           <td>115200 bps</td>
@@ -117,7 +123,7 @@
           <td>ESP8266 <code class="proto-tag">WiFi</code> 模块</td>
           <td>管脚重映射 (<code class="pin-tag">PB6</code>/<code class="pin-tag">PB7</code>)，512B 环形中断接收队列</td>
         </tr>
-        <tr>
+        <tr class="stagger-row delay-4">
           <td><span class="proto-tag">EXTI + 定时捕获</span></td>
           <td>1线 (<code class="pin-tag">DAT</code>)</td>
           <td>1 MHz (1μs 硬件时序)</td>
@@ -125,7 +131,7 @@
           <td>HX1838 红外遥控接收器</td>
           <td>双边沿中断触发，<code class="proto-tag">TIM4</code>硬件精密测宽，非阻塞状态机</td>
         </tr>
-        <tr>
+        <tr class="stagger-row delay-5">
           <td><span class="proto-tag">模拟二线制</span></td>
           <td>2线 (<code class="pin-tag">CLK</code>/<code class="pin-tag">DIO</code>)</td>
           <td>~50 kHz</td>
