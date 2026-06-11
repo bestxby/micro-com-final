@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>09 多通道人机交互控制方式设计 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<title>12 HUD 六大核心功能控制方式设计 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
   .sandbox-container {
     display: flex;
@@ -338,42 +338,18 @@
   <div class="slide-meta">人机交互沙盒</div>
 </div>
 
-<h1 class="slide-title">多通道人机交互与<span class="highlight-gradient">网页虚拟仿真大屏</span></h1>
-<p class="slide-subtitle">Multi-Channel Human-Machine Interface and Real-Time Sandbox Simulation</p>
+<h1 class="slide-title">HUD 六大核心功能页面全览</h1>
+<p class="slide-subtitle">Complete Overview of the 6 Core TFT-LCD Interface Pages</p>
 
 <div class="slide-content-layout animate-fade-in-up">
-  <div class="sandbox-container">
-    <!-- Left: Virtual Remote Control -->
-    <div class="remote-control">
-      <div class="remote-header">NEC IR REMOTE</div>
-      <div class="remote-grid">
-        <div class="btn-ir btn-power" id="btn-ir-power" title="Power Key: Arm/Disarm">⚡</div>
-        <div class="btn-ir btn-menu" id="btn-ir-menu" title="Menu Key: Toggle Theme">MENU</div>
-        
-        <div class="nav-pad">
-          <div class="btn-nav nav-up" id="btn-ir-up">▲</div>
-          <div class="btn-nav nav-down" id="btn-ir-down">▼</div>
-          <div class="btn-nav nav-left" id="btn-ir-left">◀</div>
-          <div class="btn-nav nav-right" id="btn-ir-right">▶</div>
-          <div class="btn-ok" id="btn-ir-ok">OK</div>
-        </div>
-        
-        <div class="btn-ir" id="btn-ir-1">1</div>
-        <div class="btn-ir" id="btn-ir-2">2</div>
-        <div class="btn-ir" id="btn-ir-3">3</div>
-        <div class="btn-ir" id="btn-ir-4">4</div>
-        <div class="btn-ir" id="btn-ir-5">5</div>
-        <div class="btn-ir" id="btn-ir-6">6</div>
-      </div>
-      <div style="font-size: 15px; color: var(--text-muted); text-align: center; line-height: 1.4; font-weight: 600;">
-        用鼠标点击遥控按键操纵右屏：<br>
-        <strong>◀ / ▶</strong>：翻页 &nbsp;&nbsp;<strong>MENU</strong>：换主题<br>
-        <strong>OK / ⚡</strong>：布撤防 &nbsp;&nbsp;<strong>▲ / 2</strong>：玩游戏
-      </div>
+  <div style="position: relative; width: 100%; height: 100%;">
+    <!-- Scale to fit beautifully -->
+    <div style="position: absolute; left: 50%; top: 20px; transform: translateX(-50%) scale(0.68); transform-origin: top center; width: 1950px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 50px 40px; justify-items: center;" id="grid-container">
     </div>
-
-    <!-- Right: Simulated LCD display -->
-    <div class="lcd-enclosure">
+  </div>
+  
+  <div id="source-lcd" style="display:none;">
+<div class="lcd-enclosure">
       <div class="lcd-pins-top">
         <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
         <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
@@ -581,13 +557,19 @@
   </div>
 </div>
 
+
+
+
+<button class="view-video-btn" id="openModalBtn">
+    <span class="play-icon">▶</span> 查看视频演示
+  </button>
 <div class="slide-footer">
-  <div class="section-name">05. HUD UI 设计与高保真仿真展示</div>
-  <div class="slide-number">Page 15 / 24</div>
+
+  <div class="section-name">04. HUD UI 设计与人机交互</div>
+  <div class="slide-number">Page 12 / 25</div>
 </div>
 
 <script>
-  // Page Titles
   const pageTitles = [
     "[1] REAL-TIME MONITORING",
     "[2] AI BASELINE LEARNING",
@@ -597,311 +579,108 @@
     "[6] IOT WEATHER & CLOCK"
   ];
   
-  let curPage = 0;
-  const totalPages = 6;
-  const screen = document.getElementById("lcdScreen");
-  const headerTitle = document.getElementById("lcdTitle");
-  const pageLabel = document.getElementById("lcdPageName");
+  const bottomLabels = [
+    "1. 实时温湿度监控主页",
+    "2. 异常判定 AI 自学习",
+    "3. 异常历史归档日志",
+    "4. 飞鸟小游戏沉浸体验",
+    "5. 居家防盗安防模式",
+    "6. 物联网实时天气时钟"
+  ];
+
+  const source = document.getElementById('source-lcd').children[0];
+  const grid = document.getElementById('grid-container');
   
-  function updatePage(idx) {
-    curPage = idx;
-    document.querySelectorAll(".p-tab").forEach((p, i) => {
-      p.classList.toggle("active", i === idx);
-    });
-    headerTitle.textContent = pageTitles[idx];
-    pageLabel.textContent = `PAGE ${idx}`;
-    
-    // Highlight page dots
-    for (let i = 0; i < totalPages; i++) {
-      document.getElementById(`dot-${i}`).classList.toggle("active", i === idx);
-    }
-    
-    // Stop game loop if leaving page 3
-    if (idx !== 3) {
-      stopGame();
-    } else {
-      initGame();
-    }
-  }
-  
-  // Navigation Buttons
-  document.getElementById("btn-ir-left").addEventListener("click", () => {
-    updatePage((curPage - 1 + totalPages) % totalPages);
-  });
-  document.getElementById("btn-ir-right").addEventListener("click", () => {
-    updatePage((curPage + 1) % totalPages);
-  });
-  
-  // Theme toggle
-  let themeId = 0; // 0 = Dark, 1 = Deep Space Blue
-  const indicator = document.querySelector(".lcd-topbar-theme-indicator");
-  function toggleTheme() {
-    themeId = 1 - themeId;
-    if (themeId === 0) {
-      screen.className = "lcd-screen-body lcd-theme-t0";
-    } else {
-      screen.className = "lcd-screen-body lcd-theme-t1";
-    }
-  }
-  document.getElementById("btn-ir-menu").addEventListener("click", toggleTheme);
-  
-  // Armed / Disarmed State Machine
-  let isArmed = false;
-  let hasAlarm = false;
-  const pill = document.getElementById("lcdPill");
-  
-  const p4Mode = document.getElementById("p4-sec-mode");
-  const p4Alarm = document.getElementById("p4-alarm-state");
-  const p4Dist = document.getElementById("p4-dist");
-  const p4DistBar = document.getElementById("p4-dist-bar");
-  
-  function updateAlarmState() {
-    if (!isArmed) {
-      pill.textContent = "SYSTEM SAFE";
-      pill.style.color = "var(--lcd-green)";
-      pill.style.borderColor = "var(--lcd-green)";
-      p4Mode.textContent = "DISARMED";
-      p4Mode.style.color = "var(--lcd-muted)";
-      p4Alarm.textContent = "INACTIVE";
-      p4Alarm.style.color = "var(--lcd-muted)";
-      p4Dist.textContent = "25.3 cm";
-      p4Dist.style.color = "var(--lcd-yellow)";
-      hasAlarm = false;
-      renderSegmentedBar(p4DistBar, 2, "var(--lcd-yellow)");
-    } else {
-      p4Mode.textContent = "ARMED";
-      p4Mode.style.color = "var(--lcd-red)";
+  for(let i=0; i<6; i++) {
+      let wrapper = document.createElement('div');
+      wrapper.style.display = 'flex';
+      wrapper.style.flexDirection = 'column';
+      wrapper.style.alignItems = 'center';
+      wrapper.style.gap = '24px';
       
-      if (hasAlarm) {
-        pill.textContent = "ANOMALY ALARM";
-        pill.style.color = "var(--lcd-red)";
-        pill.style.borderColor = "var(--lcd-red)";
-        p4Alarm.textContent = "ALARM!!!";
-        p4Alarm.style.color = "var(--lcd-red)";
-        p4Dist.textContent = "12.8 cm";
-        p4Dist.style.color = "var(--lcd-red)";
-        renderSegmentedBar(p4DistBar, 1, "var(--lcd-red)");
-      } else {
-        pill.textContent = "SYSTEM SAFE";
-        pill.style.color = "var(--lcd-green)";
-        pill.style.borderColor = "var(--lcd-green)";
-        p4Alarm.textContent = "SAFE";
-        p4Alarm.style.color = "var(--lcd-green)";
-        p4Dist.textContent = "62.4 cm";
-        p4Dist.style.color = "var(--lcd-green)";
-        renderSegmentedBar(p4DistBar, 5, "var(--lcd-green)");
-      }
-    }
-  }
-  
-  function toggleSecurity() {
-    isArmed = !isArmed;
-    if (!isArmed) hasAlarm = false;
-    updateAlarmState();
-  }
-  document.getElementById("btn-ir-ok").addEventListener("click", toggleSecurity);
-  document.getElementById("btn-ir-power").addEventListener("click", toggleSecurity);
-  
-  document.getElementById("simDistBtn").addEventListener("click", () => {
-    if (isArmed) {
-      hasAlarm = true;
-      updateAlarmState();
-    } else {
-      alert("系统当前处于撤防状态，请先按 OK 或 ⚡ 键布防！");
-    }
-  });
-  
-  // Segmented Bars drawing
-  function renderSegmentedBar(container, activeCount, color) {
-    container.innerHTML = "";
-    for (let i = 0; i < 12; i++) {
-      const b = document.createElement("div");
-      b.className = `seg-block ${i < activeCount ? "active" : "inactive"}`;
-      if (i < activeCount) {
-        b.style.background = color;
-      }
-      container.appendChild(b);
-    }
-  }
-  
-  // Initialize Page 0 bars
-  renderSegmentedBar(document.getElementById("p0-temp-bar"), 6, "var(--lcd-accent)");
-  renderSegmentedBar(document.getElementById("p0-humi-bar"), 6, "var(--lcd-accent)");
-  renderSegmentedBar(document.getElementById("p1-progress-bar"), 10, "var(--lcd-green)");
-  renderSegmentedBar(p4DistBar, 2, "var(--lcd-yellow)");
-  
-  // Uptime and Clock ticking
-  let uptime = 0;
-  const uptimeEl = document.getElementById("lcdUptime");
-  const clockEl = document.getElementById("p5-clock");
-  const beaconEl = document.getElementById("lcdBeacon");
-  const beaconChars = ['|', '/', '-', '\\'];
-  let beaconIdx = 0;
-  
-  setInterval(() => {
-    uptime++;
-    uptimeEl.textContent = `SYS-UP: ${String(uptime).padStart(5, ' ')}s`;
-    
-    // beacon
-    beaconEl.textContent = beaconChars[beaconIdx];
-    beaconIdx = (beaconIdx + 1) % 4;
-    
-    // clock
-    const d = new Date();
-    let h = String(d.getHours()).padStart(2, '0');
-    let m = String(d.getMinutes()).padStart(2, '0');
-    let s = String(d.getSeconds()).padStart(2, '0');
-    clockEl.textContent = `TIME: ${h}:${m}:${s}`;
-  }, 1000);
-  
-  // Game variables
-  let gameInterval = null;
-  let birdY = 160;
-  let birdVy = 0;
-  const birdX = 120;
-  let gameScore = 0;
-  let pipes = [];
-  let gState = 0; // 0 = START, 1 = PLAY, 2 = GAMEOVER
-  
-  const startScr = document.getElementById("game-start-screen");
-  const overScr = document.getElementById("game-over-screen");
-  const birdEl = document.getElementById("gb-bird");
-  const scoreText = document.getElementById("game-score-display");
-  const finalScoreEl = document.getElementById("game-final-score");
-  const pipeTop = document.getElementById("gb-pipe-top");
-  const pipeBot = document.getElementById("gb-pipe-bot");
-  
-  function initGame() {
-    gState = 0;
-    birdY = 160;
-    birdVy = 0;
-    gameScore = 0;
-    scoreText.textContent = "SCORE: 00";
-    birdEl.style.top = birdY + "px";
-    birdEl.style.display = "block";
-    startScr.style.display = "flex";
-    overScr.style.display = "none";
-    pipeTop.style.display = "none";
-    pipeBot.style.display = "none";
-    pipes = [];
-  }
-  
-  function startGame() {
-    gState = 1;
-    startScr.style.display = "none";
-    pipeTop.style.display = "block";
-    pipeBot.style.display = "block";
-    
-    // Setup pipe
-    resetPipe();
-    
-    gameInterval = setInterval(gameLoop, 30);
-  }
-  
-  function resetPipe() {
-    let gapY = 110 + Math.floor(Math.random() * 80); // 110..190
-    let pipeX = 400;
-    let gapH = 75;
-    let pipeW = 32;
-    pipes = [{
-      x: pipeX,
-      w: pipeW,
-      topH: gapY - gapH / 2 - 57, // Y: 57..
-      botH: 285 - (gapY + gapH / 2),
-      passed: false
-    }];
-  }
-  
-  function flap() {
-    if (curPage !== 3) return;
-    if (gState === 0) {
-      startGame();
-    } else if (gState === 1) {
-      birdVy = -4.5;
-    } else if (gState === 2) {
-      initGame();
-    }
-  }
-  
-  document.getElementById("btn-ir-up").addEventListener("click", flap);
-  document.getElementById("btn-ir-2").addEventListener("click", flap);
-  
-  function gameLoop() {
-    // gravity
-    birdVy += 0.4;
-    if (birdVy > 8.0) birdVy = 8.0;
-    birdY += birdVy;
-    
-    // Bounds check
-    if (birdY < 57) {
-      birdY = 57;
-      gameOver();
-    }
-    if (birdY + 12 > 285) {
-      birdY = 285 - 12;
-      gameOver();
-    }
-    
-    birdEl.style.top = birdY + "px";
-    
-    // move pipe
-    if (pipes.length > 0) {
-      let p = pipes[0];
-      p.x -= 4; // 4px per frame
+      let clone = source.cloneNode(true);
+      clone.id = "cloned-lcd-" + i;
       
-      pipeTop.style.left = p.x + "px";
-      pipeTop.style.top = "57px";
-      pipeTop.style.height = p.topH + "px";
+      let tabs = clone.querySelectorAll('.p-tab');
+      tabs.forEach((tab, idx) => {
+          if(idx === i) tab.classList.add('active');
+          else tab.classList.remove('active');
+      });
+      clone.querySelector('.lcd-header-title').textContent = pageTitles[i];
+      let pill = clone.querySelector('.lcd-topbar-pill');
+      if(pill) pill.textContent = "SYSTEM SAFE";
       
-      pipeBot.style.left = p.x + "px";
-      pipeBot.style.bottom = "35px"; // bottom of game border y=285 -> height from bottom: 320 - 285 = 35px
-      pipeBot.style.height = p.botH + "px";
+      let pageLbl = clone.querySelector('#lcdPageName') || clone.querySelector('.lcd-header-title').previousElementSibling;
+      if(pageLbl && pageLbl.id === 'lcdPageName') pageLbl.textContent = "PAGE " + i;
       
-      // Collision
-      let bx1 = birdX;
-      let bx2 = birdX + 12;
-      let by1 = birdY;
-      let by2 = birdY + 12;
+      let botRight = clone.querySelector('.lcd-bottom-right');
+      if(botRight) botRight.textContent = "G-05 HUD PAGE " + i;
       
-      let px1 = p.x;
-      let px2 = p.x + p.w;
+      let dots = clone.querySelectorAll('.p-dot');
+      dots.forEach((dot, idx) => {
+          if(idx === i) dot.classList.add('active');
+          else dot.classList.remove('active');
+      });
       
-      if (bx2 >= px1 && bx1 <= px2) {
-        let topLimit = 57 + p.topH;
-        let botLimit = 320 - 35 - p.botH;
-        if (by1 < topLimit || by2 > botLimit) {
-          gameOver();
-          return;
-        }
+      if (i === 0) {
+        let b1 = clone.querySelector('#p0-temp-bar');
+        let b2 = clone.querySelector('#p0-humi-bar');
+        if(b1) b1.innerHTML = Array(12).fill(0).map((_, j) => `<div class="seg-block ${j<6?'active':'inactive'}" style="background:var(--lcd-accent)"></div>`).join('');
+        if(b2) b2.innerHTML = Array(12).fill(0).map((_, j) => `<div class="seg-block ${j<6?'active':'inactive'}" style="background:var(--lcd-accent)"></div>`).join('');
+      } else if (i === 1) {
+        let b = clone.querySelector('#p1-progress-bar');
+        if(b) b.innerHTML = Array(12).fill(0).map((_, j) => `<div class="seg-block ${j<10?'active':'inactive'}" style="background:var(--lcd-green)"></div>`).join('');
+      } else if (i === 4) {
+        let b = clone.querySelector('#p4-dist-bar');
+        if(b) b.innerHTML = Array(12).fill(0).map((_, j) => `<div class="seg-block ${j<2?'active':'inactive'}" style="background:var(--lcd-yellow)"></div>`).join('');
       }
       
-      // Score
-      if (p.x + p.w < birdX && !p.passed) {
-        p.passed = true;
-        gameScore++;
-        scoreText.textContent = `SCORE: ${String(gameScore).padStart(2, '0')}`;
-      }
+      let label = document.createElement('div');
+      label.textContent = bottomLabels[i];
+      label.style.fontSize = '38px';
+      label.style.fontWeight = 'bold';
+      label.style.color = '#0F766E';
+      label.style.letterSpacing = '2px';
       
-      // Reset offscreen
-      if (p.x < -32) {
-        resetPipe();
-      }
-    }
+      wrapper.appendChild(clone);
+      wrapper.appendChild(label);
+      grid.appendChild(wrapper);
   }
-  
-  function gameOver() {
-    clearInterval(gameInterval);
-    gState = 2;
-    overScr.style.display = "flex";
-    finalScoreEl.textContent = `Final Score: ${gameScore}`;
-    birdEl.style.display = "none";
-    pipeTop.style.display = "none";
-    pipeBot.style.display = "none";
+</script>
+
+<div class="video-modal" id="videoModal">
+  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
+  <div class="video-modal-content">
+    <video id="modalVideo" src="../shared/videos/security_demo.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+
+<script>
+  const openModalBtn = document.getElementById("openModalBtn");
+  const videoModal = document.getElementById("videoModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalVideo = document.getElementById("modalVideo");
+
+  if(openModalBtn) {
+      openModalBtn.addEventListener("click", () => {
+        videoModal.style.display = "flex";
+        modalVideo.play().catch(err => {
+          console.log("Modal video autoplay failed or file not found:", err);
+        });
+      });
   }
-  
-  function stopGame() {
-    clearInterval(gameInterval);
-    gameInterval = null;
+
+  function closeModal() {
+    videoModal.style.display = "none";
+    modalVideo.pause();
+  }
+
+  if(closeModalBtn) {
+      closeModalBtn.addEventListener("click", closeModal);
+      videoModal.addEventListener("click", (e) => {
+        if (e.target === videoModal) closeModal();
+      });
   }
 </script>
 

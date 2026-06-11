@@ -5,80 +5,107 @@
 <title>12 云边端物联网通信与 SD 日志归档 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css?v=4">
 <style>
-  .layout-box {
+  .layout-container {
     display: flex;
-    gap: 40px;
+    flex-direction: column;
     width: 100%;
     height: 100%;
   }
-  .left-col {
+  .four-col-layout {
+    display: flex;
+    gap: 24px;
+    width: 100%;
+    flex-grow: 1;
+    margin-top: 10px;
+    padding-bottom: 20px;
+  }
+  .state-card {
     flex: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 30px 24px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  }
+  .state-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(15, 118, 110, 0.15);
   }
   
-  .desc-list {
-    list-style: none;
+  /* Top borders for visual distinction */
+  .card-edge { border-top: 6px solid #0F766E; }
+  .card-cloud { border-top: 6px solid #0369a1; }
+  .card-wechat { border-top: 6px solid #047857; }
+  .card-sd { border-top: 6px solid #CC5A01; }
+  
+  .state-icon-area {
     display: flex;
-    flex-direction: column;
-    gap: 32px;
+    align-items: center;
+    margin-bottom: 16px;
   }
-  .desc-list li {
+  .state-num {
+    font-size: 42px;
+    font-weight: 900;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: var(--font-title-family);
+    width: fit-content;
+  }
+  
+  .state-condition {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed rgba(25, 24, 22, 0.15);
+    min-height: 56px;
+    line-height: 1.3;
+  }
+  .state-desc {
     font-size: 23px;
     color: var(--text-secondary);
-    line-height: 1.8;
-    position: relative;
-    padding-left: 44px;
+    line-height: 1.7;
+    flex-grow: 1;
+    margin-bottom: 24px;
   }
-  .desc-list li::before {
-    content: "★";
-    position: absolute;
-    left: 0;
-    top: 4px;
-    font-size: 22px;
-    color: var(--brand-secondary);
-    font-weight: 800;
-  }
-  .desc-list li strong {
+  .state-desc strong {
     color: var(--text-primary);
     font-size: 26px;
     font-weight: 800;
-    display: inline !important;
-  }
-  .desc-list code {
-    /* fallback to global tokens.css styles */
   }
   
-  /* Floating Video Button at Bottom Right */
-  .view-video-btn {
-    position: absolute;
-    right: 80px;
-    bottom: 110px;
-    display: inline-flex;
+  /* Inline button for cards */
+  .card-video-btn {
+    margin-top: auto;
+    display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 16px 32px;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
     background: var(--brand-primary);
     border: 1px solid rgba(25, 24, 22, 0.1);
-    border-radius: 12px;
+    border-radius: 10px;
     color: #fff;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 800;
-    box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
+    transition: all 0.2s;
+    box-shadow: 0 4px 10px rgba(204, 90, 1, 0.15);
   }
-  .view-video-btn:hover {
-    transform: scale(1.05);
+  .card-video-btn:hover {
     background: var(--brand-secondary);
-    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+    transform: scale(1.02);
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.2);
   }
-  .play-icon {
-    font-size: 20px;
-  }
+  .play-icon { font-size: 16px; }
 
   /* Fullscreen Video Modal */
   .video-modal {
@@ -144,45 +171,102 @@
   <div class="slide-meta">物联网通信</div>
 </div>
 
-<h1 class="slide-title">云边端物联网通信与<span class="highlight-gradient">本地数据归档</span></h1>
+<h1 class="slide-title">云边端物联网通信与本地数据归档</h1>
 <p class="slide-subtitle">ESP8266 WiFi, NTP Clock Sync, ServerChan WeChat Alerts, and SD Logging</p>
 
 <div class="slide-content-layout animate-fade-in-up">
-  <div class="layout-box">
-    <!-- Left: Specifications -->
-    <div class="left-col">
-      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">物联网通信与存储设计</h2>
-      <ul class="desc-list">
-        <li>
-          <strong><code class="proto-tag">ESP8266</code> 自动断网自愈与 <code class="proto-tag">NTP</code> 同步</strong>：
-          通过 <code class="proto-tag">AT</code> 指令进行底层握手，断线后自动保存配置重连。上电后拉取中国 <code class="proto-tag">NTP</code> 服务器时间。在掉线期间，系统无缝切入本地 10ms 软件 <code class="proto-tag">RTC</code> 累加，恢复网络后自动对齐秒级误差。
-        </li>
-        <li>
-          <strong>心知天气 <code class="proto-tag">API</code> 轻量解析</strong>：
-          直接使用 <code>strstr</code> 从 <code class="proto-tag">TCP</code> 接收环形缓存中匹配特定键值对，舍弃开销巨大的 <code>JSON</code> 库，极大节约了 RAM 空间。
-        </li>
-        <li>
-          <strong>微信警报推送与 180s 冷却保护</strong>：
-          当系统布防遭入侵或温度突变偏差 &gt; 5℃ 时，调用 Server酱 接口向微信推送报警。为防 <code class="proto-tag">HTTP</code> 连接拥塞和警报频繁重入，设计了 <strong>180 秒的微信发送冷却期</strong>。
-        </li>
-        <li>
-          <strong>512B 扇区对齐的 <code class="proto-tag">SD</code> 卡日志存盘</strong>：
-          设计了 <code class="proto-tag">SD</code> 日志扇区对齐算法。读取或覆写时按照物理 512 字节进行对齐擦写，将含有北京时间戳的事件及环境参数实时持久化归档。
-        </li>
-      </ul>
-    </div>
+  <div class="layout-container">
+    <div class="four-col-layout">
+      <!-- Col 1 -->
+      <div class="state-card card-edge">
+        <div class="state-icon-area">
+          <div class="state-num">01</div>
+        </div>
+        <div class="state-condition"><code class="proto-tag">ESP8266</code> 自愈<br>与 <code class="proto-tag">NTP</code> 同步</div>
+        <div class="state-desc">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: var(--brand-secondary); font-size: 20px;">•</span>
+              <span><strong>断线重连:</strong> 基于底层 <code class="proto-tag">AT</code> 指令集实现异步握手。检测到网络异常断开时，系统会自动读取配置尝试重连，确保通信链路的高可用性。</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: var(--brand-secondary); font-size: 20px;">•</span>
+              <span><strong>时钟自适应:</strong> 断网时系统会自动无缝切入本地 10ms 软件 <code class="proto-tag">RTC</code> 累加。一旦恢复网络连接，系统会重新拉取云端时间，并自动平滑对齐秒级误差。</span>
+            </li>
+          </ul>
+        </div>
+        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+      </div>
 
+      <!-- Col 2 -->
+      <div class="state-card card-cloud">
+        <div class="state-icon-area">
+          <div class="state-num">02</div>
+        </div>
+        <div class="state-condition">心知天气 <code class="proto-tag">API</code><br>轻量解析</div>
+        <div class="state-desc">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #0369a1; font-size: 20px;">•</span>
+              <span><strong>原生解析:</strong> 针对单片机资源受限的特点，直接基于底层的 <code>strstr</code> 函数，从非阻塞 <code class="proto-tag">TCP</code> 接收的环形缓存中精准匹配特定的目标键值对。</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #0369a1; font-size: 20px;">•</span>
+              <span><strong>极致轻量:</strong> 彻底摒弃了开销极其庞大、易致内存碎片的第三方 <code>JSON</code> 库，这不仅将字符串处理效率提升数倍，更为微控制器释放了海量的 RAM 空间。</span>
+            </li>
+          </ul>
+        </div>
+        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+      </div>
+
+      <!-- Col 3 -->
+      <div class="state-card card-wechat">
+        <div class="state-icon-area">
+          <div class="state-num">03</div>
+        </div>
+        <div class="state-condition">微信警报推送<br>与防抖限制</div>
+        <div class="state-desc">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #047857; font-size: 20px;">•</span>
+              <span><strong>触发条件:</strong> 一旦超声波雷达侦测到非法入侵，或本地环境温度发生剧烈突变 (&gt;5℃)，将立即通过 Server酱 云端 <code class="proto-tag">API</code> 向用户的绑定微信推送图文警报。</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #047857; font-size: 20px;">•</span>
+              <span><strong>防抖机制:</strong> 为防止多次快速触发导致 HTTP 请求大量拥塞，系统在底层专门设计了一把状态机软锁（180s 物理冷却期），静默拦截一切短时间内的重复报警。</span>
+            </li>
+          </ul>
+        </div>
+        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+      </div>
+
+      <!-- Col 4 -->
+      <div class="state-card card-sd">
+        <div class="state-icon-area">
+          <div class="state-num">04</div>
+        </div>
+        <div class="state-condition"><code class="proto-tag">512B</code> 扇区对齐<br><code class="proto-tag">SD</code> 卡日志归档</div>
+        <div class="state-desc">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #CC5A01; font-size: 20px;">•</span>
+              <span><strong>底层对齐:</strong> 针对 FAT32 特性，设计了基于 512B 扇区对齐的日志写入算法。无论是读取还是追加覆写，均严格按照物理边界进行整块擦写，避免破坏底层簇链。</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #CC5A01; font-size: 20px;">•</span>
+              <span><strong>数据归档:</strong> 无论是状态机的每一次异常切换事件，还是带有精确北京时间戳的温湿度参数，都会被实时、永久地序列化保存到本地 SD 卡中。</span>
+            </li>
+          </ul>
+        </div>
+        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+      </div>
+    </div>
   </div>
-  
-  <!-- "查看视频演示" Button at Bottom Right -->
-  <button class="view-video-btn" id="openModalBtn">
-    <span class="play-icon">▶</span> 查看视频演示
-  </button>
 </div>
 
 <div class="slide-footer">
   <div class="section-name">06. 云边端物联网通信与 SD 日志归档</div>
-  <div class="slide-number">Page 19 / 24</div>
+  <div class="slide-number">Page 20 / 25</div>
 </div>
 
 <!-- Video Modal -->
@@ -194,15 +278,17 @@
 </div>
 
 <script>
-  const openModalBtn = document.getElementById("openModalBtn");
+  const openModalBtns = document.querySelectorAll(".card-video-btn");
   const videoModal = document.getElementById("videoModal");
   const closeModalBtn = document.getElementById("closeModalBtn");
   const modalVideo = document.getElementById("modalVideo");
 
-  openModalBtn.addEventListener("click", () => {
-    videoModal.style.display = "flex";
-    modalVideo.play().catch(err => {
-      console.log("Modal video autoplay failed or file not found:", err);
+  openModalBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      videoModal.style.display = "flex";
+      modalVideo.play().catch(err => {
+        console.log("Modal video autoplay failed or file not found:", err);
+      });
     });
   });
 

@@ -2,8 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>08 TFT-LCD 界面布局设计与仿真展示 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<title>13 TFT-LCD 界面布局设计与仿真展示 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
   .layout-box {
     display: flex;
@@ -204,10 +204,10 @@
     line-height: 1.8;
     color: var(--text-secondary);
     position: relative;
-    padding-left: 28px;
+    padding-left: 0;
   }
   .design-points li::before {
-    content: "✓";
+    content: "";
     position: absolute;
     left: 0;
     color: var(--brand-secondary);
@@ -226,6 +226,16 @@
   .design-points li code {
     /* fallback to global tokens.css styles */
   }
+
+  .left-col p { font-size: 23px; line-height: 1.8; }
+  .left-col li { font-size: 23px; line-height: 1.8; }
+  .left-col strong { font-size: 26px; }
+
+
+  /* FORCE ALIGN TEXT SIZE */
+  .left-intro p, .left-intro li, .design-points li { font-size: 23px !important; line-height: 1.8; }
+  .left-intro strong, .design-points strong { font-size: 26px !important; }
+
 </style>
 </head>
 <body>
@@ -240,22 +250,22 @@
   <div class="slide-meta">界面交互设计</div>
 </div>
 
-<h1 class="slide-title">TFT-LCD 界面设计与<span class="highlight-gradient">双主题对比</span></h1>
+<h1 class="slide-title">TFT-LCD 界面设计与双主题对比</h1>
 <p class="slide-subtitle">TFT-LCD UI HUD Layout and Dark/Light Dual Theme Display</p>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="layout-box">
     <!-- Left panel: Introduction -->
     <div class="left-intro">
-      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">界面视觉设计规范</h2>
-      <p style="font-size: 20px; color: var(--text-secondary); line-height: 1.8;">
-        仿真界面根据 STM32 主控中 480×320 TFT 液晶屏的真实排版与坐标编写。系统提供两套主题风格（默认的 Dark 黑色霓虹模式，和 Deep Space Blue 深海暗蓝高对比度模式），用以适应不同光照环境并降低背光漏光。
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">界面布局与视觉引擎</h2>
+      <p>
+        本项目在 480x320 分辨率的 TFT-LCD 上，通过纯底层 C 语言绘制逻辑，从零搭建了一套极具科技感的类 HUD (平视显示器) 高帧率交互系统。系统内嵌两套深度定制的视觉主题，以完美适应不同的应用场景与环境光线。
       </p>
       
       <ul class="design-points">
-        <li><strong>科技卡片布局 (HUD Cards)</strong>：四角折边设计，区分温度、湿度、状态、以及光强外设数据。</li>
-        <li><strong>高对比度色彩定义</strong>：完全映射 STM32 固件中 <code>theme_bg</code>, <code>theme_card_bg</code> 和 <code>theme_accent</code> 等变量。</li>
-        <li><strong>动态刷新指示</strong>：顶部包含 SYSTEM SAFE 状态指示框及底部翻页棱形点。</li>
+        <li><strong>模块化卡片架构</strong>：采用现代化的扁平悬浮设计，将温湿度、环境光照、安全评级等数据进行区块化精准隔离，信息层级分明，一目了然。</li>
+        <li><strong>双轨动态色彩映射</strong>：底层抽象出全局色彩配置指针，支持一键在“极客霓虹”与“深空暗蓝”两套高对比度主题间无缝热切换。</li>
+        <li><strong>像素级交互状态反馈</strong>：顶部配备全局安全屏障状态指示栏，配合底部的实时微秒级运行时钟与动态页码指示器，打造现代智能终端。</li>
       </ul>
     </div>
 
@@ -320,7 +330,7 @@
           </div>
           <div class="lcd-bottom-right">G-05 HUD</div>
         </div>
-        <span class="theme-tag tag-dark">主题 0：Dark 黑色霓虹模式</span>
+        <span class="theme-tag tag-dark">主题 1：Neon Black 极客霓虹</span>
       </div>
 
       <!-- Theme 1 Mockup -->
@@ -382,16 +392,56 @@
           </div>
           <div class="lcd-bottom-right">G-05 HUD</div>
         </div>
-        <span class="theme-tag tag-light">主题 1：Deep Space Blue 深海暗蓝</span>
+        <span class="theme-tag tag-light">主题 2：Dark Blue 深空暗蓝</span>
       </div>
     </div>
   </div>
 </div>
 
+<button class="view-video-btn" id="openModalBtn">
+    <span class="play-icon">▶</span> 查看视频演示
+  </button>
 <div class="slide-footer">
-  <div class="section-name">05. HUD UI 设计与高保真仿真展示</div>
-  <div class="slide-number">Page 14 / 24</div>
+  <div class="section-name">04. HUD UI 设计与人机交互</div>
+  <div class="slide-number">Page 13 / 25</div>
 </div>
+
+
+<div class="video-modal" id="videoModal">
+  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
+  <div class="video-modal-content">
+    <video id="modalVideo" src="../shared/videos/security_demo.mp4" controls preload="metadata"></video>
+  </div>
+</div>
+
+
+<script>
+  const openModalBtn = document.getElementById("openModalBtn");
+  const videoModal = document.getElementById("videoModal");
+  const closeModalBtn = document.getElementById("closeModalBtn");
+  const modalVideo = document.getElementById("modalVideo");
+
+  if(openModalBtn) {
+      openModalBtn.addEventListener("click", () => {
+        videoModal.style.display = "flex";
+        modalVideo.play().catch(err => {
+          console.log("Modal video autoplay failed or file not found:", err);
+        });
+      });
+  }
+
+  function closeModal() {
+    videoModal.style.display = "none";
+    modalVideo.pause();
+  }
+
+  if(closeModalBtn) {
+      closeModalBtn.addEventListener("click", closeModal);
+      videoModal.addEventListener("click", (e) => {
+        if (e.target === videoModal) closeModal();
+      });
+  }
+</script>
 
 </body>
 </html>

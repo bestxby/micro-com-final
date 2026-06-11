@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>14 多通道人机交互控制方式设计 - 期末汇报</title>
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
+<style>
+  .sandbox-container {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    padding-bottom: 20px;
+  }
+  
+  /* Virtual IR Remote Styling */
+  .remote-control {
+    width: 260px;
+    background: linear-gradient(135deg, #2D2A26 0%, #1A1816 100%);
+    border: 3px solid rgba(25, 24, 22, 0.2);
+    border-radius: 36px;
+    padding: 24px 18px;
+    box-shadow: 0 25px 50px rgba(25, 24, 22, 0.25), inset 0 2px 5px rgba(255,255,255,0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    user-select: none;
+  }
+  .remote-header {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .remote-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+  .btn-ir {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: #4A453E;
+    border: 1px solid rgba(25, 24, 22, 0.1);
+    color: #ECE8E1;
+    font-weight: bold;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  .btn-ir:hover { background: #5C564E; color: #f8fafc; }
+  .btn-ir:active { transform: scale(0.92); background: var(--brand-primary); }
+  .btn-power { background: #DC2626; color: #fff; }
+  .btn-power:hover { background: #EF4444; }
+  .btn-menu {
+    background: var(--brand-secondary);
+    color: #fff;
+    border-radius: 8px;
+    aspect-ratio: 2.2 / 1;
+    grid-column: span 2;
+    font-size: 12px;
+  }
+  .btn-menu:hover { background: #138E84; }
+  
+  .nav-pad {
+    grid-column: span 3;
+    aspect-ratio: 1;
+    position: relative;
+    background: #191816;
+    border-radius: 50%;
+    border: 2px solid rgba(25, 24, 22, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-nav {
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    background: #2D2A26;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 900;
+    color: #ECE8E1;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+  .btn-nav:hover { background: #4A453E; color: #fff; }
+  .btn-nav:active { background: var(--brand-secondary); color: #fff; transform: scale(0.9); }
+  .nav-up    { top: 8px; }
+  .nav-down  { bottom: 8px; }
+  .nav-left  { left: 8px; }
+  .nav-right { right: 8px; }
+  .btn-ok {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    color: #fff;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    z-index: 2;
+    font-size: 12px;
+  }
+  .btn-ok:hover { background: #E0690F; }
+  
+  /* LCD Screen Emulator Enclosure */
+  .lcd-enclosure {
+    position: relative;
+    width: 600px;
+    height: 440px;
+    background: #0c0f17;
+    border: 14px solid #191816;
+    border-radius: 20px;
+    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .lcd-pins-top, .lcd-pins-bottom {
+    display: flex;
+    justify-content: space-around;
+    padding: 2px 0;
+    background: #1f2937;
+    height: 12px;
+  }
+  .pin-dot {
+    width: 5px;
+    height: 5px;
+    background: #fbbf24;
+    border-radius: 50%;
+    box-shadow: 0 0 3px #fbbf24;
+  }
+  
+  /* 480x320 Internal scaled to fit the 572x396 screen area */
+  .lcd-screen-body {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 20px;
+    line-height: 16px;
+    transform: scale(1.19);
+    transform-origin: top left;
+    width: 480px;
+    height: 320px;
+  }
+  
+  /* Theme variables mapping to actual C variables */
+  /* Theme 0: Dark Neon */
+  .lcd-theme-t0 {
+    background: #000000;
+    color: #ffffff;
+    --lcd-border: #808080;
+    --lcd-accent: #00ffff;
+    --lcd-card: #1c1c1c;
+    --lcd-green: #00ff00;
+    --lcd-blue: #0000ff;
+    --lcd-red: #ff0000;
+    --lcd-yellow: #ffff00;
+    --lcd-muted: #808080;
+  }
+  /* Theme 1: Deep Space Blue */
+  .lcd-theme-t1 {
+    background: #0A1128;
+    color: #FFFFFF;
+    --lcd-border: #3A506B;
+    --lcd-accent: #00FFCC;
+    --lcd-card: #1C2541;
+    --lcd-green: #00FF00;
+    --lcd-blue: #3399FF;
+    --lcd-red: #FF3366;
+    --lcd-yellow: #FFCC00;
+    --lcd-muted: #758EBF;
+  }
+
+  /* Coordinate placements */
+  .lcd-topbar-line { position: absolute; left: 0; top: 24px; width: 480px; height: 1px; background: var(--lcd-accent); }
+  .lcd-sep-line1   { position: absolute; left: 0; top: 25px; width: 480px; height: 1px; background: var(--lcd-border); }
+  .lcd-sep-line2   { position: absolute; left: 0; top: 46px; width: 480px; height: 1px; background: var(--lcd-border); }
+  .lcd-bottom-line { position: absolute; left: 0; top: 295px; width: 480px; height: 1px; background: var(--lcd-border); }
+  
+  .lcd-header-decor { position: absolute; left: 8px; top: 28px; width: 3px; height: 16px; background: var(--lcd-accent); }
+  .lcd-header-title { position: absolute; left: 16px; top: 28px; color: var(--lcd-accent); }
+  
+  .lcd-topbar-pill {
+    position: absolute;
+    left: 142px; top: 4px; width: 196px; height: 16px;
+    border: 1px solid var(--lcd-green);
+    color: var(--lcd-green);
+    text-align: center;
+    line-height: 14px;
+    font-size: 13px;
+  }
+  .lcd-topbar-theme-indicator {
+    position: absolute;
+    left: 420px; top: 4px; width: 24px; height: 16px;
+    border: 1px solid var(--lcd-border);
+    box-sizing: border-box;
+  }
+  .lcd-theme-indicator-fill {
+    position: absolute;
+    left: 6px; top: 4px; width: 12px; height: 8px;
+    background: var(--lcd-accent);
+  }
+  .lcd-theme-t1 .lcd-theme-indicator-fill {
+    background: transparent;
+    border: 1px solid var(--lcd-accent);
+  }
+  
+  .lcd-page-container {
+    position: absolute;
+    left: 0; top: 47px; width: 480px; height: 248px;
+  }
+  
+  /* Card layouts */
+  .lcd-card-box {
+    position: absolute;
+    background: var(--lcd-card);
+    border: 1px solid var(--lcd-border);
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  .lcd-card-title { color: var(--lcd-accent); font-size: 13px; display: block; margin-bottom: 4px; }
+  .lcd-card-val { font-size: 19px; display: block; margin-bottom: 6px; }
+  
+  /* Segmented Bar */
+  .seg-bar { display: flex; gap: 3px; }
+  .seg-block { width: 11px; height: 6px; background: var(--lcd-theme-t0); }
+  .seg-block.active { background: var(--lcd-accent); }
+  .seg-block.inactive { background: #111; }
+  .lcd-theme-t1 .seg-block.inactive { background: #070c18; }
+  
+  /* Pages */
+  .p-tab { display: none; width: 100%; height: 100%; position: relative; }
+  .p-tab.active { display: block; }
+  
+  /* Status indicators in list */
+  .status-row { display: flex; align-items: center; gap: 4px; line-height: 15px; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lcd-green); display: inline-block; }
+  
+  /* Page 1 Left details */
+  .p1-left { position: absolute; left: 16px; top: 9px; width: 184px; height: 220px; }
+  .p1-right { position: absolute; left: 216px; top: 9px; width: 248px; height: 220px; }
+  
+  /* Timeline */
+  .timeline-vert { position: absolute; left: 24px; top: 9px; bottom: 9px; border-left: 2px dashed var(--lcd-border); }
+  .timeline-node { position: absolute; left: 19px; width: 12px; height: 12px; border-radius: 50%; background: var(--lcd-red); border: 2px solid var(--lcd-red); box-shadow: 0 0 6px var(--lcd-red); }
+  .timeline-card { position: absolute; left: 42px; width: 422px; height: 48px; }
+  
+  /* Page 3: Game Frame */
+  .game-frame {
+    position: absolute;
+    left: 20px; top: 9px; width: 441px; height: 231px;
+    background: #000;
+    border: 2px solid var(--lcd-border);
+  }
+  .game-frame::before {
+    content: "";
+    position: absolute;
+    top: -3px; left: -3px; right: -3px; bottom: -3px;
+    border: 1px solid var(--lcd-border);
+    pointer-events: none;
+  }
+  .game-corner {
+    position: absolute;
+    width: 10px; height: 10px;
+    border: 2px solid var(--lcd-accent);
+    z-index: 10;
+  }
+  .gc-tl { top: -2px; left: -2px; border-right: 0; border-bottom: 0; }
+  .gc-tr { top: -2px; right: -2px; border-left: 0; border-bottom: 0; }
+  .gc-bl { bottom: -2px; left: -2px; border-right: 0; border-top: 0; }
+  .gc-br { bottom: -2px; right: -2px; border-left: 0; border-top: 0; }
+  
+  .game-bird {
+    position: absolute;
+    width: 12px; height: 12px;
+    background: var(--lcd-yellow);
+    left: 120px;
+    z-index: 8;
+  }
+  .game-pipe-top, .game-pipe-bot {
+    position: absolute;
+    width: 32px;
+    background: var(--lcd-green);
+    z-index: 6;
+  }
+  
+  /* Bottom Dots and text */
+  .page-dots-container {
+    position: absolute;
+    left: 0; top: 308px; width: 480px;
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+  }
+  .p-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lcd-border); }
+  .p-dot.active { background: var(--lcd-accent); }
+  
+  .lcd-bottom-left { position: absolute; left: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+  .lcd-bottom-right { position: absolute; right: 16px; top: 296px; color: var(--lcd-muted); font-size: 14px; }
+
+  /* Times New Roman formula class on LCD */
+  .lcd-formula {
+    font-family: 'Times New Roman', Times, serif;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">人机交互沙盒</div>
+</div>
+
+<h1 class="slide-title">多通道人机交互：全方位控制方案</h1>
+<p class="slide-subtitle">Multi-Channel HMI: Physical Buttons, Touch Screen, and IR Remote</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div style="display: flex; justify-content: center; align-items: stretch; height: 100%; padding: 10px 60px 20px; gap: 40px;">
+    
+    <!-- 1. 实体按键 -->
+    <div style="flex: 1; background: #FCFAF7; border: 1px solid #EAE6DF; border-radius: 20px; padding: 25px 30px; text-align: center; box-shadow: 0 15px 35px rgba(25,24,22,0.08); display: flex; flex-direction: column;">
+      <div style="height: 120px; display: flex; align-items: center; justify-content: center; font-size: 80px;">🕹️</div>
+      <h2 style="color: var(--brand-primary); margin-bottom: 12px; font-size: 32px;">1. 实验箱物理按键</h2>
+      <p style="color: var(--text-muted); font-size: 22px; line-height: 1.8; text-align: left; background: #F3EBE1; padding: 16px; border-radius: 12px; flex-grow: 1;">
+        <strong style="color: #4A453E;">输入源：</strong><br>实验板载独立按键 (KEY1-KEY4) + 五向导航摇杆<br><br>
+        <strong style="color: #4A453E;">特点：</strong><br>
+        提供最稳定、零延迟的硬件级控制，带有物理段落感。<br>适用于基础的菜单切换、系统急停复位及游戏控制。
+      </p>
+      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放按键操控演示</button>
+    </div>
+
+    <!-- 2. 触摸屏 -->
+    <div style="flex: 1; background: #FCFAF7; border: 1px solid #EAE6DF; border-radius: 20px; padding: 25px 30px; text-align: center; box-shadow: 0 15px 35px rgba(25,24,22,0.08); display: flex; flex-direction: column;">
+      <div style="height: 120px; display: flex; align-items: center; justify-content: center; font-size: 80px;">👆</div>
+      <h2 style="color: var(--brand-primary); margin-bottom: 12px; font-size: 32px;">2. TFT 电阻触摸屏</h2>
+      <p style="color: var(--text-muted); font-size: 22px; line-height: 1.8; text-align: left; background: #F3EBE1; padding: 16px; border-radius: 12px; flex-grow: 1;">
+        <strong style="color: #4A453E;">输入源：</strong><br>XPT2046 触摸控制器采集压感坐标<br><br>
+        <strong style="color: #4A453E;">特点：</strong><br>
+        实现直观的图形化 GUI 交互。用户可直接点击屏幕虚拟按钮或进行交互操作，体验类似现代智能手机的直觉控制。
+      </p>
+      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放触屏操控演示</button>
+    </div>
+
+    <!-- 3. 红外遥控 -->
+    <div style="flex: 1; background: #FCFAF7; border: 1px solid #EAE6DF; border-radius: 20px; padding: 25px 30px; text-align: center; box-shadow: 0 15px 35px rgba(25,24,22,0.08); display: flex; flex-direction: column;">
+      <div style="height: 140px; display: flex; align-items: center; justify-content: center; transform: scale(0.85); transform-origin: center;">
+        
+        <!-- Authentic 17-key Mini Remote HTML -->
+        <div style="width: 76px; height: 176px; background: #181818; border-radius: 6px; border: 2px solid #333; display: flex; flex-direction: column; align-items: center; padding: 10px 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.4), inset 0 1px 3px rgba(255,255,255,0.1);">
+          <div style="width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px 4px; margin-bottom: 10px;">
+            <!-- Row 1 -->
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">1</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">2</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">3</div>
+            <!-- Row 2 -->
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">4</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">5</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">6</div>
+            <!-- Row 3 -->
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">7</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">8</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">9</div>
+            <!-- Row 4 -->
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">*</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">0</div>
+            <div style="aspect-ratio: 1; background: #383838; border-radius: 50%; color: #eee; font-size: 9px; font-family: sans-serif; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 2px rgba(0,0,0,0.5);">#</div>
+          </div>
+          <!-- Navigation Pad -->
+          <div style="position: relative; width: 48px; height: 48px; background: #252525; border-radius: 50%; box-shadow: inset 0 0 4px rgba(0,0,0,0.8);">
+            <!-- Up -->
+            <div style="position: absolute; top: 2px; left: 16px; width: 16px; height: 16px; background: #383838; border-radius: 50%; color: #ccc; font-size: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 1px rgba(0,0,0,0.5);">▲</div>
+            <!-- Down -->
+            <div style="position: absolute; bottom: 2px; left: 16px; width: 16px; height: 16px; background: #383838; border-radius: 50%; color: #ccc; font-size: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 1px rgba(0,0,0,0.5);">▼</div>
+            <!-- Left -->
+            <div style="position: absolute; left: 2px; top: 16px; width: 16px; height: 16px; background: #383838; border-radius: 50%; color: #ccc; font-size: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 1px rgba(0,0,0,0.5);">◀</div>
+            <!-- Right -->
+            <div style="position: absolute; right: 2px; top: 16px; width: 16px; height: 16px; background: #383838; border-radius: 50%; color: #ccc; font-size: 7px; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 1px rgba(0,0,0,0.5);">▶</div>
+            <!-- OK -->
+            <div style="position: absolute; left: 16px; top: 16px; width: 16px; height: 16px; background: #0F766E; border-radius: 50%; color: white; font-size: 6px; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.6);">OK</div>
+          </div>
+        </div>
+
+      </div>
+      <h2 style="color: var(--brand-primary); margin-bottom: 12px; font-size: 32px;">3. NEC 红外遥控器</h2>
+      <p style="color: var(--text-muted); font-size: 22px; line-height: 1.8; text-align: left; background: #F3EBE1; padding: 16px; border-radius: 12px; flex-grow: 1;">
+        <strong style="color: #4A453E;">输入源：</strong><br>17 键红外遥控器 + EXTI 外部中断 + TIM4<br><br>
+        <strong style="color: #4A453E;">特点：</strong><br>
+        实现远距离无线操控。支持翻页、布撤防、主题切换等高频操作。采用标准 NEC 协议严格解码，抗干扰性强。
+      </p>
+      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放红外遥控演示</button>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="slide-footer">
+  <div class="section-name">04. HUD UI 设计与人机交互</div>
+  <div class="slide-number">Page 14 / 25</div>
+</div>
+</body>
+</html>

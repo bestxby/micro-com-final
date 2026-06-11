@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>汇报目录 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
   .agenda-grid {
     display: grid;
@@ -14,7 +14,20 @@
     height: 100%;
     padding: 10px 0;
   }
+  .agenda-grid > a {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+    border: none;
+    height: 100%;
+  }
+  .agenda-grid > a:nth-child(7) {
+    grid-column: span 3;
+  }
   .agenda-card {
+    cursor: pointer;
+    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     padding: 24px;
@@ -24,8 +37,7 @@
     position: relative;
     overflow: hidden;
   }
-  .agenda-card:nth-child(7) {
-    grid-column: span 3;
+  .agenda-grid > a:nth-child(7) .agenda-card {
     flex-direction: row;
     align-items: center;
     justify-content: flex-start;
@@ -33,29 +45,35 @@
     padding: 20px 40px;
   }
   .agenda-num {
-    font-size: 36px;
+    font-size: 46px;
     font-weight: 900;
     background: var(--brand-gradient);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     font-family: var(--font-title-family);
+    width: fit-content;
     margin-bottom: 6px;
   }
-  .agenda-card:nth-child(7) .agenda-num {
+  .agenda-grid > a:nth-child(7) .agenda-num {
     margin-bottom: 0;
-    font-size: 44px;
+    font-size: 54px;
   }
   .agenda-title {
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 800;
     color: var(--text-primary);
     margin-bottom: 6px;
   }
   .agenda-desc {
-    font-size: 15px;
+    font-size: 20px;
     color: var(--text-secondary);
     line-height: 1.5;
+  }
+  .agenda-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 30px -10px rgba(15, 118, 110, 0.15);
+    border-color: rgba(15, 118, 110, 0.3);
   }
 </style>
 </head>
@@ -71,61 +89,31 @@
   <div class="slide-meta">汇报目录</div>
 </div>
 
-<h1 class="slide-title">汇报目录与<span class="highlight-gradient">系统设计大纲</span></h1>
+<h1 class="slide-title">汇报目录与系统设计大纲</h1>
 <p class="slide-subtitle">Agenda & Presentation Outline</p>
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="agenda-grid">
     <!-- Card 1 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">01</div>
-      <div class="agenda-title">研究背景与应用场景定位</div>
-      <div class="agenda-desc">智能居家痛点与自适应自愈系统架构</div>
-    </div>
+    <a href="../index.html#3" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">01</div><div class="agenda-title">研究背景与应用场景定位</div><div class="agenda-desc">智能居家痛点与自适应自愈系统架构</div></div></a>
 
     <!-- Card 2 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">02</div>
-      <div class="agenda-title">物理硬件底座与引脚重构</div>
-      <div class="agenda-desc">STM32引脚排布、冲突规避与重映射说明</div>
-    </div>
+    <a href="../index.html#5" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">02</div><div class="agenda-title">物理硬件底座与引脚重构</div><div class="agenda-desc">STM32引脚排布、冲突规避与重映射说明</div></div></a>
 
     <!-- Card 3 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">03</div>
-      <div class="agenda-title">底层驱动协议与时序优化</div>
-      <div class="agenda-desc">位带操作I2C、极速SPI刷新与NEC红外硬件解码</div>
-    </div>
+    <a href="../index.html#8" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">03</div><div class="agenda-title">底层驱动协议与时序优化</div><div class="agenda-desc">位带操作I2C、极速SPI刷新与NEC红外硬件解码</div></div></a>
 
     <!-- Card 4 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">04</div>
-      <div class="agenda-title">边缘数据计算与智能算法</div>
-      <div class="agenda-desc">EMA低通滤波、自学习环境温升基线机制</div>
-    </div>
+    <a href="../index.html#11" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">04</div><div class="agenda-title">HUD UI 设计与人机交互</div><div class="agenda-desc">六大核心大屏与多通道控制</div></div></a>
 
     <!-- Card 5 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">05</div>
-      <div class="agenda-title">HUD 界面布局与增量渲染</div>
-      <div class="agenda-desc">双主题TFT-LCD布局、人机交互与脏矩形重绘</div>
-    </div>
+    <a href="../index.html#15" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">05</div><div class="agenda-title">边缘计算与算法优化</div><div class="agenda-desc">AI 自学习、EMA 滤波与图形增量算法</div></div></a>
 
     <!-- Card 6 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">06</div>
-      <div class="agenda-title">多级安全防护与物联网通信</div>
-      <div class="agenda-desc">声光防盗警戒、ESP8266自愈重连与微信推送</div>
-    </div>
+    <a href="../index.html#18" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">06</div><div class="agenda-title">多级安全防护与物联网通信</div><div class="agenda-desc">声光防盗警戒、ESP8266自愈重连与微信推送</div></div></a>
 
     <!-- Card 7 -->
-    <div class="glass-card agenda-card">
-      <div class="agenda-num">07</div>
-      <div>
-        <div class="agenda-title">系统联合测试、总结与展望</div>
-        <div class="agenda-desc">72小时长效稳定运行实测、Keil AC6编译指标与项目经验总结</div>
-      </div>
-    </div>
+    <a href="../index.html#21" target="_parent" style="text-decoration: none; color: inherit; display: block; outline: none; border: none; height: 100%;"><div class="glass-card agenda-card"><div class="agenda-num">07</div><div><div class="agenda-title">系统联合测试、总结与展望</div><div class="agenda-desc">72小时长效稳定运行实测、Keil AC6编译指标与项目经验总结</div></div></div></a>
   </div>
 </div>
 
@@ -133,6 +121,7 @@
   <div class="section-name">汇报目录 / Agenda</div>
   <div class="slide-number">Page 2 / 24</div>
 </div>
+
 
 </body>
 </html>
