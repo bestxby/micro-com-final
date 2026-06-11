@@ -1,0 +1,9 @@
+{
+  "演示文档/slides\\section1-01-divider-background.html": "<div class=\"part-title\">项目背景与<br>应用场景定位</div>",
+  "演示文档/slides\\section2-01-divider-hardware.html": "<div class=\"part-title\">物理硬件底座与<br>引脚重构冲突规避</div>",
+  "演示文档/slides\\section3-01-divider-driver.html": "<div class=\"part-title\">底层驱动协议与<br>时序寄存器级优化</div>",
+  "演示文档/slides\\section4-01-divider-ui.html": "<div class=\"part-title\">TFT-LCD UI 界面与<br>脏矩形图形加速渲染</div>",
+  "演示文档/slides\\section5-01-divider-algorithm.html": "<div class=\"part-title\">边缘数据计算与<br>环境基线学习算法</div>",
+  "演示文档/slides\\section6-01-divider-security.html": "<div class=\"part-title\">多通道安全防护与<br>云边端物联网通信</div>",
+  "演示文档/slides\\section7-01-divider-testing.html": "<div class=\"part-title\">整机联合调试、<br>系统设计总结与展望</div>"
+}

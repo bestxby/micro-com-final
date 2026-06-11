@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>06 底层驱动协议开发与深度寄存器优化 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
   .col-container {
     display: grid;
@@ -22,7 +22,7 @@
   .opt-title {
     font-size: 25px;
     font-weight: 800;
-    color: var(--brand-secondary);
+    color: var(--brand-primary);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
@@ -32,7 +32,7 @@
     width: 36px;
     height: 36px;
     border-radius: 6px;
-    background: var(--brand-gradient);
+    background: var(--brand-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -56,6 +56,14 @@
     border-top: 1px solid var(--card-border);
     padding-top: 12px;
   }
+  .opt-title code.proto-tag, .opt-title code.pin-tag {
+    color: var(--brand-primary) !important;
+  }
+
+  /* FORCE ALIGN TEXT SIZE (Like Slide 17) */
+  p, li { font-size: 23px !important; line-height: 1.8; }
+  strong { font-size: 26px !important; }
+
 </style>
 </head>
 <body>
@@ -70,7 +78,7 @@
   <div class="slide-meta">驱动寄存器优化</div>
 </div>
 
-<h1 class="slide-title">底层驱动开发与<span class="highlight-gradient">寄存器级时序优化</span></h1>
+<h1 class="slide-title">底层驱动开发与寄存器级时序优化</h1>
 <p class="slide-subtitle">Low-Level Driver Optimization and Bit-Banding Timings</p>
 
 <div class="slide-content-layout animate-fade-in-up">

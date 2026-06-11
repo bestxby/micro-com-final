@@ -3,135 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <title>11 智能居家多级安全防护功能设计 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
-  .layout-box {
+  .layout-container {
     display: flex;
-    gap: 40px;
+    flex-direction: column;
     width: 100%;
     height: 100%;
   }
-  .left-col {
+  .three-col-layout {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    
+    margin-top: 10px;
+  }
+  .state-card {
     flex: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 20px;
+    padding: 36px 32px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    padding-top: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   }
+  .state-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 50px -12px rgba(15, 118, 110, 0.15);
+  }
+  .card-safe { border-top: 6px solid #0F766E; }
+  .card-warning { border-top: 6px solid #CC5A01; }
+  .card-alarm { border-top: 6px solid #DC2626; }
+  
+  .state-badge {
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 22px;
+    font-weight: 900;
+    display: inline-block;
+    width: fit-content;
+    margin-bottom: 24px;
+    letter-spacing: 0.05em;
+  }
+  .badge-safe { background: rgba(15, 118, 110, 0.1); color: #0F766E; border: 1px solid rgba(15, 118, 110, 0.2); }
+  .badge-warning { background: rgba(204, 90, 1, 0.1); color: #CC5A01; border: 1px solid rgba(204, 90, 1, 0.2); }
+  .badge-alarm { background: rgba(220, 38, 38, 0.1); color: #DC2626; border: 1px solid rgba(220, 38, 38, 0.2); }
+  
+  .state-condition {
+    font-size: 23px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(25, 24, 22, 0.15);
+    min-height: 72px;
+  }
+  .state-desc {
+    font-size: 23px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+    
+  }
+  .state-desc strong {
+    color: var(--text-primary);
+    font-size: 26px;
+    font-weight: 800;
+  }
+  
   .fsm-box {
     background: var(--card-bg);
     border: 1px solid var(--card-border);
     box-shadow: var(--glass-shadow);
-    border-radius: 12px;
-    padding: 24px;
-    margin-top: 32px;
-  }
-  .state-badge {
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 20px;
-    font-weight: bold;
-    display: inline-block;
-  }
-  .badge-safe { background: rgba(15, 118, 110, 0.08); color: var(--brand-secondary); border: 1px solid rgba(15, 118, 110, 0.2); }
-  .badge-warning { background: rgba(204, 90, 1, 0.08); color: var(--brand-primary); border: 1px solid rgba(204, 90, 1, 0.2); }
-  .badge-alarm { background: rgba(220, 38, 38, 0.08); color: var(--alert-red); border: 1px solid rgba(220, 38, 38, 0.2); }
-  
-  .desc-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
-  }
-  .desc-list li {
-    font-size: 23px;
-    color: var(--text-secondary);
-    line-height: 1.8;
-  }
-  .desc-list li strong {
-    color: var(--text-primary);
-    font-size: 25px;
-    font-weight: 800;
-  }
-  
-  /* Floating Video Button at Bottom Right */
-  .view-video-btn {
-    position: absolute;
-    right: 80px;
-    bottom: 110px;
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 32px;
-    background: var(--brand-primary);
-    border: 1px solid rgba(25, 24, 22, 0.1);
-    border-radius: 12px;
-    color: #fff;
-    font-size: 18px;
-    font-weight: 800;
-    box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 100;
-  }
-  .view-video-btn:hover {
-    transform: scale(1.05);
-    background: var(--brand-secondary);
-    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
-  }
-  .play-icon {
-    font-size: 20px;
-  }
-
-  /* Fullscreen Video Modal */
-  .video-modal {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(25, 24, 22, 0.96);
-    backdrop-filter: blur(16px);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .video-modal-content {
-    position: relative;
-    width: 85%;
-    max-width: 1400px;
-    aspect-ratio: 16 / 9;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid var(--card-border);
-    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
-  }
-  .video-modal-content video {
+    border-radius: 16px;
+    padding: 24px 220px 24px 32px; /* Pad right to prevent overlap with video button */
+    margin-top: 24px;
     width: 100%;
-    height: 100%;
-    display: block;
-    outline: none;
-  }
-  .close-modal-btn {
-    position: absolute;
-    top: 32px;
-    right: 32px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: rgba(252, 250, 247, 0.1);
-    border: 1px solid rgba(252, 250, 247, 0.15);
-    color: #FCFAF7;
-    font-size: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10000;
-  }
-  .close-modal-btn:hover {
-    background: var(--alert-red);
-    border-color: var(--alert-red);
-    transform: scale(1.1);
   }
 </style>
 </head>
@@ -147,39 +97,47 @@
   <div class="slide-meta">居家安全防护</div>
 </div>
 
-<h1 class="slide-title">智能居家多级<span class="highlight-gradient">安全防护与状态机</span></h1>
+<h1 class="slide-title">智能居家多级安全防护与状态机</h1>
 <p class="slide-subtitle">Multi-Level Home Security Logic and Finite State Machine Control</p>
 
 <div class="slide-content-layout animate-fade-in-up">
-  <div class="layout-box">
-    <!-- Left: FSM and Logic Descriptions -->
-    <div class="left-col">
-      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">声光防盗多级警戒逻辑</h2>
-      <ul class="desc-list">
-        <li>
-          <span class="state-badge badge-safe">SAFE 状态</span> &nbsp;&nbsp;(超声波测距 &ge; 30cm 或撤防模式)<br>
-          <strong>外设动作</strong>：绿灯 (LED4) 平滑呼吸运行，有源蜂鸣器静音。
-        </li>
-        <li>
-          <span class="state-badge badge-warning">WARNING 状态</span> &nbsp;&nbsp;(布防下，距离 15cm 至 30cm)<br>
-          <strong>外设动作</strong>：黄灯 (LED3) 保持常亮，蜂鸣器静音，数码管显示实时距离。
-        </li>
-        <li>
-          <span class="state-badge badge-alarm">ALARM 状态</span> &nbsp;&nbsp;(布防下，距离 &lt; 15cm)<br>
-          <strong>外设动作</strong>：红灯 (LED2) 5Hz 高频爆闪，蜂鸣器断续声鸣警报，屏幕弹窗警报，并触发<strong>微信警报推送 (180s 冷却限制)</strong>。
-        </li>
-      </ul>
+  <div class="layout-container">
+    <div class="three-col-layout">
+      <!-- SAFE -->
+      <div class="state-card card-safe">
+        <div class="state-badge badge-safe">SAFE 状态</div>
+        <div class="state-condition">触发条件：超声波测距 &ge; 30cm 或处于撤防模式</div>
+        <div class="state-desc">
+          <strong>外设动作：</strong>绿灯 (LED4) 平滑呼吸运行，有源蜂鸣器静音。系统处于常规环境监控状态，安全无风险。
+        </div>
+      </div>
       
-      <div class="fsm-box">
-        <h3 style="font-size: 25px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 8px;">状态机转换规则 (<code class="proto-tag">FSM</code>)</h3>
-        <p style="font-size: 21px; color: var(--text-muted); line-height: 1.8;">
-          • 撤防模式 (Disarmed) &rarr; 按 KEY3 / 红外OK &rarr; 布防监测 (Armed)<br>
-          • Armed 状态下，系统持续轮询测距：当超声波距离突变触发特定边界时，直接进行 <strong>Safe &harr; Warning &harr; Alarm</strong> 物理映射。撤防操作将强制重置为 Safe 状态。
-        </p>
+      <!-- WARNING -->
+      <div class="state-card card-warning">
+        <div class="state-badge badge-warning">WARNING 状态</div>
+        <div class="state-condition">触发条件：布防模式下，距离介于 15cm 至 30cm</div>
+        <div class="state-desc">
+          <strong>外设动作：</strong>黄灯 (LED3) 保持常亮警告，蜂鸣器静音。屏幕数码管开始实时显示侵入距离，提示可能的安全威胁。
+        </div>
+      </div>
+      
+      <!-- ALARM -->
+      <div class="state-card card-alarm">
+        <div class="state-badge badge-alarm">ALARM 状态</div>
+        <div class="state-condition">触发条件：布防模式下，距离 &lt; 15cm</div>
+        <div class="state-desc">
+          <strong>外设动作：</strong>红灯 (LED2) 5Hz 高频爆闪，蜂鸣器断续声鸣警报。屏幕弹出警报窗口，并立即触发微信警报推送。
+        </div>
       </div>
     </div>
 
-    <!-- Right: LARGE Video Viewport -->
+    <div class="fsm-box">
+      <h3 style="font-size: 32px; font-weight: 800; color: var(--brand-secondary); margin-bottom: 12px;">状态机转换规则 (FSM)</h3>
+      <p style="font-size: 23px; color: var(--text-muted); line-height: 1.8;">
+        • 撤防模式 (Disarmed) &rarr; 按 KEY3 / 红外OK &rarr; 布防监测 (Armed)<br>
+        • Armed 状态下，系统持续轮询测距：当超声波距离突变触发特定边界时，直接进行 <strong><span style="color: #0F766E;">Safe</span> &harr; <span style="color: #CC5A01;">Warning</span> &harr; <span style="color: #DC2626;">Alarm</span></strong> 的状态机物理映射。撤防操作将强制系统重置为 <strong style="color: #0F766E;">Safe</strong> 状态。
+      </p>
+    </div>
   </div>
   
   <!-- "查看视频演示" Button at Bottom Right -->

@@ -64,7 +64,10 @@ h1.slide-title {
   line-height: 1.2;
   letter-spacing: -0.01em;
   margin-bottom: 6px;
-  color: var(--text-primary);
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 p.slide-subtitle {
@@ -255,26 +258,7 @@ p.slide-subtitle {
 }
 
 /* Bottom-right video trigger button styling */
-.view-video-btn {
-  position: absolute;
-  right: 80px;
-  bottom: 110px;
-  padding: 12px 24px;
-  background: var(--brand-primary);
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-family: var(--font-family);
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(204, 90, 1, 0.3);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  z-index: 50;
-  transition: all 0.3s ease;
-}
+
 
 .view-video-btn:hover {
   background: #e0690b;
@@ -566,3 +550,84 @@ code.proto-tag {
 
 
 
+
+
+/* Floating Video Button at Bottom Right */
+.view-video-btn {
+  position: absolute;
+  right: 80px;
+  bottom: 85px;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 32px;
+  background: var(--brand-primary);
+  border: 1px solid rgba(25, 24, 22, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  box-shadow: 0 10px 25px rgba(204, 90, 1, 0.2);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+.view-video-btn:hover {
+  transform: scale(1.05);
+  background: var(--brand-secondary);
+  box-shadow: 0 15px 35px rgba(15, 118, 110, 0.3);
+}
+.play-icon {
+  font-size: 20px;
+}
+
+/* Fullscreen Video Modal */
+.video-modal {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(25, 24, 22, 0.96);
+  backdrop-filter: blur(16px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.video-modal-content {
+  position: relative;
+  width: 85%;
+  max-width: 1400px;
+  aspect-ratio: 16 / 9;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
+}
+.video-modal-content video {
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+.close-modal-btn {
+  position: absolute;
+  top: 32px;
+  right: 32px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(252, 250, 247, 0.1);
+  border: 1px solid rgba(252, 250, 247, 0.15);
+  color: #FCFAF7;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10000;
+}
+.close-modal-btn:hover {
+  background: var(--alert-red);
+  border-color: var(--alert-red);
+  transform: scale(1.1);
+}
