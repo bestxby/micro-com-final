@@ -424,6 +424,8 @@
   if(openModalBtn) {
       openModalBtn.addEventListener("click", () => {
         videoModal.style.display = "flex";
+        videoModal.style.opacity = "1";
+        videoModal.style.pointerEvents = "auto";
         modalVideo.play().catch(err => {
           console.log("Modal video autoplay failed or file not found:", err);
         });
@@ -432,6 +434,8 @@
 
   function closeModal() {
     videoModal.style.display = "none";
+    videoModal.style.opacity = "0";
+    videoModal.style.pointerEvents = "none";
     modalVideo.pause();
   }
 
