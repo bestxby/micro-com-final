@@ -7,7 +7,7 @@
  * LCD 引脚配置 (4 线软件模拟 SPI, ST7796S 驱动 IC)
  * ============================================================ */
 #define LCD_RST_PORT        GPIOA
-#define LCD_RST_PIN         GPIO_Pin_3       /* PA3 → Arduino A3 → FPGA U22 → TFT RST  */
+#define LCD_RST_PIN         GPIO_Pin_1       /* PA1 → Arduino A1 → FPGA U21 → TFT RST  */
 #define LCD_CS_PORT         GPIOA
 #define LCD_CS_PIN          GPIO_Pin_4       /* PA4 → Arduino A4 → FPGA V22 → TFT CS   */
 #define LCD_SCL_PORT        GPIOA

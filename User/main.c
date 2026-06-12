@@ -24,8 +24,8 @@
  * 【期末视频录制 - 功能切换开关】
  * 说明：每次只能将下方的【其中一个】宏设置为 1，其他的必须设为 0！
  * ============================================================ */
-#define RUN_MODE_ALL       0   // 1: 运行原版所有功能
-#define RUN_MODE_ENV_AI    1   // 1: 录制环境监测与AI功能 (默认测试)
+#define RUN_MODE_ALL       1   // 1: 运行原版所有功能
+#define RUN_MODE_ENV_AI    0   // 1: 录制环境监测与AI功能 (默认测试)
 #define RUN_MODE_GAME      0   // 1: 录制 Flappy Bird 游戏
 #define RUN_MODE_SECURITY  0   // 1: 录制超声波防盗报警功能
 #define RUN_MODE_IOT       0   // 1: 录制 ESP8266 网络天气功能
@@ -897,8 +897,8 @@ float warn_threshold_dist  = 50.0f;
 void Process_Touch_Input(void) {
     if (tp_dev.sta & TP_CATH_PRES) {
         tp_dev.sta &= ~TP_CATH_PRES; // 清除点击标记
-        uint16_t tx = tp_dev.x[0];
-        uint16_t ty = tp_dev.y[0];
+        uint16_t tx = tp_dev.x;
+        uint16_t ty = tp_dev.y;
         
         // 全局：右上角主题切换框 (X: 420..444, Y: 4..20)
         if (tx >= 415 && tx <= 450 && ty >= 0 && ty <= 25) {
@@ -957,6 +957,8 @@ int main(void) {
 
     /* 硬件初始化 */
     LED_Init();
+    SD_UART_Init(115200);
+    USART1_Init(115200);
     KEY_Init();
     IR_Init();
     LCD_Init();
@@ -967,8 +969,8 @@ int main(void) {
 #if RUN_MODE_ALL || RUN_MODE_ENV_AI
     /* 初始化 BH1750 (软件 I2C) */
     bh1750_healthy = (BH1750_Init() == 0);
-    /* 重新配置并启用 SD 卡 (MISO已移至PA11) */
-    sd_healthy = (SD_Init() == SD_RESPONSE_NO_ERROR);
+    sd_healthy = 1; /* 串口透传模式：不需要初始化真实SD卡，始终标记为健康 */
+    SD_UART_SendString("SD Logging Mode: Hardware UART Tunneling Active on PA2.\r\n");
 #endif
 
     TM1637_Init();
@@ -997,25 +999,8 @@ int main(void) {
 
 #if RUN_MODE_ALL || RUN_MODE_ENV_AI
     if (sd_healthy) {
-        /* 自动扫描 SD 卡空闲扇区以恢复数据记录
-         * Fix: 限制扫描范围至 1000~4000 扇区（最多 3000 个），避免最坏情况
-         * 下扫描 19000 扇区导致开机阻塞长达约 1.5 分钟。
-         * 3000 个扇区 × 每扇区约 1ms（高速SPI约 100us，低速约 5ms）
-         * 低速时序最坏情况约 15 秒，实际高速切换后约 0.3 秒，完全可接受。 */
-        uint8_t temp_sector[512];
+        /* 串口透传模式：由 Zynq PS 端负责文件系统和续写，STM32端无需扫描扇区 */
         log_sector_cursor = 1000;
-        while (log_sector_cursor < 4000) {
-            if (SD_ReadBlock(temp_sector, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
-                if ((temp_sector[0] == 'U' && temp_sector[1] == 'P' && temp_sector[2] == ':') ||
-                    (temp_sector[0] == '2' && temp_sector[1] == '0' && temp_sector[2] == '2')) {
-                    log_sector_cursor++;
-                } else {
-                    break;
-                }
-            } else {
-                break;
-            }
-        }
     }
 #endif
 
@@ -1098,7 +1083,7 @@ int main(void) {
 #if RUN_MODE_ALL || RUN_MODE_ENV_AI
             if (sd_healthy) {
                 char log_entry[65];
-                int len = sprintf(log_entry, "%s T:%5.2fC H:%5.2f%% L:%5.1flx A:%d M:%d",
+                sprintf(log_entry, "%s T:%5.2fC H:%5.2f%% L:%5.1flx A:%d M:%d\r\n",
                                   current_net_time,
                                   aht20_healthy ? test_aht20_temp : 0.0f,
                                   aht20_healthy ? test_aht20_humi : 0.0f,
@@ -1106,29 +1091,8 @@ int main(void) {
                                   current_ai_state,
                                   system_mode);
                 
-                /* 空格填充至 62 字节，最后加 \r\n 并以 \0 结尾 */
-                for (int i = len; i < 62; i++) {
-                    log_entry[i] = ' ';
-                }
-                log_entry[62] = '\r';
-                log_entry[63] = '\n';
-                log_entry[64] = '\0';
-                
-                memcpy(&log_buffer[log_buffer_index * 64], log_entry, 64);
-                log_buffer_index++;
-                
-                /* 累积满 8 条数据 (512 字节 = 1 扇区) 时进行写入 */
-                if (log_buffer_index >= 8) {
-                    log_buffer_index = 0;
-                    if (SD_WriteBlock(log_buffer, log_sector_cursor, 512) == SD_RESPONSE_NO_ERROR) {
-                        log_sector_cursor++;
-                        if (log_sector_cursor >= 25000) {
-                            log_sector_cursor = 1000; /* 循环写保护，防溢出 */
-                        }
-                    } else {
-                        sd_healthy = 0; /* 标记为异常，自动在 1.5s 周期内重连 */
-                    }
-                }
+                /* 方案一：直接通过 USART2 (引脚 PA2 -> Arduino A2) 透传给 Zynq */
+                SD_UART_SendString(log_entry);
             }
 #endif
         }
@@ -1146,7 +1110,7 @@ int main(void) {
             // 通过串口1发送红外键值，方便调试与自定义修改
             char dbg_buf[32];
             sprintf(dbg_buf, "IR Received CMD: 0x%02X\r\n", ir_cmd);
-            USART1_SendString(dbg_buf);
+            SD_UART_SendString(dbg_buf);
 
             // 1. 左右键翻页 (支持物理导航左/右键与数字键 7/9)
             if (ir_cmd == IR_NAV_LEFT || ir_cmd == IR_NUM_7) {
@@ -1229,6 +1193,7 @@ int main(void) {
             if (aht20_healthy) {
                 AHT20_StartMeasure();
             }
+#endif
         }
         if (loop_cnt >= 150) {
             loop_cnt = 0;
@@ -1264,12 +1229,7 @@ int main(void) {
                 }
             }
 
-            /* SD Card 自动重连 */
-            if (!sd_healthy) {
-                if (SD_Init() == SD_RESPONSE_NO_ERROR) {
-                    sd_healthy = 1;
-                }
-            }
+
 #endif
 
 #if RUN_MODE_ALL || RUN_MODE_IOT

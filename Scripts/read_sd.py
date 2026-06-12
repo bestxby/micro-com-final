@@ -67,8 +67,8 @@ def read_raw_sectors(device_path, start_sector=1000, max_sectors=20000, sector_s
                 # Each 512-byte sector contains 8 chunks of 64 bytes
                 for chunk_idx in range(8):
                     chunk = data[chunk_idx * 64 : (chunk_idx + 1) * 64]
-                    # Check if the chunk starts with 'UP:'
-                    if chunk[0:3] == b'UP:':
+                    # Check if the chunk starts with 'UP:' (legacy) or '20' (new Beijing time format)
+                    if chunk[0:3] == b'UP:' or chunk[0:2] == b'20':
                         try:
                             # Try to decode the line as ASCII
                             line = chunk.decode('ascii', errors='ignore').strip()
