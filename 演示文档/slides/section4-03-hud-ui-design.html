@@ -61,17 +61,17 @@
     --lcd-muted: #808080;
   }
   
-  /* Theme 1: Deep Space Blue (Cyberpunk Style) */
+  /* Theme 1: Hardware RGB/BGR Inversion (Light BG, Red Border, Green Text) */
   .lcd-t1 {
-    background: #0A1128;
-    color: #FFFFFF;
-    --lcd-border: #3A506B;
-    --lcd-accent: #00FFCC;
-    --lcd-card: #1C2541;
-    --lcd-green: #00FF00;
-    --lcd-red: #FF3366;
-    --lcd-yellow: #FFCC00;
-    --lcd-muted: #758EBF;
+    background: #FF8080;
+    color: #003300;
+    --lcd-border: #FFFFFF;
+    --lcd-accent: #FFFFFF;
+    --lcd-card: #B3FFB3;
+    --lcd-green: #006600;
+    --lcd-red: #990000;
+    --lcd-yellow: #FFFF00;
+    --lcd-muted: #333333;
   }
  
   /* Coordinate-Based Elements */
@@ -158,7 +158,7 @@
   .lcd-t0 .seg-block.active { background: var(--lcd-accent); }
   .lcd-t1 .seg-block.active { background: var(--lcd-accent); }
   .seg-block.inactive { background: #111; }
-  .lcd-t1 .seg-block.inactive { background: #0c0f17; }
+  .lcd-t1 .seg-block.inactive { background: #A0AAB5; }
   
   /* Status dot indicator */
   .status-dot {
@@ -264,7 +264,7 @@
       
       <ul class="design-points">
         <li><strong>模块化卡片架构</strong>：采用现代化的扁平悬浮设计，将温湿度、环境光照、安全评级等数据进行区块化精准隔离，信息层级分明，一目了然。</li>
-        <li><strong>双轨动态色彩映射</strong>：底层抽象出全局色彩配置指针，支持一键在“极客霓虹”与“深空暗蓝”两套高对比度主题间无缝热切换。</li>
+        <li><strong>双轨色彩映射与实机特性</strong>：底层支持双主题热切换。由于实机 TFT-LCD 寄存器 RGB/BGR 通道解析倒置，原本深空的蓝底色渲染为反色（右侧已仿真还原此硬件现象）。</li>
         <li><strong>像素级交互状态反馈</strong>：顶部配备全局安全屏障状态指示栏，配合底部的实时微秒级运行时钟与动态页码指示器，打造现代智能终端。</li>
       </ul>
     </div>
@@ -392,7 +392,7 @@
           </div>
           <div class="lcd-bottom-right">G-05 HUD</div>
         </div>
-        <span class="theme-tag tag-light">主题 2：Dark Blue 深空暗蓝</span>
+        <span class="theme-tag tag-light" style="background: rgba(255, 0, 0, 0.08); color: #CC0000; border: 1px solid rgba(255, 0, 0, 0.2);">主题 2：实机渲染 (RGB/BGR倒置)</span>
       </div>
     </div>
   </div>
@@ -410,7 +410,7 @@
 <div class="video-modal" id="videoModal">
   <div class="close-modal-btn" id="closeModalBtn">&times;</div>
   <div class="video-modal-content">
-    <video id="modalVideo" src="../shared/videos/security_demo.mp4" controls preload="metadata"></video>
+    <video id="modalVideo" src="../assets/demo_slide13.mp4" controls preload="metadata"></video>
   </div>
 </div>
 

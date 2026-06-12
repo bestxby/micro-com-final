@@ -178,18 +178,18 @@
     --lcd-yellow: #ffff00;
     --lcd-muted: #808080;
   }
-  /* Theme 1: Deep Space Blue */
+  /* Theme 1: Hardware RGB/BGR Inversion */
   .lcd-theme-t1 {
-    background: #0A1128;
-    color: #FFFFFF;
-    --lcd-border: #3A506B;
-    --lcd-accent: #00FFCC;
-    --lcd-card: #1C2541;
-    --lcd-green: #00FF00;
+    background: #FF8080;
+    color: #003300;
+    --lcd-border: #FFFFFF;
+    --lcd-accent: #FFFFFF;
+    --lcd-card: #B3FFB3;
+    --lcd-green: #006600;
     --lcd-blue: #3399FF;
-    --lcd-red: #FF3366;
-    --lcd-yellow: #FFCC00;
-    --lcd-muted: #758EBF;
+    --lcd-red: #990000;
+    --lcd-yellow: #FFFF00;
+    --lcd-muted: #333333;
   }
 
   /* Coordinate placements */
@@ -247,7 +247,7 @@
   .seg-block { width: 11px; height: 6px; background: var(--lcd-theme-t0); }
   .seg-block.active { background: var(--lcd-accent); }
   .seg-block.inactive { background: #111; }
-  .lcd-theme-t1 .seg-block.inactive { background: #070c18; }
+  .lcd-theme-t1 .seg-block.inactive { background: #A0AAB5; }
   
   /* Pages */
   .p-tab { display: none; width: 100%; height: 100%; position: relative; }
@@ -353,7 +353,7 @@
         <strong style="color: #4A453E;">特点：</strong><br>
         提供最稳定、零延迟的硬件级控制，带有物理段落感。<br>适用于基础的菜单切换、系统急停复位及游戏控制。
       </p>
-      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放按键操控演示</button>
+      <button onclick="playVideo('../assets/demo_buttons.mp4')" style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放按键操控演示</button>
     </div>
 
     <!-- 2. 触摸屏 -->
@@ -365,7 +365,7 @@
         <strong style="color: #4A453E;">特点：</strong><br>
         实现直观的图形化 GUI 交互。用户可直接点击屏幕虚拟按钮或进行交互操作，体验类似现代智能手机的直觉控制。
       </p>
-      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放触屏操控演示</button>
+      <button onclick="alert('触屏操控演示视频暂未录制，敬请期待！')" style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放触屏操控演示</button>
     </div>
 
     <!-- 3. 红外遥控 -->
@@ -414,7 +414,7 @@
         <strong style="color: #4A453E;">特点：</strong><br>
         实现远距离无线操控。支持翻页、布撤防、主题切换等高频操作。采用标准 NEC 协议严格解码，抗干扰性强。
       </p>
-      <button style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放红外遥控演示</button>
+      <button onclick="playVideo('../assets/demo_ir_remote.mp4')" style="margin-top: 20px; padding: 12px 24px; background: #0F766E; color: white; border: none; border-radius: 8px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(15,118,110,0.3); transition: all 0.2s;" onmouseover="this.style.background='#115E59'; this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#0F766E'; this.style.transform='none'">▶ 播放红外遥控演示</button>
     </div>
 
   </div>
@@ -425,5 +425,58 @@
   <div class="section-name">04. HUD UI 设计与人机交互</div>
   <div class="slide-number">Page 14 / 25</div>
 </div>
+
+<!-- Video Modal Overlay -->
+<div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 9999; align-items: center; justify-content: center;">
+  <div style="position: relative; width: 80%; max-width: 1400px; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+    <button onclick="closeVideo()" style="position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 50%; color: white; width: 44px; height: 44px; font-size: 28px; cursor: pointer; z-index: 10000; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">&times;</button>
+    <video id="demoVideo" controls style="width: 100%; display: block; max-height: 85vh; background: #000;">
+      <source id="videoSource" src="" type="video/mp4">
+    </video>
+  </div>
+</div>
+<script>
+  var audioCtx = null;
+  var gainNode = null;
+
+  function playVideo(src) {
+    var source = document.getElementById('videoSource');
+    var video = document.getElementById('demoVideo');
+    source.src = src;
+    video.load();
+    document.getElementById('videoModal').style.display = 'flex';
+    
+    // 初始化并使用 Web Audio API 将音量放大 5 倍
+    if (!audioCtx) {
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) {
+        audioCtx = new AudioContext();
+        var track = audioCtx.createMediaElementSource(video);
+        gainNode = audioCtx.createGain();
+        gainNode.gain.value = 5.0; // 音量放大5倍
+        track.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+      }
+    }
+    
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+
+    var playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(error) {
+        console.log("Auto-play was prevented. Provide user interaction if needed.");
+      });
+    }
+  }
+  
+  function closeVideo() {
+    var video = document.getElementById('demoVideo');
+    video.pause();
+    video.currentTime = 0;
+    document.getElementById('videoModal').style.display = 'none';
+  }
+</script>
 </body>
 </html>
