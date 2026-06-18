@@ -5,6 +5,13 @@
 <title>02 研究背景与智能家居系统架构 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
+  .content-box {
+    display: flex;
+    gap: 30px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
   .left-col {
     flex: 1.1;
     display: flex;
@@ -115,12 +122,14 @@
   <div class="slide-meta">环境温度监测系统综合设计</div>
 </div>
 
+<h1 class="slide-title">系统设计定位与核心优化策略</h1>
+<p class="slide-subtitle">System Design Positioning and Core Optimization Strategies</p>
+
 <div class="slide-content-layout animate-fade-in-up">
-  <div class="left-col">
-    <h1 class="slide-title">系统设计定位与核心优化策略</h1>
-    <p class="slide-subtitle">System Design Positioning and Core Optimization Strategies</p>
-    
-    <ul class="pain-list">
+  <div class="content-box">
+    <div class="left-col">
+      <h2 style="font-size: 36px; font-weight: 800; color: var(--text-primary); margin-bottom: 32px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">系统级架构规划</h2>
+      <ul class="pain-list">
       <li><strong>系统定位</strong>：<br>
         本项目致力于打造一款综合型、高集成的“环境自适应自愈型智能居家安全网关”。<br>
         硬件底座以 STM32F103 微控制器为核心，深度集成多维物理传感器阵列（包括 AHT20 温湿度、BMP280 气压、BH1750 光照以及超声波测距）。<br>
@@ -172,6 +181,7 @@
           <p>AHT20/BMP280/BH1750 • HC-SR04 • TM1637数码管 • SD卡 • 蜂鸣器</p>
         </div>
       </div>
+    </div>
     </div>
   </div>
 </div>

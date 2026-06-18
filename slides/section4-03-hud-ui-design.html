@@ -5,21 +5,21 @@
 <title>13 TFT-LCD 界面布局设计与仿真展示 - 期末汇报</title>
 <link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
-  .layout-box {
+  .content-box {
     display: flex;
     gap: 24px;
     width: 100%;
     height: 100%;
     align-items: stretch;
   }
-  .left-intro {
+  .left-col {
     flex: 0.6;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     padding-top: 10px;
   }
-  .right-screens {
+  .right-col {
     flex: 1.4;
     display: flex;
     justify-content: center;
@@ -231,11 +231,6 @@
   .left-col li { font-size: 23px; line-height: 1.8; }
   .left-col strong { font-size: 26px; }
 
-
-  /* FORCE ALIGN TEXT SIZE */
-  .left-intro p, .left-intro li, .design-points li { font-size: 23px !important; line-height: 1.8; }
-  .left-intro strong, .design-points strong { font-size: 26px !important; }
-
 </style>
 </head>
 <body>
@@ -254,9 +249,9 @@
 <p class="slide-subtitle">TFT-LCD UI HUD Layout and Dark/Light Dual Theme Display</p>
 
 <div class="slide-content-layout animate-fade-in-up">
-  <div class="layout-box">
+  <div class="content-box">
     <!-- Left panel: Introduction -->
-    <div class="left-intro">
+    <div class="left-col">
       <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">界面布局与视觉引擎</h2>
       <p>
         本项目在 480x320 分辨率的 TFT-LCD 上，通过纯底层 C 语言绘制逻辑，从零搭建了一套极具科技感的类 HUD (平视显示器) 高帧率交互系统。系统内嵌两套深度定制的视觉主题，以完美适应不同的应用场景与环境光线。
@@ -270,7 +265,7 @@
     </div>
 
     <!-- Right panel: Side by Side Screen Mockups -->
-    <div class="right-screens">
+    <div class="right-col">
       <!-- Dark Theme Mockup -->
       <div style="text-align: center;">
         <div class="lcd-preview lcd-t0">
