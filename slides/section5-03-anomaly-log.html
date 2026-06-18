@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -72,6 +72,7 @@
     margin: 16px 0 16px 44px;
     overflow-x: auto;
     border: 1px solid var(--card-border);
+    white-space: pre-wrap;
   }
   .code-comment { color: #6a9955; }
   .code-type { color: #569cd6; }
@@ -156,21 +157,21 @@
     <!-- Right Column: Visualizer -->
     <div class="right-col">
       <h3 style="font-size: 24px; font-weight: bold; color: var(--brand-secondary); position: absolute; top: 24px; left: 32px; margin: 0;">Ring Buffer 内存分布示意</h3>
-      <div class="ring-buffer-viz">
-        <svg width="280" height="280" viewBox="0 0 280 280" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 0; opacity: 0.3;">
-          <circle cx="140" cy="140" r="100" fill="none" stroke="#191816" stroke-width="2" stroke-dasharray="8,8" />
-          <path d="M 230 140 Q 235 170 215 190" fill="none" stroke="#dc2626" stroke-width="3" marker-end="url(#arrow)"/>
+      <div class="ring-buffer-viz" style="width: 320px; height: 320px; position: relative;">
+        <svg width="320" height="320" viewBox="0 0 320 320" style="position: absolute; top: 0; left: 0; z-index: 0; opacity: 0.3;">
+          <circle cx="160" cy="160" r="110" fill="none" stroke="#191816" stroke-width="2" stroke-dasharray="8,8" />
+          <path d="M 270 160 Q 275 200 240 230" fill="none" stroke="#dc2626" stroke-width="3" marker-end="url(#arrow)"/>
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626" />
             </marker>
           </defs>
         </svg>
-        <div class="ring-node" style="top: 15%; left: 35%;">Idx 0<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Oldest</span></div>
-        <div class="ring-node active" style="top: 40%; left: 60%; border-width: 3px;">Idx 1<br><span style="font-size: 14px; font-weight: bold; margin-top: 4px;">New!</span></div>
-        <div class="ring-node" style="top: 65%; left: 35%;">Idx 2<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
-        <div class="ring-node" style="top: 50%; left: 10%;">Idx 3<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
-        <div class="ring-node" style="top: 25%; left: 10%;">Idx 4<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
+        <div class="ring-node" style="top: 5px; left: 115px;">Idx 0<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Oldest</span></div>
+        <div class="ring-node active" style="top: 81px; left: 219px; border-width: 3px;">Idx 1<br><span style="font-size: 14px; font-weight: bold; margin-top: 4px;">New!</span></div>
+        <div class="ring-node" style="top: 204px; left: 179px;">Idx 2<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
+        <div class="ring-node" style="top: 204px; left: 50px;">Idx 3<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
+        <div class="ring-node" style="top: 81px; left: 10px;">Idx 4<br><span style="font-size: 12px; font-weight: normal; margin-top: 4px;">Empty</span></div>
       </div>
     </div>
   </div>
