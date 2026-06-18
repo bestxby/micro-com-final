@@ -2,6 +2,9 @@
 *.uvoptx
 *.uvguix.*
 *.scvd
+u5/output/
+u5/*.uvguix.*
+u5/DebugConfig/
 
 # Build outputs
 final_src/output/
@@ -27,6 +30,19 @@ final_src/build.log
 *.map
 *.build_log.htm
 
+# Vivado 工程生成文件
+vivado/LCD_Project/LCD_Project.cache/
+vivado/LCD_Project/LCD_Project.hw/
+vivado/LCD_Project/LCD_Project.runs/
+vivado/LCD_Project/LCD_Project.xpr
+vivado/LCD_Project/*.lpr
+
+# 大型数据手册 (二进制, 不参与版本管理)
+u5/Box_datasheet/*.pdf
+u5/Box_datasheet/*.doc
+u5/Box_datasheet/*.rar
+u5/Box_datasheet/~$*
+
 # IDE / OS junk
 .vscode/
 .idea/
@@ -37,6 +53,9 @@ Thumbs.db
 Desktop.ini
 ~$*
 *.tmp
+*.log
+*.jou
+.DS_Store
 build.log
 build_log.txt
 

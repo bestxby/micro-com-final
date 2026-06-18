@@ -1,0 +1,8 @@
+verilog xil_defaultlib -i "D:/Vivado_zync_2025/2025.2/Vivado/data/rsb/busdef" --include "D:/Vivado_zync_2025/2025.2/Vivado/data/xilinx_vip/include" --include "../../../../LCD_Project.gen/sources_1/bd/system/ipshared/ec67/hdl" --include "../../../../LCD_Project.gen/sources_1/bd/system/ipshared/9a25/hdl" \
+"../../../bd/system/ip/system_processing_system7_0_0/sim/system_processing_system7_0_0.v" \
+"../../../bd/system/sim/system.v" \
+
+verilog xil_defaultlib "glbl.v"
+
+# Do not sort compile order
+nosort
