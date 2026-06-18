@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -7,106 +7,198 @@
 <style>
   .content-box {
     display: flex;
-    gap: 30px;
+    gap: 40px;
     width: 100%;
     height: 100%;
     align-items: stretch;
   }
   .left-col {
-    flex: 1.1;
+    flex: 1.2;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    padding-top: 20px;
+    gap: 24px;
+    padding-top: 10px;
   }
   .right-col {
-    flex: 0.9;
+    flex: 0.8;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    padding-top: 20px;
     position: relative;
-  }
-  .pain-list {
-    margin-top: 30px;
-    list-style: none;
-  }
-  .pain-list li {
-    font-size: 21px;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    margin-bottom: 24px;
-    position: relative;
-    padding-left: 44px;
-  }
-  .pain-list li::before {
-    content: "★";
-    position: absolute;
-    left: 0;
-    top: 2px;
-    font-size: 22px;
-    color: var(--brand-secondary);
-    font-weight: 800;
-  }
-  .pain-list li strong {
-    color: var(--text-primary);
-    font-size: 26px;
-    font-weight: 800;
-    display: inline !important;
+    padding: 0 20px;
   }
   
+  /* Hero Box for System Positioning */
+  .hero-box {
+    background: linear-gradient(135deg, rgba(15, 118, 110, 0.08) 0%, rgba(15, 118, 110, 0.02) 100%);
+    border-left: 4px solid var(--brand-secondary);
+    border-radius: 0 16px 16px 0;
+    padding: 24px 30px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-box::after {
+    content: "";
+    position: absolute;
+    top: -50%; left: -50%; width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 60%);
+    opacity: 0; transition: opacity 0.5s; pointer-events: none;
+  }
+  .hero-box:hover::after { opacity: 1; }
+  
+  .hero-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .hero-desc {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+  .hero-desc strong {
+    color: var(--text-primary);
+  }
+
+  /* Strategy Cards Grid */
+  .strategy-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-top: 10px;
+    margin-bottom: -10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .strategy-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .strat-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: all 0.3s;
+  }
+  .strat-card:hover {
+    transform: translateX(10px);
+    border-color: var(--brand-secondary);
+    box-shadow: 0 8px 24px rgba(15, 118, 110, 0.1);
+  }
+  .strat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(15, 118, 110, 0.1);
+    color: var(--brand-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .strat-info h4 {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .strat-info p {
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text-muted);
+  }
+
   /* 5-Layer Topology Diagram CSS */
   .topo-container {
     display: flex;
     flex-direction: column;
     gap: 12px;
     width: 100%;
-    max-width: 650px;
-    padding: 16px;
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    box-shadow: var(--glass-shadow);
+    position: relative;
+    padding: 20px 0;
+  }
+  /* Connecting line behind layers */
+  .topo-container::before {
+    content: "";
+    position: absolute;
+    left: 48px;
+    top: 40px;
+    bottom: 40px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--brand-secondary) 0%, rgba(204,90,1,0.8) 100%);
+    z-index: 0;
+    opacity: 0.5;
   }
   .topo-layer {
     display: flex;
     align-items: center;
-    gap: 16px;
-    padding: 12px 16px;
-    background: rgba(252, 250, 247, 0.95);
+    gap: 20px;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.95);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
-    transition: all 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.04);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     cursor: default;
+    z-index: 1;
+    position: relative;
+    backdrop-filter: blur(10px);
   }
   .topo-layer:hover {
-    transform: translateX(8px);
+    transform: scale(1.05) translateX(-10px);
     border-color: var(--brand-secondary);
-    background: #FCFAF7;
-    box-shadow: 0 8px 25px rgba(15, 118, 110, 0.15);
+    box-shadow: 0 15px 35px rgba(15, 118, 110, 0.15);
+    z-index: 10;
   }
   .layer-num {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--brand-gradient);
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--card-bg);
+    border: 2px solid var(--brand-secondary);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
-    font-weight: 800;
-    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--brand-secondary);
+    flex-shrink: 0;
+    box-shadow: 0 0 15px rgba(15, 118, 110, 0.2) inset;
+    line-height: 1;
+  }
+  .layer-num span {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-top: 2px;
   }
   .layer-info h3 {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
   }
   .layer-info p {
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-muted);
+    font-family: monospace;
+    font-weight: 600;
   }
 </style>
 </head>
@@ -127,62 +219,93 @@
 
 <div class="slide-content-layout animate-fade-in-up">
   <div class="content-box">
+    
+    <!-- Left Column: Strategy & Positioning -->
     <div class="left-col">
-      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 20px; border-left: 5px solid var(--brand-secondary); padding-left: 16px;">系统级架构规划</h2>
-      <ul class="pain-list">
-      <li><strong>系统定位</strong>：<br>
-        本项目致力于打造一款综合型、高集成的“环境自适应自愈型智能居家安全网关”。<br>
-        硬件底座以 STM32F103 微控制器为核心，深度集成多维物理传感器阵列（包括 AHT20 温湿度、BMP280 气压、BH1750 光照以及超声波测距）。<br>
-        架构上横跨“物理感知、边缘计算、人机交互、底层驱动、云端通信”五大层次，集成了本地安全防御、离线异常日志归档存储，以及基于 ESP8266 WiFi 的物联网心跳维持与微信实时告警推送功能，构建出一个全天候、全方位的高可用智能家居中枢体系。
-      </li>
-      <li><strong>核心优化策略</strong>：<br>
-        在软件算法与系统调度层面，彻底打破了传统嵌入式设备依赖死板静态阈值以及高耗能全屏刷新的设计瓶颈。<br>
-        数据侧：创新性地引入了环境数据一阶 EMA（指数移动平均）低通滤波去噪，以及长达 150s 的环境基准自学习判定模型，极大地降低了环境噪声带来的误报率。<br>
-        渲染侧：自主编写并应用了屏幕增量脏矩形（Dirty Rectangle）局部刷新算法，有效规避了 SPI 宽带瓶颈，实现了堪比智能手机的丝滑高帧率 UI 动画体验。<br>
-        通信侧：构建了具有状态机隔离机制的网络自愈调度策略，并加入了 180s 物理冷却防抖软锁，确保设备在弱网环境乃至断网重连下依然具备极高的系统鲁棒性与零挂死率。
-      </li>
-    </ul>
-  </div>
+      <div class="hero-box">
+        <div class="hero-title"><span style="font-size: 28px;">🎯</span> 环境自适应自愈型网关</div>
+        <div class="hero-desc">
+          硬件底座以 <strong>STM32F103</strong> 微控制器为核心，深度集成多维物理传感器阵列（AHT20/BMP280等）。<br><br>
+          架构横跨“物理感知、边缘计算、人机交互、底层驱动、云端通信”五大层次，构建出集本地防御、离线归档与微信告警于一体的<strong>全天候高可用中枢体系</strong>。
+        </div>
+      </div>
 
-  <div class="right-col">
-    <div class="topo-container">
-      <div class="topo-layer">
-        <div class="layer-num">5</div>
-        <div class="layer-info">
-          <h3>云边端层 (Cloud & IoT Services)</h3>
-          <p>ESP8266 WiFi • NTP北京时间校准 • 心知天气 • 微信Server酱警报推送</p>
-        </div>
+      <div class="strategy-title">
+        <span style="color: var(--brand-secondary);">⚡</span> 核心软硬件调度突破
       </div>
-      <div class="topo-layer">
-        <div class="layer-num">4</div>
-        <div class="layer-info">
-          <h3>人机交互层 (Human-Machine Interface)</h3>
-          <p>TFT-LCD 6大子页面 • 物理按键扫描消抖 • HX1838 红外遥控异步接收</p>
+      
+      <div class="strategy-grid">
+        <div class="strat-card">
+          <div class="strat-icon">D</div>
+          <div class="strat-info">
+            <h4>数据侧：动态环境基准自学习</h4>
+            <p>打破死板静态阈值，创新引入一阶 EMA 低通滤波去噪，结合长达 150s 的环境基准自学习模型，极致降低误报率。</p>
+          </div>
         </div>
-      </div>
-      <div class="topo-layer">
-        <div class="layer-num">3</div>
-        <div class="layer-info">
-          <h3>边缘计算与算法层 (Edge Computing)</h3>
-          <p>EMA 一阶低通去噪 • 150s 渐进式环境基准学习 • ±5°C 突变温度判定边界</p>
+        <div class="strat-card">
+          <div class="strat-icon">R</div>
+          <div class="strat-info">
+            <h4>渲染侧：脏矩形增量局部刷新</h4>
+            <p>自主研发屏幕脏矩形 (Dirty Rectangle) 算法，规避 SPI 带宽瓶颈，在单片机上实现堪比智能手机的丝滑高帧率动画体验。</p>
+          </div>
         </div>
-      </div>
-      <div class="topo-layer">
-        <div class="layer-num">2</div>
-        <div class="layer-info">
-          <h3>底层驱动与优化层 (Drivers & Optimization)</h3>
-          <p>模拟 I2C/SPI 位带操作 • USART 接收中断环形队列 • 脏矩形增量更新</p>
-        </div>
-      </div>
-      <div class="topo-layer">
-        <div class="layer-num">1</div>
-        <div class="layer-info">
-          <h3>物理感知与执行层 (Physical Peripherals)</h3>
-          <p>AHT20/BMP280/BH1750 • HC-SR04 • TM1637数码管 • SD卡 • 蜂鸣器</p>
+        <div class="strat-card">
+          <div class="strat-icon">C</div>
+          <div class="strat-info">
+            <h4>通信侧：状态隔离与网络自愈</h4>
+            <p>构建物理防抖软锁 (180s 冷却隔离)，配合底层硬件级 WiFi 重连轮询，确保设备在弱网或断网环境下的零挂死率。</p>
+          </div>
         </div>
       </div>
     </div>
+
+    <!-- Right Column: Architecture 5-Layer Stack -->
+    <div class="right-col">
+      <div class="topo-container">
+        
+        <div class="topo-layer">
+          <div class="layer-num">L5<span>Cloud</span></div>
+          <div class="layer-info">
+            <h3>云边端服务层</h3>
+            <p>ESP8266 • NTP Time • Weather • Server酱</p>
+          </div>
+        </div>
+        
+        <div class="topo-layer">
+          <div class="layer-num">L4<span>HMI</span></div>
+          <div class="layer-info">
+            <h3>人机交互层</h3>
+            <p>TFT-LCD UI • KEY Scan • HX1838 IR</p>
+          </div>
+        </div>
+        
+        <div class="topo-layer">
+          <div class="layer-num">L3<span>Edge</span></div>
+          <div class="layer-info">
+            <h3>边缘计算与算法层</h3>
+            <p>EMA Filter • 150s Base Learning • ±5°C Limit</p>
+          </div>
+        </div>
+        
+        <div class="topo-layer">
+          <div class="layer-num" style="border-color: rgba(204,90,1,0.8); color: rgba(204,90,1,0.8); box-shadow: 0 0 15px rgba(204,90,1,0.2) inset;">L2<span>Driver</span></div>
+          <div class="layer-info">
+            <h3>底层驱动与优化层</h3>
+            <p>I2C/SPI Bit-band • USART RingBuf • Dirty-Rect</p>
+          </div>
+        </div>
+        
+        <div class="topo-layer">
+          <div class="layer-num" style="border-color: rgba(204,90,1,0.8); color: rgba(204,90,1,0.8); box-shadow: 0 0 15px rgba(204,90,1,0.2) inset;">L1<span>Phys</span></div>
+          <div class="layer-info">
+            <h3>物理感知与执行层</h3>
+            <p>AHT20/BMP280 • HC-SR04 • TM1637 • SD Fat32</p>
+          </div>
+        </div>
+
+      </div>
     </div>
+    
   </div>
 </div>
 
@@ -191,5 +314,8 @@
   <div class="slide-number">Page 4 / 26</div>
 </div>
 
+<script>
+  // Prepend BOM and convert to UTF-8 properly for the file saving
+</script>
 </body>
 </html>
