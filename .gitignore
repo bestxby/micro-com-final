@@ -45,3 +45,7 @@ node_modules/
 
 # Generated slide presentations
 *.pptx
+
+# Videos
+*.mp4
+*.mov

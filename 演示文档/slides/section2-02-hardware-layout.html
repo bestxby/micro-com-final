@@ -222,23 +222,26 @@
     <!-- Card 7 -->
     <div class="hw-card">
       <div class="hw-header">
-        <span class="hw-title">TM1637 4位数码管</span>
-        <span class="pin-tag">CLK:PB13 / DIO:PB14</span>
+        <span class="hw-title">独立物理按键组</span>
+        <span class="pin-tag">KEY1-4 / 五向摇杆</span>
       </div>
       <div class="hw-body">
-        <p class="hw-text">模拟二线制协议，高对比度数字数码显示，用于实时显示本地环境温度。</p>
+        <p class="hw-text">板载独立按键与五向摇杆，配合软件消抖算法，提供稳定、无延迟的物理人机交互与系统模式切换。</p>
         <div class="photo-placeholder">
           <svg width="70" height="70" viewBox="0 0 60 60">
-            <rect x="5" y="15" width="50" height="30" rx="3" fill="rgba(239, 68, 68, 0.1)" stroke="var(--alert-red)" stroke-width="2"/>
-            <text x="10" y="36" font-family="monospace" font-size="16" fill="var(--alert-red)" font-weight="bold">26.4</text>
-            <circle cx="48" cy="22" r="1.5" fill="var(--alert-red)"/>
-            <text x="44" y="36" font-family="monospace" font-size="12" fill="var(--alert-red)">C</text>
+            <!-- Joystick / D-Pad Representation -->
+            <circle cx="22" cy="30" r="10" fill="rgba(15, 118, 110, 0.1)" stroke="var(--brand-secondary)" stroke-width="2"/>
+            <circle cx="22" cy="30" r="4" fill="var(--brand-secondary)"/>
+            <path d="M22,14 L22,17 M22,43 L22,46 M14,30 L17,30 M43,30 L46,30" stroke="var(--brand-secondary)" stroke-width="2" stroke-linecap="round"/>
+            <!-- Buttons -->
+            <circle cx="46" cy="20" r="6" fill="rgba(25, 24, 22, 0.05)" stroke="var(--text-secondary)" stroke-width="2"/>
+            <circle cx="46" cy="40" r="6" fill="rgba(25, 24, 22, 0.05)" stroke="var(--text-secondary)" stroke-width="2"/>
           </svg>
         </div>
       </div>
       <div class="hw-footer">
-        <span class="proto-tag">二线制串行协议</span>
-        <span class="hw-role">本地气温数值展示</span>
+        <span class="proto-tag">GPIO 轮询与硬件中断</span>
+        <span class="hw-role">系统模式切换与输入</span>
       </div>
     </div>
 
@@ -263,24 +266,18 @@
     <!-- Card 9 -->
     <div class="hw-card">
       <div class="hw-header">
-        <span class="hw-title">执行器与人机输入组</span>
-        <span class="pin-tag">PB15(BEEP) / PA0/1/2(LED)</span>
+        <span class="hw-title">有源蜂鸣器</span>
+        <span class="pin-tag">BEEP: PB15</span>
       </div>
       <div class="hw-body">
-        <p class="hw-text">包含有源蜂鸣器、三色 LED 指示灯及独立输入按键（KEY1-3、KEY_L/R）。</p>
+        <p class="hw-text">通过 GPIO 输出电平直接驱动的本地发声器件，用于在环境温湿度异常或防盗触发时发出刺耳的声音报警。</p>
         <div class="photo-placeholder">
-          <svg width="70" height="70" viewBox="0 0 60 60">
-            <circle cx="15" cy="20" r="5" fill="var(--alert-red)" filter="drop-shadow(0 0 4px var(--alert-red))"/>
-            <circle cx="30" cy="20" r="5" fill="var(--brand-secondary)" filter="drop-shadow(0 0 4px var(--brand-secondary))"/>
-            <circle cx="45" cy="20" r="5" fill="var(--brand-primary)" filter="drop-shadow(0 0 4px var(--brand-primary))"/>
-            <rect x="20" y="38" width="20" height="12" rx="1" fill="none" stroke="var(--text-muted)" stroke-width="2"/>
-            <circle cx="30" cy="44" r="3" fill="var(--text-muted)"/>
-          </svg>
+          <img src="../assets/module_buzzer.jpg" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 6px;">
         </div>
       </div>
       <div class="hw-footer">
-        <span class="proto-tag">GPIO / 独立按键</span>
-        <span class="hw-role">声光告警与人机输入</span>
+        <span class="proto-tag">GPIO 数字电平控制</span>
+        <span class="hw-role">环境异常声音报警</span>
       </div>
     </div>
   </div>
@@ -288,7 +285,7 @@
 
 <div class="slide-footer">
   <div class="section-name">02. 物理硬件底座与引脚重构</div>
-  <div class="slide-number">Page 6 / 24</div>
+  <div class="slide-number">Page 6 / 26</div>
 </div>
 
 </body>
