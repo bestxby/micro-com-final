@@ -12,15 +12,15 @@
 # ============================================================================
 
 # --- A-1. Arduino 侧输入 (← STM32 驱动, FPGA 为 INPUT) ---
-set_property IOSTANDARD LVCMOS33 [get_ports A3_LCD_RST]
+set_property IOSTANDARD LVCMOS33 [get_ports STM_UART_TX]
 set_property IOSTANDARD LVCMOS33 [get_ports A4_LCD_CS]
 set_property IOSTANDARD LVCMOS33 [get_ports A5_LCD_SCK]
 set_property IOSTANDARD LVCMOS33 [get_ports B4_LCD_SDA]
 set_property IOSTANDARD LVCMOS33 [get_ports D6_LCD_BL]
 set_property IOSTANDARD LVCMOS33 [get_ports B3_LCD_DC]
 
-# STM32 PA3 → Arduino A3 → U22
-set_property PACKAGE_PIN U22  [get_ports A3_LCD_RST]
+# STM32 PA3 → Arduino A3 → U22 (现为 STM_UART_TX)
+set_property PACKAGE_PIN U22  [get_ports STM_UART_TX]
 # STM32 PA4 → Arduino A4 → V22
 set_property PACKAGE_PIN V22  [get_ports A4_LCD_CS]
 # STM32 PA5 → Arduino A5 → W22
@@ -55,12 +55,12 @@ set_property PACKAGE_PIN P22 [get_ports TFT_LED]   ;# J5-9  TFT 背光
 # --- B-1. Arduino 侧输入 (← STM32 驱动, FPGA 为 INPUT) ---
 set_property IOSTANDARD LVCMOS33 [get_ports A0_LED2]
 set_property IOSTANDARD LVCMOS33 [get_ports A1_LED3]
-set_property IOSTANDARD LVCMOS33 [get_ports A2_LED4]
+set_property IOSTANDARD LVCMOS33 [get_ports STM_UART_RX]
 set_property IOSTANDARD LVCMOS33 [get_ports B5_LED1]
 
 set_property PACKAGE_PIN T21  [get_ports A0_LED2]   ;# STM32 PA0  → Arduino A0
 set_property PACKAGE_PIN U21  [get_ports A1_LED3]   ;# STM32 PA1  → Arduino A1
-set_property PACKAGE_PIN T22  [get_ports A2_LED4]   ;# STM32 PA2  → Arduino A2
+set_property PACKAGE_PIN T22  [get_ports STM_UART_RX]   ;# STM32 PA2  → Arduino A2
 set_property PACKAGE_PIN V18  [get_ports B5_LED1]   ;# STM32 PC13 → Arduino B5
 
 # --- B-2. 底板 LED 输出 (FPGA 驱动, OUTPUT) ---
@@ -90,12 +90,12 @@ set_property PACKAGE_PIN K15 [get_ports BASE_BTN2]  ;# 底板按键 PB18 (S1) - 
 set_property PACKAGE_PIN J15 [get_ports BASE_BTN3]  ;# 底板按键 PB19 (S2) - Left
 set_property PACKAGE_PIN W18 [get_ports BASE_BTN4]  ;# 底板按键 PB20 (S3) - Right
 
-# --- C-2. Arduino 侧输出 (FPGA 驱动 → STM32, OUTPUT) ---
-set_property IOSTANDARD LVCMOS33 [get_ports D7_KEY1]
+# --- C-2. Arduino 侧输出 (FPGA 驱动 → STM32, OUTPUT) 或者 输入 ---
+set_property IOSTANDARD LVCMOS33 [get_ports D7_LCD_RST]
 set_property IOSTANDARD LVCMOS33 [get_ports D0_KEY2]
 set_property IOSTANDARD LVCMOS33 [get_ports B0_OUT]
 
-set_property PACKAGE_PIN Y20  [get_ports D7_KEY1]   ;# → Arduino D7 → STM32 PB0
+set_property PACKAGE_PIN Y20  [get_ports D7_LCD_RST]   ;# ← Arduino D7 ← STM32 PB0 (LCD_RST)
 set_property PACKAGE_PIN Y18  [get_ports D0_KEY2]   ;# → Arduino D0 → STM32 PB8
 set_property PACKAGE_PIN AB21 [get_ports B0_OUT]    ;# → Arduino B0 → STM32 PA15
 
