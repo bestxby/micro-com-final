@@ -1,0 +1,211 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>17 寮傚父鐘舵€佽拷婧笌鍘嗗彶鏁版嵁鐜舰闃熷垪 - 鏈熸湯姹囨姤</title>
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
+<style>
+  .layout-box {
+    display: flex;
+    gap: 40px;
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+  }
+  .left-intro {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-top: 10px;
+  }
+  .right-visual {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .data-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--glass-shadow);
+    border-radius: 16px;
+    padding: 24px 30px;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 16px;
+    border-bottom: 2px dashed rgba(15, 118, 110, 0.2);
+    padding-bottom: 12px;
+  }
+  .ring-buffer-viz {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-top: 10px;
+  }
+  .ring-node {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    background: rgba(25, 24, 22, 0.05);
+    border: 2px solid var(--text-muted);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: monospace;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+  .ring-node.active {
+    background: rgba(204, 90, 1, 0.1);
+    border-color: var(--alert-red);
+    color: var(--alert-red);
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
+  }
+  .p-text {
+    font-size: 20px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .code-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 16px;
+    line-height: 1.5;
+    overflow-x: auto;
+  }
+  .token-keyword { color: #569cd6; }
+  .token-type { color: #4ec9b0; }
+  .token-property { color: #9cdcfe; }
+  .token-number { color: #b5cea8; }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">杈圭紭绔绠椾笌绠楁硶浼樺寲</div>
+</div>
+
+<h1 class="slide-title">寮傚父鐘舵€佽拷婧笌鍘嗗彶鏁版嵁鐜舰闃熷垪</h1>
+<p class="slide-subtitle">Anomaly Traceback via Circular Ring Buffer Data Logging</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="layout-box">
+    <!-- Left text -->
+    <div class="left-intro">
+      <h2 style="font-size: 32px; font-weight: 800; color: var(--text-primary); margin-bottom: 24px; border-left: 5px solid var(--alert-red); padding-left: 16px;">寮傚父蹇収鐨勬湰鍦板皝瀛樻満鍒?/h2>
+      <p class="p-text" style="margin-bottom: 24px;">
+        涓轰簡鍦ㄧ郴缁熷彂鐢熸俯婀垮害绐佸彉鎴栭潪娉曞叆渚垫椂鑳藉杩涜鏈夋晥鐨勫巻鍙茶拷婧紝搴曞眰鍥轰欢 <code>anomaly_log.c</code> 涓笓闂ㄦ瀯寤轰簡涓€涓?strong>鍐呭瓨绾х幆褰㈢紦鍐插尯锛圧ing Buffer锛?/strong>銆?        褰撶幆澧冨弬鏁板墽鐑堣秺杩囪嚜閫傚簲鍩虹嚎锛圔aseline锛夋椂锛岀郴缁熷皢瑙﹀彂寮傚父鍒ゅ畾閫昏緫骞朵繚瀛樺紓甯稿揩鐓с€?      </p>
+      
+      <div class="code-block" style="margin-bottom: 24px;">
+<span class="token-keyword">typedef struct</span> {<br>
+&nbsp;&nbsp;<span class="token-type">uint32_t</span> <span class="token-property">timestamp_s</span>; &nbsp;&nbsp;<span style="color:#6a9955;">// 绯荤粺鎶ヨ绉掔骇鏃堕棿鎴?/span><br>
+&nbsp;&nbsp;<span class="token-type">float</span> <span class="token-property">baseline_temp</span>; &nbsp;<span style="color:#6a9955;">// 瑙﹀彂鏃剁殑鐜鍩哄噯娓╁害</span><br>
+&nbsp;&nbsp;<span class="token-type">float</span> <span class="token-property">current_temp</span>; &nbsp;&nbsp;<span style="color:#6a9955;">// 寮傚父绐佸彉娓╁害</span><br>
+&nbsp;&nbsp;<span class="token-type">float</span> <span class="token-property">current_press</span>; &nbsp;<span style="color:#6a9955;">// 鐬椂澶ф皵鍘嬪己</span><br>
+} <span class="token-type">AnomalySnapshot</span>;<br>
+      </div>
+
+      <p class="p-text">
+        渚濋潬鐜舰闃熷垪 <code>head = (head + 1) % MAX</code> 鐨勫惊鐜鍐欑壒鎬э紝鍗曠墖鏈哄湪鏋佸皬鐨?SRAM 寮€閿€涓嬶紝瀹炵幇浜嗗鏈€鏂板紓甯歌褰曠殑姘镐箙鐣欏瓨锛屽苟鏀寔鐢ㄦ埛闅忔椂鍦ㄥ睆骞曞唴鍥炴斁鏌ョ湅銆?      </p>
+    </div>
+
+    <!-- Right visual demo -->
+    <div class="right-visual">
+      <div class="data-card">
+        <div class="card-title">Ring Buffer 鍐呭瓨鎸囬拡妯″瀷</div>
+        <div class="ring-buffer-viz">
+          <!-- Hand-coded pseudo circular layout -->
+          <div class="ring-node" style="top: 10px; left: 140px;">Idx 0<br>Old</div>
+          <div class="ring-node active" style="top: 40px; left: 230px; transform: scale(1.1);">Idx 1<br>New!</div>
+          <div class="ring-node" style="top: 120px; left: 230px;">Idx 2<br>Empty</div>
+          <div class="ring-node" style="top: 150px; left: 140px;">Idx 3<br>Empty</div>
+          <div class="ring-node" style="top: 120px; left: 50px;">Idx 4<br>Empty</div>
+          <div class="ring-node" style="top: 40px; left: 50px;">Idx 5<br>Empty</div>
+          
+          <svg style="position: absolute; top:0; left:0; width: 100%; height: 100%; pointer-events: none;">
+            <circle cx="175" cy="115" r="55" fill="none" stroke="rgba(25,24,22,0.1)" stroke-width="2" stroke-dasharray="6,6" />
+            <path d="M195,65 Q210,65 220,75" fill="none" stroke="var(--alert-red)" stroke-width="3" marker-end="url(#arrow)"/>
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="var(--alert-red)" />
+              </marker>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="data-card" style="flex-grow: 1; justify-content: center; align-items: center; border: 2px dashed var(--brand-secondary); background: rgba(15, 118, 110, 0.05);">
+        <button class="view-video-btn" onclick="playVideo('../shared/videos/anomaly_log_demo.mp4')" style="position: static; box-shadow: 0 10px 25px rgba(15,118,110,0.3);">
+          <span class="play-icon">鈻?/span> 鎾斁鍘嗗彶鏁版嵁鏌ヨ婕旂ず
+        </button>
+        <span style="margin-top: 16px; color: var(--text-muted); font-size: 16px;">婕旂ず鍖呭惈锛氳Е鍙戝紓甯哥姸鎬佷笌 TFT 灞忓箷鏃ュ織鏌ヨ閲嶆斁</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">05. 杈圭紭绔绠椾笌绠楁硶浼樺寲</div>
+  <div class="slide-number">Page 17 / 26</div>
+</div>
+
+<!-- Video Modal Overlay -->
+<div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 9999; align-items: center; justify-content: center;">
+  <div style="position: relative; width: 80%; max-width: 1400px; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+    <button onclick="closeVideo()" style="position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 50%; color: white; width: 44px; height: 44px; font-size: 28px; cursor: pointer; z-index: 10000; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">&times;</button>
+    <video id="demoVideo" controls style="width: 100%; display: block; max-height: 85vh; background: #000;">
+      <source id="videoSource" src="" type="video/mp4">
+    </video>
+  </div>
+</div>
+
+<script>
+  function playVideo(src) {
+    var source = document.getElementById('videoSource');
+    var video = document.getElementById('demoVideo');
+    source.src = src;
+    video.load();
+    video.volume = 1.0;
+    document.getElementById('videoModal').style.display = 'flex';
+
+    var playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(error) {
+        console.log("Auto-play was prevented. Provide user interaction if needed.");
+      });
+    }
+  }
+  
+  function closeVideo() {
+    var video = document.getElementById('demoVideo');
+    video.pause();
+    video.currentTime = 0;
+    document.getElementById('videoModal').style.display = 'none';
+  }
+</script>
+
+</body>
+</html>
+

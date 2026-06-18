@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>12 云边端物联网通信与 SD 日志归档 - 期末汇报</title>
-<link rel="stylesheet" href="../shared/tokens.css?v=4">
+<link rel="stylesheet" href="../shared/tokens.css?v=17">
 <style>
   .layout-container {
     display: flex;
@@ -25,7 +25,7 @@
     border: 1px solid var(--card-border);
     box-shadow: var(--glass-shadow);
     border-radius: 20px;
-    padding: 30px 24px;
+    padding: 24px 20px;
     display: flex;
     flex-direction: column;
     position: relative;
@@ -40,16 +40,16 @@
   /* Top borders for visual distinction */
   .card-edge { border-top: 6px solid #0F766E; }
   .card-cloud { border-top: 6px solid #0369a1; }
-  .card-wechat { border-top: 6px solid #047857; }
   .card-sd { border-top: 6px solid #CC5A01; }
+  .card-wechat { border-top: 6px solid #047857; }
   
   .state-icon-area {
     display: flex;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
   }
   .state-num {
-    font-size: 42px;
+    font-size: 36px;
     font-weight: 900;
     background: var(--brand-gradient);
     -webkit-background-clip: text;
@@ -60,21 +60,30 @@
   }
   
   .state-condition {
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 800;
     color: var(--text-primary);
-    margin-bottom: 16px;
-    padding-bottom: 12px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
     border-bottom: 1px dashed rgba(25, 24, 22, 0.15);
-    min-height: 56px;
+    min-height: 54px;
     line-height: 1.3;
   }
   .state-desc {
     font-size: 23px;
     color: var(--text-secondary);
-    line-height: 1.7;
+    line-height: 1.6;
     flex-grow: 1;
-    margin-bottom: 24px;
+    margin-bottom: 16px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }
+  .state-desc::-webkit-scrollbar {
+    width: 6px;
+  }
+  .state-desc::-webkit-scrollbar-thumb {
+    background: rgba(25, 24, 22, 0.2);
+    border-radius: 6px;
   }
   .state-desc strong {
     color: var(--text-primary);
@@ -107,55 +116,15 @@
   }
   .play-icon { font-size: 16px; }
 
-  /* Fullscreen Video Modal */
-  .video-modal {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(25, 24, 22, 0.96);
-    backdrop-filter: blur(16px);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-  }
-  .video-modal-content {
-    position: relative;
-    width: 85%;
-    max-width: 1400px;
-    aspect-ratio: 16 / 9;
-    border-radius: 24px;
-    overflow: hidden;
-    border: 1px solid var(--card-border);
-    box-shadow: 0 25px 60px rgba(25, 24, 22, 0.5);
-  }
-  .video-modal-content video {
-    width: 100%;
-    height: 100%;
-    display: block;
-    outline: none;
-  }
-  .close-modal-btn {
-    position: absolute;
-    top: 32px;
-    right: 32px;
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    background: rgba(252, 250, 247, 0.1);
-    border: 1px solid rgba(252, 250, 247, 0.15);
-    color: #FCFAF7;
-    font-size: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    z-index: 10000;
-  }
-  .close-modal-btn:hover {
-    background: var(--alert-red);
-    border-color: var(--alert-red);
-    transform: scale(1.1);
+  .text-notice {
+    margin-top: auto;
+    font-size: 17px;
+    color: #047857;
+    font-weight: bold;
+    text-align: center;
+    padding: 12px 0;
+    background: rgba(4, 120, 87, 0.08);
+    border-radius: 8px;
   }
 </style>
 </head>
@@ -177,73 +146,52 @@
 <div class="slide-content-layout animate-fade-in-up">
   <div class="layout-container">
     <div class="four-col-layout">
-      <!-- Col 1 -->
+      <!-- Col 1: WiFi Auto-Reconnect -->
       <div class="state-card card-edge">
         <div class="state-icon-area">
           <div class="state-num">01</div>
         </div>
-        <div class="state-condition"><code class="proto-tag">ESP8266</code> 自愈<br>与 <code class="proto-tag">NTP</code> 同步</div>
+        <div class="state-condition"><code class="proto-tag">WiFi</code> 自动重连<br>与网络链路自愈</div>
         <div class="state-desc">
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
             <li style="display: flex; align-items: flex-start; gap: 8px;">
               <span style="color: var(--brand-secondary); font-size: 20px;">•</span>
-              <span><strong>断线重连:</strong> 基于底层 <code class="proto-tag">AT</code> 指令集实现异步握手。检测到网络异常断开时，系统会自动读取配置尝试重连，确保通信链路的高可用性。</span>
+              <span><strong>连接状态实时监控:</strong> 系统上电后通过 AT 指令自动连接热点，并在 LCD 屏幕上实时、动态刷新 ONLINE/OFFLINE 连接状态指示。</span>
             </li>
             <li style="display: flex; align-items: flex-start; gap: 8px;">
               <span style="color: var(--brand-secondary); font-size: 20px;">•</span>
-              <span><strong>时钟自适应:</strong> 断网时系统会自动无缝切入本地 10ms 软件 <code class="proto-tag">RTC</code> 累加。一旦恢复网络连接，系统会重新拉取云端时间，并自动平滑对齐秒级误差。</span>
+              <span><strong>底层物理自愈:</strong> 当热点异常断开时，依靠 ESP8266 硬件底层重连算法持续轮询并重试，待热点重现后自动重连并重建通信链路。</span>
             </li>
           </ul>
         </div>
-        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+        <button class="card-video-btn" onclick="playVideo('../shared/videos/wifi_demo.mp4')"><span class="play-icon">▶</span> 查看视频演示</button>
       </div>
 
-      <!-- Col 2 -->
+      <!-- Col 2: NTP Time & Weather -->
       <div class="state-card card-cloud">
         <div class="state-icon-area">
           <div class="state-num">02</div>
         </div>
-        <div class="state-condition">心知天气 <code class="proto-tag">API</code><br>轻量解析</div>
+        <div class="state-condition">网络时间与天气<br>实时自动获取</div>
         <div class="state-desc">
           <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
             <li style="display: flex; align-items: flex-start; gap: 8px;">
               <span style="color: #0369a1; font-size: 20px;">•</span>
-              <span><strong>原生解析:</strong> 针对单片机资源受限的特点，直接基于底层的 <code>strstr</code> 函数，从非阻塞 <code class="proto-tag">TCP</code> 接收的环形缓存中精准匹配特定的目标键值对。</span>
+              <span><strong>获取具体时空信息:</strong> 系统联网后自动通过 NTP 服务同步网络高精度北京时间（维护秒级 RTC），同时定时向天气服务端发起请求，直接获取当前城市的室外气温与当日的天气状况（多态晴雨图标/文本）。</span>
             </li>
             <li style="display: flex; align-items: flex-start; gap: 8px;">
               <span style="color: #0369a1; font-size: 20px;">•</span>
-              <span><strong>极致轻量:</strong> 彻底摒弃了开销极其庞大、易致内存碎片的第三方 <code>JSON</code> 库，这不仅将字符串处理效率提升数倍，更为微控制器释放了海量的 RAM 空间。</span>
+              <span><strong>极简原生解析:</strong> 保留底层单片机内存优化的精髓，强调使用标准的 <code>strstr</code> 对上述时间、天气网络数据流进行原生匹配，避免重型 JSON 解析库带来的开销与碎片。</span>
             </li>
           </ul>
         </div>
-        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
+        <button class="card-video-btn" onclick="playVideo('../shared/videos/weather_demo.mp4')"><span class="play-icon">▶</span> 查看视频演示</button>
       </div>
 
-      <!-- Col 3 -->
-      <div class="state-card card-wechat">
-        <div class="state-icon-area">
-          <div class="state-num">03</div>
-        </div>
-        <div class="state-condition">微信警报推送<br>与防抖限制</div>
-        <div class="state-desc">
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="color: #047857; font-size: 20px;">•</span>
-              <span><strong>触发条件:</strong> 一旦超声波雷达侦测到非法入侵，或本地环境温度发生剧烈突变 (&gt;5℃)，将立即通过 Server酱 云端 <code class="proto-tag">API</code> 向用户的绑定微信推送图文警报。</span>
-            </li>
-            <li style="display: flex; align-items: flex-start; gap: 8px;">
-              <span style="color: #047857; font-size: 20px;">•</span>
-              <span><strong>防抖机制:</strong> 为防止多次快速触发导致 HTTP 请求大量拥塞，系统在底层专门设计了一把状态机软锁（180s 物理冷却期），静默拦截一切短时间内的重复报警。</span>
-            </li>
-          </ul>
-        </div>
-        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
-      </div>
-
-      <!-- Col 4 -->
+      <!-- Col 3: SD Logging (Swapped from Col 4) -->
       <div class="state-card card-sd">
         <div class="state-icon-area">
-          <div class="state-num">04</div>
+          <div class="state-num">03</div>
         </div>
         <div class="state-condition"><code class="proto-tag">512B</code> 扇区对齐<br><code class="proto-tag">SD</code> 卡日志归档</div>
         <div class="state-desc">
@@ -258,49 +206,71 @@
             </li>
           </ul>
         </div>
-        <button class="card-video-btn"><span class="play-icon">▶</span> 查看视频演示</button>
       </div>
+
+      <!-- Col 4: WeChat Alerts (Swapped from Col 3) -->
+      <div class="state-card card-wechat">
+        <div class="state-icon-area">
+          <div class="state-num">04</div>
+        </div>
+        <div class="state-condition">微信警报推送<br>与防抖限制</div>
+        <div class="state-desc">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px;">
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #047857; font-size: 20px;">•</span>
+              <span><strong>触发条件:</strong> 一旦超声波雷达侦测到非法入侵，或本地环境温度发生剧烈突变 (&gt;5℃)，将立即通过 Server酱 云端 <code class="proto-tag">API</code> 向用户的绑定微信推送图文警报。</span>
+            </li>
+            <li style="display: flex; align-items: flex-start; gap: 8px;">
+              <span style="color: #047857; font-size: 20px;">•</span>
+              <span><strong>防抖机制:</strong> 为防止多次快速触发导致 HTTP 请求大量拥塞，系统在底层专门设计了一把状态机软锁（180s 物理冷却期），静默拦截一切短时间内的重复报警。</span>
+            </li>
+          </ul>
+        </div>
+        <div class="text-notice">✓ 微信推送已在安防演示视频中展示</div>
+      </div>
+
     </div>
   </div>
 </div>
 
 <div class="slide-footer">
   <div class="section-name">06. 云边端物联网通信与 SD 日志归档</div>
-  <div class="slide-number">Page 20 / 25</div>
+  <div class="slide-number">Page 21 / 26</div>
 </div>
 
-<!-- Video Modal -->
-<div class="video-modal" id="videoModal">
-  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
-  <div class="video-modal-content">
-    <video id="modalVideo" src="../shared/videos/iot_demo.mp4" controls preload="metadata"></video>
+<!-- Video Modal Overlay -->
+<div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 9999; align-items: center; justify-content: center;">
+  <div style="position: relative; width: 80%; max-width: 1400px; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+    <button onclick="closeVideo()" style="position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 50%; color: white; width: 44px; height: 44px; font-size: 28px; cursor: pointer; z-index: 10000; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">&times;</button>
+    <video id="demoVideo" controls style="width: 100%; display: block; max-height: 85vh; background: #000;">
+      <source id="videoSource" src="" type="video/mp4">
+    </video>
   </div>
 </div>
 
 <script>
-  const openModalBtns = document.querySelectorAll(".card-video-btn");
-  const videoModal = document.getElementById("videoModal");
-  const closeModalBtn = document.getElementById("closeModalBtn");
-  const modalVideo = document.getElementById("modalVideo");
+  function playVideo(src) {
+    var source = document.getElementById('videoSource');
+    var video = document.getElementById('demoVideo');
+    source.src = src;
+    video.load();
+    video.volume = 1.0;
+    document.getElementById('videoModal').style.display = 'flex';
 
-  openModalBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      videoModal.style.display = "flex";
-      modalVideo.play().catch(err => {
-        console.log("Modal video autoplay failed or file not found:", err);
+    var playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(error) {
+        console.log("Auto-play was prevented. Provide user interaction if needed.");
       });
-    });
-  });
-
-  function closeModal() {
-    videoModal.style.display = "none";
-    modalVideo.pause();
+    }
   }
-
-  closeModalBtn.addEventListener("click", closeModal);
-  videoModal.addEventListener("click", (e) => {
-    if (e.target === videoModal) closeModal();
-  });
+  
+  function closeVideo() {
+    var video = document.getElementById('demoVideo');
+    video.pause();
+    video.currentTime = 0;
+    document.getElementById('videoModal').style.display = 'none';
+  }
 </script>
 
 </body>

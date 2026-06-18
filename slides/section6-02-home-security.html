@@ -108,7 +108,7 @@
         <div class="state-badge badge-safe">SAFE 状态</div>
         <div class="state-condition">触发条件：超声波测距 &ge; 30cm 或处于撤防模式</div>
         <div class="state-desc">
-          <strong>外设动作：</strong>绿灯 (LED4) 平滑呼吸运行，有源蜂鸣器静音。系统处于常规环境监控状态，安全无风险。
+          <strong>外设动作：</strong>有源蜂鸣器保持静默。系统处于后台常规环境监控状态，各项指标安全无风险。
         </div>
       </div>
       
@@ -117,7 +117,7 @@
         <div class="state-badge badge-warning">WARNING 状态</div>
         <div class="state-condition">触发条件：布防模式下，距离介于 15cm 至 30cm</div>
         <div class="state-desc">
-          <strong>外设动作：</strong>黄灯 (LED3) 保持常亮警告，蜂鸣器静音。屏幕数码管开始实时显示侵入距离，提示可能的安全威胁。
+          <strong>外设动作：</strong>系统唤醒屏幕与数码管，开始高频实时显示外部侵入距离的动态变化，提供初级预警提示。
         </div>
       </div>
       
@@ -126,7 +126,7 @@
         <div class="state-badge badge-alarm">ALARM 状态</div>
         <div class="state-condition">触发条件：布防模式下，距离 &lt; 15cm</div>
         <div class="state-desc">
-          <strong>外设动作：</strong>红灯 (LED2) 5Hz 高频爆闪，蜂鸣器断续声鸣警报。屏幕弹出警报窗口，并立即触发微信警报推送。
+          <strong>外设动作：</strong>有源蜂鸣器立即介入并输出高频断续声鸣警报。屏幕全屏闪烁警告，并同步触发微信远程推送。
         </div>
       </div>
     </div>
@@ -141,46 +141,49 @@
   </div>
   
   <!-- "查看视频演示" Button at Bottom Right -->
-  <button class="view-video-btn" id="openModalBtn">
+  <button class="view-video-btn" onclick="playVideo('../shared/videos/security_demo.mp4')">
     <span class="play-icon">▶</span> 查看视频演示
   </button>
 </div>
 
 <div class="slide-footer">
   <div class="section-name">06. 智能居家多级安全防护功能设计</div>
-  <div class="slide-number">Page 18 / 24</div>
+  <div class="slide-number">Page 20 / 26</div>
 </div>
 
-<!-- Video Modal -->
-<div class="video-modal" id="videoModal">
-  <div class="close-modal-btn" id="closeModalBtn">&times;</div>
-  <div class="video-modal-content">
-    <video id="modalVideo" src="../shared/videos/security_demo.mp4" controls preload="metadata"></video>
+<!-- Video Modal Overlay -->
+<div id="videoModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000000; z-index: 9999; align-items: center; justify-content: center;">
+  <div style="position: relative; width: 80%; max-width: 1400px; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);">
+    <button onclick="closeVideo()" style="position: absolute; top: 15px; right: 20px; background: rgba(0,0,0,0.5); border: 2px solid white; border-radius: 50%; color: white; width: 44px; height: 44px; font-size: 28px; cursor: pointer; z-index: 10000; text-shadow: 0 2px 4px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(0,0,0,0.5)'">&times;</button>
+    <video id="demoVideo" controls style="width: 100%; display: block; max-height: 85vh; background: #000;">
+      <source id="videoSource" src="" type="video/mp4">
+    </video>
   </div>
 </div>
 
 <script>
-  const openModalBtn = document.getElementById("openModalBtn");
-  const videoModal = document.getElementById("videoModal");
-  const closeModalBtn = document.getElementById("closeModalBtn");
-  const modalVideo = document.getElementById("modalVideo");
+  function playVideo(src) {
+    var source = document.getElementById('videoSource');
+    var video = document.getElementById('demoVideo');
+    source.src = src;
+    video.load();
+    video.volume = 1.0;
+    document.getElementById('videoModal').style.display = 'flex';
 
-  openModalBtn.addEventListener("click", () => {
-    videoModal.style.display = "flex";
-    modalVideo.play().catch(err => {
-      console.log("Modal video autoplay failed or file not found:", err);
-    });
-  });
-
-  function closeModal() {
-    videoModal.style.display = "none";
-    modalVideo.pause();
+    var playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(function(error) {
+        console.log("Auto-play was prevented. Provide user interaction if needed.");
+      });
+    }
   }
-
-  closeModalBtn.addEventListener("click", closeModal);
-  videoModal.addEventListener("click", (e) => {
-    if (e.target === videoModal) closeModal();
-  });
+  
+  function closeVideo() {
+    var video = document.getElementById('demoVideo');
+    video.pause();
+    video.currentTime = 0;
+    document.getElementById('videoModal').style.display = 'none';
+  }
 </script>
 
 </body>

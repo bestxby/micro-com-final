@@ -423,7 +423,7 @@
 
 <div class="slide-footer">
   <div class="section-name">04. HUD UI 设计与人机交互</div>
-  <div class="slide-number">Page 14 / 25</div>
+  <div class="slide-number">Page 14 / 26</div>
 </div>
 
 <!-- Video Modal Overlay -->
@@ -436,32 +436,13 @@
   </div>
 </div>
 <script>
-  var audioCtx = null;
-  var gainNode = null;
-
   function playVideo(src) {
     var source = document.getElementById('videoSource');
     var video = document.getElementById('demoVideo');
     source.src = src;
     video.load();
+    video.volume = 1.0;
     document.getElementById('videoModal').style.display = 'flex';
-    
-    // 初始化并使用 Web Audio API 将音量放大 5 倍
-    if (!audioCtx) {
-      var AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (AudioContext) {
-        audioCtx = new AudioContext();
-        var track = audioCtx.createMediaElementSource(video);
-        gainNode = audioCtx.createGain();
-        gainNode.gain.value = 5.0; // 音量放大5倍
-        track.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-      }
-    }
-    
-    if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
 
     var playPromise = video.play();
     if (playPromise !== undefined) {
