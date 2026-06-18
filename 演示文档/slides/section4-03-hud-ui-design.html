@@ -46,6 +46,7 @@
     font-weight: bold;
     font-size: 16px;
     line-height: 16px;
+    zoom: 0.8; /* Scale down to prevent horizontal overflow on laptops */
   }
   
   /* Theme 0: Dark (Neon style) */
@@ -200,8 +201,8 @@
     gap: 16px;
   }
   .design-points li {
-    font-size: 20px;
-    line-height: 1.8;
+    font-size: 19px;
+    line-height: 1.6;
     color: var(--text-secondary);
     position: relative;
     padding-left: 0;
@@ -227,9 +228,9 @@
     /* fallback to global tokens.css styles */
   }
 
-  .left-col p { font-size: 23px; line-height: 1.8; }
-  .left-col li { font-size: 23px; line-height: 1.8; }
-  .left-col strong { font-size: 26px; }
+  .left-col p { font-size: 19px; line-height: 1.6; }
+  .left-col li { font-size: 19px; line-height: 1.6; }
+  .left-col strong { font-size: 22px; }
 
 </style>
 </head>
