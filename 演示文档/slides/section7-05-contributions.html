@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>16 团队分工与开源贡献 - 期末汇报</title>
+<link rel="stylesheet" href="../assets/css/tokens.css?v=17">
+<style>
+  .col-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    width: 100%;
+    height: 100%;
+    padding: 10px 0;
+  }
+  .exp-card {
+    display: flex;
+    flex-direction: column;
+    padding: 36px;
+    height: 100%;
+    justify-content: flex-start;
+  }
+  .exp-title {
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--brand-secondary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .exp-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: var(--brand-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: #fff;
+  }
+  .exp-desc {
+    font-size: 21px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .exp-desc strong {
+    color: var(--text-primary);
+    font-weight: 800;
+  }
+  .exp-desc code {
+    /* fallback to global tokens.css styles */
+  }
+
+  /* FORCE ALIGN TEXT SIZE */
+  p, li { font-size: 23px !important; line-height: 1.8; }
+  strong { font-size: 26px !important; }
+  
+  .github-box {
+    margin-top: 20px;
+    background: rgba(25, 24, 22, 0.05);
+    border: 1px dashed var(--brand-secondary);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s ease;
+  }
+  .github-box:hover {
+    background: rgba(15, 118, 110, 0.1);
+    transform: translateY(-2px);
+  }
+  .github-box a {
+    color: var(--brand-secondary);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 28px;
+  }
+  .github-logo {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tech-grid-bg"></div>
+
+<div class="slide-header">
+  <div class="logo-area">
+    <div class="logo-icon"></div>
+    <div class="logo-text">MCU & Embedded System</div>
+  </div>
+  <div class="slide-meta">分工与开源</div>
+</div>
+
+<h1 class="slide-title">项目团队分工与开源贡献</h1>
+<p class="slide-subtitle">Team Collaboration, Roles, and Open Source Community</p>
+
+<div class="slide-content-layout animate-fade-in-up">
+  <div class="col-container">
+    <!-- Card 1 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">SW</div>
+        <span>成员一 肖博元：软件架构与应用层开发</span>
+      </div>
+      <p class="exp-desc">
+        在本项目中，肖博元主要负责软件部分的架构设计与开发。涵盖了底层的驱动协议优化（如 I2C/SPI）、传感器数据的解析采集、状态机的前后台逻辑搭建、以及 TFT-LCD 屏幕的 UI 界面设计与脏矩形渲染优化。此外，还负责了云边端物联网通信（WiFi联网、时间同步、微信警报推送）和系统集成联调。
+      </p>
+    </div>
+
+    <!-- Card 2 -->
+    <div class="glass-card exp-card">
+      <div class="exp-title">
+        <div class="exp-icon">HW</div>
+        <span>成员二 周元白：FPGA 硬件底座与底层设计</span>
+      </div>
+      <p class="exp-desc">
+        在本项目中，周元白主要负责 FPGA 及底层硬件部分的工作。涵盖了硬件电路的搭建与物理排线布局、基于 FPGA 的硬件逻辑加速模块设计、外设引脚的重映射与冲突规避方案规划，以及与主控板的联合测试。他的硬件底座与逻辑加速为整个系统的高效运行提供了坚实可靠的物理保障。
+      </p>
+    </div>
+
+    <!-- Card 3 -->
+    <div class="glass-card exp-card" style="grid-column: span 2; padding: 24px 36px;">
+      <div class="exp-title">
+        <div class="exp-icon">OS</div>
+        <span>项目开源地址与文档</span>
+      </div>
+      <p class="exp-desc" style="margin-bottom: 10px;">
+        本项目的所有源代码、硬件连线图、UI 设计素材以及完整的开发文档均已开源托管至 GitHub 平台，供大家参考交流。
+      </p>
+      <div class="github-box">
+        <p style="margin:0; color: var(--text-muted); font-size: 16px !important;">🔗 开源仓库地址：</p>
+        <a href="https://github.com/bestxby/micro-com-final" target="_blank">
+          <svg class="github-logo" height="32" aria-hidden="true" viewBox="0 0 16 16" version="1.1" width="32" data-view-component="true" fill="currentColor">
+            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"></path>
+          </svg>
+          github.com/bestxby/micro-com-final
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="slide-footer">
+  <div class="section-name">07. 团队分工与开源贡献</div>
+  <div class="slide-number">Page 26 / 27</div>
+</div>
+
+</body>
+</html>

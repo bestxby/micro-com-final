@@ -2,6 +2,8 @@
 
 > 基于 **STM32F103C8T6** 的高集成度智能家居安全网关。融合了环境多维感知、边缘计算算法、高帧率 TFT-LCD 人机交互、SD 卡持久化归档以及云端物联网微信报警推送机制。
 
+[![GitHub Repository](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/bestxby/micro-com-final)
+
 ---
 
 ## 🌟 项目简介
@@ -124,4 +126,4 @@
 *   按下 `BTN2` (或遥控器 `▲ 上` / `数字 2` 键) 控制小鸟起跳。在避开水管的同时，体验脏矩形算法带来的 60FPS 无拖影极限渲染！
 
 ---
-*Created with ❤️ by the Embedded System Team.*
+*Created with ❤️ by 肖博元 & 周元白.*
